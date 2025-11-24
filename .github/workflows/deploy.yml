@@ -12,12 +12,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Deploy via SSH
+    - name: Deploy via SSH with password
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SERVER_IP }}
         username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        port: 22
         script: |
           cd /var/www/stellarion_website_room
           ./deploy.sh
