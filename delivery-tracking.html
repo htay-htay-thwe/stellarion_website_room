@@ -247,11 +247,6 @@
             };
 
             const bootstrap = () => {
-                const token = Commerce.getToken();
-                if (!token) {
-                    window.location.href = `signin.html?redirect=${encodeURIComponent(window.location.pathname)}`;
-                    return;
-                }
                 const params = new URLSearchParams(window.location.search);
                 let orderId = params.get('orderId');
                 if (!orderId) {

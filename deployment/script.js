@@ -738,14 +738,18 @@ function saveCart() {
  * Update cart UI
  */
 function updateCartUI() {
-    // Update cart count badge
     const cartCount = document.getElementById('cartCount');
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.textContent = totalItems;
+    if (cartCount) {
+        cartCount.textContent = totalItems;
+    }
 
-    // Update cart items display
     const cartItems = document.getElementById('cartItems');
     const cartTotal = document.getElementById('cartTotal');
+
+    if (!cartItems || !cartTotal) {
+        return;
+    }
 
     if (cart.length === 0) {
         cartItems.innerHTML = `
@@ -770,8 +774,7 @@ function updateCartUI() {
     cart.forEach(item => {
         const itemTotal = item.price * item.quantity;
         total += itemTotal;
-        
-        const itemPrices = formatDualCurrency(item.price);
+
         const itemTotalPrices = formatDualCurrency(itemTotal);
 
         html += `
@@ -798,7 +801,7 @@ function updateCartUI() {
     });
 
     cartItems.innerHTML = html;
-    
+
     const totalPrices = formatDualCurrency(total);
     cartTotal.innerHTML = `
         <div class="text-right">
@@ -1898,8 +1901,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (cartBtn) {
         cartBtn.addEventListener('click', () => {
-            cartModal.classList.remove('hidden');
-            cartModal.classList.add('flex');
+            window.location.href = 'cart.html';
         });
     }
 

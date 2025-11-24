@@ -112,7 +112,9 @@
                 const redirect = `${signinUrl}?redirect=${encodeURIComponent(global.location.pathname)}`;
                 global.location.href = redirect;
             }
-            throw new Error('Authentication required');
+            const error = new Error('Authentication required');
+            error.code = 'AUTH_REQUIRED';
+            throw error;
         }
         return token;
     };
@@ -145,9 +147,11 @@
         const finalHeaders = new Headers(headers);
 
         if (auth) {
-            const token = ensureAuthenticated({ redirectOnFail: false });
+            const token = getStoredToken();
             if (!token) {
-                throw new Error('Authentication required');
+                const error = new Error('Authentication required');
+                error.code = 'AUTH_REQUIRED';
+                throw error;
             }
             finalHeaders.set('Authorization', `Bearer ${token}`);
         }
