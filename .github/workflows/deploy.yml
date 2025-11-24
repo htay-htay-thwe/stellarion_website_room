@@ -22,4 +22,4 @@ jobs:
           cd /var/www/stellarion_website_room
           ./deploy.sh
 
-        #   update
+        #   updated
