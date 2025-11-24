@@ -21,6 +21,8 @@ const { testConnection, initializeDatabase, getConnection } = require('./config/
 const userRoutes = require('./routes/users');
 const companyRoutes = require('./routes/companies');
 const companyRegistrationRoutes = require('./routes/companyRegistration');
+const cartRoutes = require('./routes/cart');
+const orderRoutes = require('./routes/orders');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -68,6 +70,8 @@ const upload = multer({
 app.use('/api/users', userRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/company-registration', companyRegistrationRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api', orderRoutes);
 
 // ============================================
 // 3D MODELS DATABASE ENDPOINTS

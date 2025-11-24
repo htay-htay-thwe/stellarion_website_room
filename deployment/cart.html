@@ -1,0 +1,731 @@
+<!-- cart page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - Stellarion</title>
+    <link rel="stylesheet" href="modern-styles.css">
+    <style>
+        body {
+            background: #f8fafc;
+            color: #0f172a;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        header {
+            background: #0f172a;
+            color: #fff;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a {
+            color: #cbd5f5;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        main {
+            max-width: 1160px;
+            margin: 2rem auto;
+            padding: 0 1.5rem 3rem;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        .cart-layout {
+            display: grid;
+            gap: 2.5rem;
+            align-items: start;
+        }
+        @media (min-width: 1024px) {
+            .cart-layout {
+                grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1fr);
+            }
+        }
+        @media (max-width: 1023px) {
+            .cart-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .cart-item {
+            background: #fff;
+            border-radius: 20px;
+            padding: 1.75rem;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .cart-item-header {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .cart-item-figure {
+            flex-shrink: 0;
+            width: 92px;
+            height: 92px;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cart-item-figure img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .cart-item-title {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .cart-item h3 {
+            font-size: 1.2rem;
+            margin: 0 0 0.4rem;
+        }
+        .cart-item p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        .cart-item-body {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1.5rem;
+            justify-content: space-between;
+        }
+        .cart-item-body > div {
+            min-width: 140px;
+        }
+        .cart-item-footer {
+            display: none;
+        }
+        .cart-meta {
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+        .cart-price {
+            font-weight: 600;
+            color: #2563eb;
+        }
+        .cart-total {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .qty-control {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #f8fafc;
+            border-radius: 999px;
+            padding: 0.25rem 0.6rem;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+        .quantity-input {
+            width: 60px;
+            padding: 0.4rem 0.5rem;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .quantity-input:focus {
+            outline: none;
+        }
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #e2e8f0;
+            color: #0f172a;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .qty-btn:hover {
+            background: #2563eb;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .delete-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            color: #dc2626;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+        .cart-item-header .delete-button {
+            justify-self: end;
+        }
+        .delete-button:hover {
+            background: #fee2e2;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(220, 38, 38, 0.15);
+        }
+        .delete-button svg {
+            width: 22px;
+            height: 22px;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        @media (max-width: 640px) {
+            .cart-item-header {
+                grid-template-columns: auto 1fr;
+                grid-template-rows: auto auto;
+            }
+            .cart-item-title {
+                grid-column: 2;
+            }
+            .cart-item-header .delete-button {
+                grid-column: 2;
+                grid-row: 1 / span 2;
+                justify-self: end;
+            }
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            border: none;
+            padding: 0.7rem 1.6rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+        .btn-danger {
+            background: #f97316;
+            color: #fff;
+        }
+        .cart-summary {
+            background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+            color: #fff;
+            padding: 2rem 1.75rem;
+            border-radius: 22px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+            position: sticky;
+            top: 1.5rem;
+        }
+        .cart-summary h2 {
+            margin: 0 0 1.5rem;
+            font-size: 1.4rem;
+        }
+        .summary-details {
+            display: grid;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .summary-details dt {
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(226, 232, 240, 0.7);
+        }
+        .summary-details dd {
+            margin: 0.25rem 0 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .summary-total {
+            border-top: 1px solid rgba(148, 163, 184, 0.35);
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+        }
+        .summary-total span {
+            display: block;
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+        .summary-note {
+            font-size: 0.85rem;
+            color: rgba(226, 232, 240, 0.65);
+            margin-top: 1rem;
+        }
+        .cart-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .message {
+            margin-bottom: 1.5rem;
+            padding: 0.9rem 1.1rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .message-info {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        .message-error {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .message-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+        [hidden] {
+            display: none !important;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
+            border-radius: 20px;
+            color: #334155;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+        .empty-state h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.75rem;
+        }
+        .empty-state a {
+            color: #2563eb;
+            font-weight: 600;
+        }
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .cart-item-body {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .cart-summary {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <strong>Stellarion</strong>
+        </div>
+        <nav>
+            <a href="index.html">Back to Catalogue</a>
+        </nav>
+    </header>
+    <main>
+        <h1>Your Cart</h1>
+        <noscript>
+            <p class="message message-error">JavaScript is required to view the live cart. Please enable it and refresh.</p>
+        </noscript>
+        <div class="message message-info" data-cart-message hidden></div>
+
+        <section data-empty-state class="empty-state" hidden>
+            <h2>Your cart is empty</h2>
+            <p>Browse the <a href="index.html">model catalogue</a> to add items.</p>
+        </section>
+
+        <section data-cart-section hidden>
+            <div class="cart-layout">
+                <div class="cart-items" data-cart-items></div>
+                <aside class="cart-summary" data-cart-totals>
+                    <h2>Order Summary</h2>
+                    <dl class="summary-details">
+                        <div>
+                            <dt>Items</dt>
+                            <dd data-cart-items-count>0 items</dd>
+                        </div>
+                        <div>
+                            <dt>Total Quantity</dt>
+                            <dd data-cart-quantity>0</dd>
+                        </div>
+                        <div class="summary-total">
+                            <dt>Subtotal</dt>
+                            <dd><span data-cart-subtotal>$0.00</span></dd>
+                        </div>
+                    </dl>
+                    <div class="cart-actions">
+                        <button class="btn btn-primary" data-checkout-button>Proceed to Checkout</button>
+                        <p class="summary-note">Taxes and delivery charges are calculated during checkout.</p>
+                    </div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <script src="assets/js/commerce-utils.js"></script>
+    <script>
+        (function initCartPage() {
+            if (!window.Commerce) {
+                console.error('Commerce helpers are missing.');
+                return;
+            }
+
+            const messageEl = document.querySelector('[data-cart-message]');
+            const emptyState = document.querySelector('[data-empty-state]');
+            const cartSection = document.querySelector('[data-cart-section]');
+            const itemsContainer = document.querySelector('[data-cart-items]');
+            const totalsBox = document.querySelector('[data-cart-totals]');
+            const checkoutButton = document.querySelector('[data-checkout-button]');
+
+            let currentCart = null;
+            let userId = null;
+
+            const LOCAL_CART_KEY = 'stellarion_cart';
+
+            const showMessage = (text, type = 'info') => {
+                if (!messageEl) return;
+                messageEl.textContent = text;
+                messageEl.className = `message message-${type}`;
+                messageEl.hidden = !text;
+            };
+
+            const redirectToSignin = () => {
+                const target = 'signin.html?redirect=cart.html';
+                setTimeout(() => {
+                    window.location.href = target;
+                }, 1600);
+            };
+
+            const readLocalCartItems = () => {
+                try {
+                    const raw = localStorage.getItem(LOCAL_CART_KEY);
+                    const parsed = raw ? JSON.parse(raw) : [];
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch (error) {
+                    console.warn('Unable to read local cart items:', error);
+                    return [];
+                }
+            };
+
+            const writeLocalCartItems = (items) => {
+                try {
+                    localStorage.setItem(LOCAL_CART_KEY, JSON.stringify(items));
+                } catch (error) {
+                    console.warn('Failed to persist local cart items:', error);
+                }
+            };
+
+            const mapLocalItems = (items = []) => {
+                return items.map((item, index) => {
+                    const idCandidates = [item.id, item.productId, item.modelId, item.cartItemId, index + 1];
+                    const resolvedId = idCandidates.map((candidate) => Number.parseInt(candidate, 10)).find((value) => Number.isFinite(value) && value > 0) ?? index + 1;
+                    const quantity = Number.parseInt(item.quantity, 10) || 1;
+                    const unitPrice = Number.parseFloat(item.price ?? item.unitPrice ?? 0) || 0;
+                    const lineTotal = Number((unitPrice * quantity).toFixed(2));
+                    return {
+                        cartItemId: resolvedId,
+                        modelId: item.modelId ?? item.id ?? resolvedId,
+                        name: item.name || 'Untitled Model',
+                        description: item.description || item.summary || '',
+                        previewUrl: item.previewUrl || item.image || item.thumbnail || null,
+                        quantity,
+                        unitPrice,
+                        lineTotal
+                    };
+                });
+            };
+
+            const buildLocalCart = () => {
+                const items = mapLocalItems(readLocalCartItems());
+                const totals = items.reduce((acc, item) => {
+                    acc.itemCount += 1;
+                    acc.totalQuantity += item.quantity;
+                    acc.subtotal += item.lineTotal;
+                    return acc;
+                }, { itemCount: 0, totalQuantity: 0, subtotal: 0 });
+                totals.subtotal = Number(totals.subtotal.toFixed(2));
+                return { items, totals };
+            };
+
+            const refreshLocalCart = () => {
+                currentCart = buildLocalCart();
+                renderCart(currentCart);
+                return currentCart;
+            };
+
+            const updateTotals = (totals = { itemCount: 0, totalQuantity: 0, subtotal: 0 }) => {
+                if (!totalsBox) return;
+                const itemsLabel = totalsBox.querySelector('[data-cart-items-count]');
+                const quantityLabel = totalsBox.querySelector('[data-cart-quantity]');
+                const subtotalLabel = totalsBox.querySelector('[data-cart-subtotal]');
+                if (itemsLabel) {
+                    const count = totals.itemCount || 0;
+                    itemsLabel.textContent = `${count} item${count === 1 ? '' : 's'}`;
+                }
+                if (quantityLabel) {
+                    quantityLabel.textContent = totals.totalQuantity || 0;
+                }
+                if (subtotalLabel) {
+                    subtotalLabel.textContent = Commerce.formatCurrency(totals.subtotal || 0);
+                }
+            };
+
+            const renderCart = (cart) => {
+                if (!itemsContainer || !emptyState || !cartSection) return;
+
+                itemsContainer.innerHTML = '';
+                if (!cart || !cart.items || cart.items.length === 0) {
+                    cartSection.hidden = true;
+                    emptyState.hidden = false;
+                    updateTotals();
+                    Commerce.setLoadingState(checkoutButton, false);
+                    return;
+                }
+
+                cartSection.hidden = false;
+                emptyState.hidden = true;
+
+                const fragment = document.createDocumentFragment();
+                cart.items.forEach((item) => {
+                    const card = document.createElement('article');
+                    card.className = 'cart-item';
+                    card.dataset.cartItemId = item.cartItemId;
+                    card.setAttribute('data-cart-item', '');
+                    card.innerHTML = `
+                        <div class="cart-item-header">
+                            <div class="cart-item-figure">
+                                ${item.previewUrl ? `<img src="${item.previewUrl}" alt="${item.name || 'Cart item'}">` : `<span class="cart-meta">No image</span>`}
+                            </div>
+                            <div class="cart-item-title">
+                                <h3>${item.name || 'Untitled Model'}</h3>
+                                <p>${item.description || ''}</p>
+                            </div>
+                            <button class="delete-button" data-action="remove" title="Remove item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                                    <path d="M10 11l0 6"></path>
+                                    <path d="M14 11l0 6"></path>
+                                    <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                                <span class="sr-only">Remove item</span>
+                            </button>
+                        </div>
+                        <div class="cart-item-body">
+                            <div>
+                                <span class="cart-meta">Unit Price</span>
+                                <div class="cart-price">${Commerce.formatCurrency(item.unitPrice)}</div>
+                            </div>
+                            <div class="qty-control" data-quantity-wrapper>
+                                <button class="qty-btn" data-quantity-change="decrease" aria-label="Decrease quantity">-</button>
+                                <input type="number" class="quantity-input" min="1" value="${item.quantity}" data-quantity-input>
+                                <button class="qty-btn" data-quantity-change="increase" aria-label="Increase quantity">+</button>
+                            </div>
+                            <div>
+                                <span class="cart-meta">Line Total</span>
+                                <div class="cart-total" data-line-total>${Commerce.formatCurrency(item.lineTotal)}</div>
+                            </div>
+                        </div>
+                    `;
+                    fragment.appendChild(card);
+                });
+                itemsContainer.appendChild(fragment);
+                updateTotals(cart.totals || {});
+                Commerce.setLoadingState(checkoutButton, false);
+            };
+
+            const fetchCart = async () => {
+                try {
+                    showMessage('Loading your cart…', 'info');
+                    const result = await Commerce.apiFetch(`/api/cart/${userId}`, { auth: Boolean(userId) });
+                    if (!result?.success) {
+                        throw new Error(result?.message || 'Unable to load cart');
+                    }
+                    currentCart = result.cart;
+                    if (!currentCart?.items || currentCart.items.length === 0) {
+                        const localCart = buildLocalCart();
+                        if (localCart.items.length > 0) {
+                            currentCart = localCart;
+                            renderCart(currentCart);
+                            showMessage('Showing items saved locally. Sign in to sync your cart.', 'info');
+                            return;
+                        }
+                    }
+                    renderCart(currentCart);
+                    showMessage('', 'info');
+                } catch (error) {
+                    console.error('Failed to load cart', error);
+                    if (error.code === 'AUTH_REQUIRED') {
+                        showMessage('Please sign in to access your cart. Redirecting…', 'error');
+                        cartSection.hidden = true;
+                        emptyState.hidden = true;
+                        redirectToSignin();
+                    } else {
+                        const localCart = buildLocalCart();
+                        if (localCart.items.length > 0) {
+                            currentCart = localCart;
+                            renderCart(currentCart);
+                            showMessage('Showing items saved locally. They will sync once your connection is restored.', 'info');
+                        } else {
+                            showMessage(error.message || 'Failed to load cart', 'error');
+                            cartSection.hidden = true;
+                            emptyState.hidden = false;
+                        }
+                    }
+                }
+            };
+
+            const handleQuantityAction = async (row, action) => {
+                if (!row) {
+                    showMessage('Unable to identify the selected item.', 'error');
+                    return;
+                }
+                const cartItemId = Number.parseInt(row?.dataset.cartItemId, 10);
+                if (!Number.isFinite(cartItemId)) {
+                    showMessage('Invalid cart item selected.', 'error');
+                    return;
+                }
+
+                if (!userId) {
+                    showMessage('Please sign in to manage your cart.', 'error');
+                    redirectToSignin();
+                    return;
+                }
+
+                if (action === 'update') {
+                    const input = row.querySelector('[data-quantity-input]');
+                    const value = Number.parseInt(input?.value, 10);
+                    if (!Number.isFinite(value) || value <= 0) {
+                        showMessage('Quantity must be at least 1.', 'error');
+                        return;
+                    }
+                    const button = row.querySelector('[data-action="update"]');
+                    try {
+                        Commerce.setLoadingState(button, true, { text: 'Saving…' });
+                        const response = await Commerce.apiFetch('/api/cart/update', {
+                            method: 'PATCH',
+                            body: { cartItemId, userId, quantity: value }
+                        });
+                        if (!response?.success) {
+                            throw new Error(response?.message || 'Unable to update cart');
+                        }
+                        currentCart = response.cart;
+                        renderCart(currentCart);
+                        showMessage('Cart updated', 'success');
+                    } catch (error) {
+                        console.error('Update failed', error);
+                        showMessage(error.message || 'Unable to update cart item', 'error');
+                    }
+                }
+
+                if (action === 'remove') {
+                    const button = row.querySelector('[data-action="remove"]');
+                    try {
+                        Commerce.setLoadingState(button, true, { text: 'Removing…' });
+                        const response = await Commerce.apiFetch(`/api/cart/remove/${cartItemId}?userId=${userId}`, {
+                            method: 'DELETE'
+                        });
+                        if (!response?.success) {
+                            throw new Error(response?.message || 'Unable to remove cart item');
+                        }
+                        currentCart = response.cart;
+                        renderCart(currentCart);
+                        showMessage('Item removed', 'success');
+                    } catch (error) {
+                        console.error('Remove failed', error);
+                        showMessage(error.message || 'Unable to remove cart item', 'error');
+                    }
+                }
+            };
+
+            const attachEvents = () => {
+                if (itemsContainer) {
+                    itemsContainer.addEventListener('click', async (event) => {
+                        const quantityButton = event.target.closest('[data-quantity-change]');
+                        if (quantityButton) {
+                            const row = quantityButton.closest('[data-cart-item]');
+                            if (!row) return;
+                            const input = row.querySelector('[data-quantity-input]');
+                            let value = Number.parseInt(input?.value, 10) || 1;
+                            value += quantityButton.dataset.quantityChange === 'increase' ? 1 : -1;
+                            if (value <= 0) {
+                                await handleQuantityAction(row, 'remove');
+                                return;
+                            }
+                            input.value = value;
+                            await handleQuantityAction(row, 'update');
+                            return;
+                        }
+
+                        const actionButton = event.target.closest('[data-action]');
+                        if (!actionButton) return;
+                        const row = actionButton.closest('[data-cart-item]');
+                        handleQuantityAction(row, actionButton.dataset.action);
+                    });
+
+                    itemsContainer.addEventListener('change', (event) => {
+                        const input = event.target.closest('[data-quantity-input]');
+                        if (!input) return;
+                        const row = input.closest('[data-cart-item]');
+                        handleQuantityAction(row, 'update');
+                    });
+                }
+                if (checkoutButton) {
+                    checkoutButton.addEventListener('click', () => {
+                        if (!currentCart || !currentCart.items || currentCart.items.length === 0) {
+                            showMessage('Your cart is empty.', 'error');
+                            return;
+                        }
+                        sessionStorage.setItem('stellarion_checkout_cart', JSON.stringify(currentCart));
+                        window.location.href = 'checkout.html';
+                    });
+                }
+            };
+
+            const bootstrap = () => {
+                userId = Commerce.getActiveUserId();
+                attachEvents();
+                if (!userId) {
+                    cartSection.hidden = true;
+                    emptyState.hidden = true;
+                    showMessage('Please sign in to access your cart. Redirecting…', 'error');
+                    redirectToSignin();
+                    return;
+                }
+                fetchCart();
+            };
+
+            document.addEventListener('DOMContentLoaded', bootstrap);
+        })();
+    </script>
+</body>
+</html>

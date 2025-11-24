@@ -16,6 +16,11 @@ const dbConfig = {
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 
+const getConnection = async () => {
+    const connection = await pool.getConnection();
+    return connection;
+};
+
 // Test database connection
 const testConnection = async () => {
     try {
@@ -77,6 +82,7 @@ const initializeDatabase = async () => {
 
 module.exports = {
     pool,
+    getConnection,
     testConnection,
     executeQuery,
     getOne,

@@ -260,7 +260,7 @@ let currentModel = null;
 // PRODUCTS DATA
 // ============================================
 
-const products = [
+let products = [
     {
         id: 1,
         name: "Luxury Velvet Sectional Sofa",
@@ -401,10 +401,62 @@ const products = [
 // ============================================
 // STATE MANAGEMENT
 // ============================================
-let cart = JSON.parse(localStorage.getItem('stellarion_cart')) || [];
-let wishlist = JSON.parse(localStorage.getItem('stellarion_wishlist')) || [];
+const LOCAL_CART_KEY = 'stellarion_cart';
+const LOCAL_WISHLIST_KEY = 'stellarion_wishlist';
+const LOCAL_USER_KEY = 'stellarion_user';
+
+const readStorageValue = (key, fallback) => {
+    try {
+        const stored = localStorage.getItem(key);
+        if (!stored) {
+            return fallback;
+        }
+        return JSON.parse(stored);
+    } catch (error) {
+        console.warn(`Failed to parse ${key} from storage:`, error);
+        return fallback;
+    }
+};
+
+const writeStorageValue = (key, value) => {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+        console.warn(`Failed to write ${key} to storage:`, error);
+    }
+};
+
+const loadStoredCart = () => {
+    const stored = readStorageValue(LOCAL_CART_KEY, []);
+    return Array.isArray(stored) ? stored : [];
+};
+
+const loadStoredWishlist = () => {
+    const stored = readStorageValue(LOCAL_WISHLIST_KEY, []);
+    return Array.isArray(stored) ? stored : [];
+};
+
+let cart = loadStoredCart();
+let wishlist = loadStoredWishlist();
 let currentProduct = null;
-let currentUser = JSON.parse(localStorage.getItem('stellarion_user')) || null;
+let currentUser = readStorageValue(LOCAL_USER_KEY, null);
+
+const getCommerce = () => (typeof window !== 'undefined' && window.Commerce ? window.Commerce : null);
+const getAuthenticatedUserId = () => {
+    const commerce = getCommerce();
+    if (!commerce || typeof commerce.getActiveUserId !== 'function') {
+        return null;
+    }
+    return commerce.getActiveUserId();
+};
+const getAuthToken = () => {
+    const commerce = getCommerce();
+    if (!commerce || typeof commerce.getToken !== 'function') {
+        return null;
+    }
+    return commerce.getToken();
+};
+const isUserAuthenticated = () => Boolean(getAuthToken() && getAuthenticatedUserId());
 
 // ============================================
 // 3D VIEWER FUNCTIONALITY WITH THREE.JS
@@ -681,31 +733,161 @@ function show3DViewer(productId) {
 // CART FUNCTIONALITY
 // ============================================
 
+const getUnitPrice = (item) => {
+    const value = Number(item?.unitPrice ?? item?.price ?? 0);
+    return Number.isFinite(value) ? value : 0;
+};
+
+const normalizeServerCartItems = (serverCart) => {
+    if (!serverCart || !Array.isArray(serverCart.items)) {
+        return [];
+    }
+    return serverCart.items.map((item) => {
+        const quantity = Number.parseInt(item.quantity, 10) || 1;
+        const unitPrice = getUnitPrice(item);
+        return {
+            id: Number.parseInt(item.modelId, 10) || item.modelId,
+            cartItemId: item.cartItemId,
+            name: item.name || 'Untitled Model',
+            description: item.description || '',
+            image: item.previewUrl || item.image || null,
+            previewUrl: item.previewUrl || null,
+            unitPrice,
+            price: unitPrice,
+            quantity
+        };
+    });
+};
+
+const applyServerCartToState = (cartPayload) => {
+    const items = normalizeServerCartItems(cartPayload);
+    cart = items;
+    saveCart();
+    updateCartUI();
+    return items;
+};
+
+const syncCartFromServer = async ({ silent = false } = {}) => {
+    if (!isUserAuthenticated()) {
+        cart = loadStoredCart();
+        if (!silent) {
+            console.info('No authenticated session detected. Using local cart.');
+        }
+        return null;
+    }
+
+    const commerce = getCommerce();
+    const userId = getAuthenticatedUserId();
+    if (!commerce || !userId) {
+        if (!silent) {
+            console.warn('Commerce helpers unavailable. Falling back to local cart.');
+        }
+        cart = loadStoredCart();
+        updateCartUI();
+        return null;
+    }
+
+    try {
+        const response = await commerce.apiFetch(`/api/cart/${userId}`, { auth: true });
+        if (response?.success && response.cart) {
+            applyServerCartToState(response.cart);
+            return response.cart;
+        }
+        if (!silent) {
+            console.warn('Server cart response missing payload.');
+        }
+    } catch (error) {
+        if (!silent) {
+            console.error('Failed to synchronize cart from server:', error);
+        }
+    }
+
+    cart = loadStoredCart();
+    updateCartUI();
+    return null;
+};
+
 /**
  * Add product to cart
  */
-function addToCart(productId) {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
+async function addToCart(productId) {
+    const product = products.find((p) => p.id === productId);
+    if (!product) {
+        return;
+    }
 
-    const existingItem = cart.find(item => item.id === productId);
-    
+    const commerce = getCommerce();
+    const userId = getAuthenticatedUserId();
+    const modelIdCandidate = Number.parseInt(product.modelId ?? product.id, 10);
+    const canUseServer = Boolean(commerce && userId && Number.isFinite(modelIdCandidate) && modelIdCandidate > 0);
+
+    let attemptedServerSync = false;
+    const unitPrice = getUnitPrice(product);
+    if (canUseServer) {
+        attemptedServerSync = true;
+        try {
+            const response = await commerce.apiFetch('/api/cart/add', {
+                method: 'POST',
+                body: {
+                    userId,
+                    modelId: modelIdCandidate,
+                    quantity: 1,
+                    unitPrice
+                }
+            });
+
+            if (response?.success && response.cart) {
+                applyServerCartToState(response.cart);
+                showNotification(`${product.name} added to cart!`);
+                return;
+            }
+        } catch (error) {
+            console.error('Failed to add item to server cart:', error);
+        }
+    }
+
+    const existingItem = cart.find((item) => item.id === productId);
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
-        cart.push({ ...product, quantity: 1 });
+        cart.push({ ...product, unitPrice, price: unitPrice, quantity: 1 });
     }
 
     saveCart();
     updateCartUI();
-    showNotification(`${product.name} added to cart!`);
+    let notificationMessage = `${product.name} added to cart!`;
+    if (!isUserAuthenticated()) {
+        notificationMessage = `${product.name} added to cart! Sign in to sync across devices.`;
+    } else if (attemptedServerSync) {
+        notificationMessage = `${product.name} added locally. Unable to sync with the server right now.`;
+    }
+    showNotification(notificationMessage);
 }
 
 /**
  * Remove product from cart
  */
-function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
+async function removeFromCart(productId) {
+    const commerce = getCommerce();
+    const userId = getAuthenticatedUserId();
+    const item = cart.find((entry) => entry.id === productId);
+    const cartItemId = item?.cartItemId;
+
+    if (commerce && userId && cartItemId) {
+        try {
+            const response = await commerce.apiFetch(`/api/cart/remove/${cartItemId}?userId=${userId}`, {
+                method: 'DELETE'
+            });
+            if (response?.success && response.cart) {
+                applyServerCartToState(response.cart);
+                return;
+            }
+        } catch (error) {
+            console.error('Failed to remove item from server cart:', error);
+        }
+    }
+
+    cart = cart.filter((entry) => entry.id !== productId);
     saveCart();
     updateCartUI();
 }
@@ -713,25 +895,53 @@ function removeFromCart(productId) {
 /**
  * Update product quantity in cart
  */
-function updateQuantity(productId, change) {
+async function updateQuantity(productId, change) {
     const item = cart.find(item => item.id === productId);
     if (!item) return;
 
-    item.quantity += change;
-    
-    if (item.quantity <= 0) {
-        removeFromCart(productId);
-    } else {
-        saveCart();
-        updateCartUI();
+    const commerce = getCommerce();
+    const userId = getAuthenticatedUserId();
+    const newQuantity = item.quantity + change;
+
+    if (commerce && userId && item.cartItemId) {
+        if (newQuantity <= 0) {
+            await removeFromCart(productId);
+            return;
+        }
+
+        try {
+            const response = await commerce.apiFetch('/api/cart/update', {
+                method: 'PATCH',
+                body: {
+                    cartItemId: item.cartItemId,
+                    userId,
+                    quantity: newQuantity
+                }
+            });
+            if (response?.success && response.cart) {
+                applyServerCartToState(response.cart);
+                return;
+            }
+        } catch (error) {
+            console.error('Failed to update server cart quantity:', error);
+        }
     }
+
+    item.quantity = newQuantity;
+
+    if (item.quantity <= 0) {
+        cart = cart.filter(entry => entry.id !== productId);
+    }
+
+    saveCart();
+    updateCartUI();
 }
 
 /**
  * Save cart to localStorage
  */
 function saveCart() {
-    localStorage.setItem('stellarion_cart', JSON.stringify(cart));
+    writeStorageValue(LOCAL_CART_KEY, cart);
 }
 
 /**
@@ -772,14 +982,17 @@ function updateCartUI() {
     let html = '';
 
     cart.forEach(item => {
-        const itemTotal = item.price * item.quantity;
+        const unitPrice = getUnitPrice(item);
+        const itemTotal = unitPrice * item.quantity;
         total += itemTotal;
 
+        const itemPrices = formatDualCurrency(unitPrice);
         const itemTotalPrices = formatDualCurrency(itemTotal);
+        const imageSrc = item.image || item.previewUrl || 'assets/logo/logo.png';
 
         html += `
             <div class="flex gap-4 mb-4 pb-4 border-b luxury-border">
-                <img src="${item.image}" alt="${item.name}" class="w-24 h-24 object-cover">
+                <img src="${imageSrc}" alt="${item.name}" class="w-24 h-24 object-cover">
                 <div class="flex-1">
                     <h4 class="font-bold text-primary mb-1">${item.name}</h4>
                     <p class="text-sm text-luxury/70 font-body mb-2">${item.description}</p>
@@ -842,7 +1055,7 @@ function toggleWishlist(productId) {
  * Save wishlist to localStorage
  */
 function saveWishlist() {
-    localStorage.setItem('stellarion_wishlist', JSON.stringify(wishlist));
+    writeStorageValue(LOCAL_WISHLIST_KEY, wishlist);
 }
 
 /**
@@ -1133,7 +1346,7 @@ function createProductCard(product) {
     const prices = formatDualCurrency(product.price);
 
     return `
-        <div class="product-card bg-white shadow-lg hover:shadow-2xl luxury-border overflow-hidden">
+        <div class="product-card bg-white shadow-lg hover:shadow-2xl luxury-border overflow-hidden" data-product-id="${product.id}">
             <div class="product-image-container">
                 <img src="${product.image}" alt="${product.name}" class="w-full h-64 object-cover">
                 <button class="view-3d-btn" onclick="show3DViewer(${product.id})">
@@ -1163,6 +1376,97 @@ function createProductCard(product) {
             </div>
         </div>
     `;
+}
+
+const inspirationThemes = [
+    {
+        cardClasses: 'group cursor-pointer overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 transition-all duration-500',
+        gradient: 'from-gray-900/80 via-gray-900/40 to-transparent',
+        accentBar: 'bg-blue-500',
+        ctaColor: 'text-blue-400'
+    },
+    {
+        cardClasses: 'group cursor-pointer overflow-hidden luxury-border bg-light hover:shadow-2xl transition-all duration-500',
+        gradient: 'from-primary/90 via-primary/50 to-transparent',
+        accentBar: 'bg-secondary',
+        ctaColor: 'text-secondary'
+    },
+    {
+        cardClasses: 'group cursor-pointer overflow-hidden luxury-border bg-light hover:shadow-2xl transition-all duration-500',
+        gradient: 'from-primary/90 via-primary/50 to-transparent',
+        accentBar: 'bg-secondary',
+        ctaColor: 'text-secondary'
+    }
+];
+
+function createInspirationCard(product, index) {
+    const theme = inspirationThemes[index] || inspirationThemes[inspirationThemes.length - 1];
+    const styleNumber = String(index + 1).padStart(2, '0');
+    const description = product.description || 'Discover premium craftsmanship tailored to modern living.';
+    const prices = formatDualCurrency(getUnitPrice(product));
+
+    return `
+        <div class="${theme.cardClasses}" data-product-id="${product.id}">
+            <div class="relative h-96 overflow-hidden">
+                <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t ${theme.gradient}"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-0.5 ${theme.accentBar}"></div>
+                        <span class="text-sm uppercase tracking-widest">Style ${styleNumber}</span>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-3">${product.name}</h3>
+                    <p class="text-white/90 font-body mb-4">${description}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="${theme.ctaColor} font-body font-semibold text-sm uppercase tracking-wider opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                            Discover More <i class="ti ti-arrow-right ml-2"></i>
+                        </div>
+                        <div class="text-right text-white/80 font-body text-xs leading-5">
+                            <div class="text-sm font-semibold text-white">${prices.usd}</div>
+                            <div>${prices.thb}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderInspiration(inspirationProducts = null) {
+    const grid = document.getElementById('inspirationGrid');
+    if (!grid) return;
+
+    const source = Array.isArray(inspirationProducts) && inspirationProducts.length
+        ? inspirationProducts
+        : products.slice(0, 3);
+
+    const unique = [];
+    const seen = new Set();
+    for (const item of source) {
+        if (!item || seen.has(item.id)) {
+            continue;
+        }
+        seen.add(item.id);
+        unique.push(item);
+        if (unique.length === 3) {
+            break;
+        }
+    }
+
+    const inspirationItems = unique.length ? unique : source;
+
+    if (!inspirationItems || !inspirationItems.length) {
+        grid.innerHTML = `
+            <div class="col-span-full text-center py-16 text-gray-500 font-body text-lg">
+                No inspiration stories are available right now. Please check back soon.
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = inspirationItems.slice(0, 3)
+        .map((product, index) => createInspirationCard(product, index))
+        .join('');
 }
 
 /**
@@ -1817,6 +2121,7 @@ function addProductToWebsite(productName, imageUrl, model3DUrl) {
         
         // Re-render products
         renderProducts();
+        renderInspiration();
         
         // Show success notification
         showNotification(`✅ "${productName}" added to your catalog!`);
@@ -1868,12 +2173,14 @@ function saveCustomProducts() {
 // EVENT LISTENERS
 // ============================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    await syncCartFromServer({ silent: true });
     // Load custom products from localStorage
     loadCustomProducts();
     
     // Initial render
     renderProducts();
+    renderInspiration();
     updateCartUI();
     updateWishlistUI();
     updateUserUI();
