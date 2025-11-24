@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Shared Room | Stellarion Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #020617;
+            --overlay-bg: rgba(10, 16, 28, 0.78);
+            --overlay-border: rgba(148, 163, 184, 0.24);
+            --accent: #6366f1;
+            --text: #e2e8f0;
+            --muted: rgba(148, 163, 184, 0.78);
+            --success: #34d399;
+            --danger: #f87171;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at 18% -8%, rgba(99, 102, 241, 0.25), transparent 62%),
+                radial-gradient(circle at 78% 12%, rgba(56, 189, 248, 0.24), transparent 66%),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        canvas#viewerCanvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+
+        .overlay {
+            position: fixed;
+            top: clamp(16px, 4vw, 28px);
+            left: clamp(16px, 4vw, 32px);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: clamp(16px, 4vw, 24px);
+            max-width: min(320px, 82vw);
+            border-radius: 20px;
+            backdrop-filter: blur(14px);
+            background: var(--overlay-bg);
+            border: 1px solid var(--overlay-border);
+            box-shadow: 0 20px 60px -45px rgba(15, 23, 42, 0.95);
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .overlay h1 {
+            margin: 0;
+            font-size: 1.15rem;
+            letter-spacing: 0.06rem;
+        }
+
+        .top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            letter-spacing: 0.06rem;
+            text-transform: uppercase;
+            color: rgba(191, 219, 254, 0.92);
+            padding: 7px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(99, 102, 241, 0.38);
+            background: rgba(99, 102, 241, 0.15);
+            transition: background 0.18s ease, transform 0.18s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(99, 102, 241, 0.28);
+            transform: translateY(-1px);
+        }
+
+        .share-code-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(99, 102, 241, 0.28);
+            background: rgba(99, 102, 241, 0.18);
+        }
+
+        .share-code-pill button {
+            background: none;
+            border: none;
+            padding: 0;
+            color: rgba(226, 232, 240, 0.92);
+            cursor: pointer;
+        }
+
+        .status-bar {
+            font-size: 0.86rem;
+            line-height: 1.4;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            background: rgba(148, 163, 184, 0.12);
+        }
+
+        .status-bar.success {
+            background: rgba(52, 211, 153, 0.16);
+            border-color: rgba(52, 211, 153, 0.32);
+            color: rgba(236, 253, 245, 0.95);
+        }
+
+        .status-bar.error {
+            background: rgba(248, 113, 113, 0.16);
+            border-color: rgba(248, 113, 113, 0.35);
+            color: #fecaca;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+            min-width: 160px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text);
+            padding: 10px 14px;
+            font-size: 0.88rem;
+        }
+
+        .input-group button {
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(14, 165, 233, 0.88));
+            color: #fff;
+            font-size: 0.85rem;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: transform 0.18s ease;
+        }
+
+        .input-group button:hover {
+            transform: translateY(-1px);
+        }
+
+        .share-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.86rem;
+            color: rgba(226, 232, 240, 0.9);
+        }
+
+        .share-meta p {
+            margin: 0;
+            line-height: 1.45;
+        }
+
+        .share-meta .note {
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.24);
+            background: rgba(99, 102, 241, 0.12);
+            color: rgba(226, 232, 240, 0.95);
+        }
+
+        .share-meta .timestamp {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .asset-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(11, 19, 33, 0.7);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .asset-info h2 {
+            margin: 0;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14rem;
+            color: rgba(191, 219, 254, 0.85);
+        }
+
+        .asset-info .asset-name {
+            margin: 0;
+            font-size: 1.02rem;
+            font-weight: 600;
+            color: rgba(244, 247, 255, 0.96);
+        }
+
+        .asset-info .asset-meta {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.82rem;
+            color: rgba(209, 213, 219, 0.85);
+        }
+
+        .asset-info .asset-meta li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .asset-info .asset-meta li i {
+            color: rgba(129, 140, 248, 0.9);
+        }
+
+        .asset-info .asset-tip {
+            margin: 0;
+            font-size: 0.75rem;
+            color: rgba(165, 180, 195, 0.78);
+        }
+
+        @media (max-width: 600px) {
+            .overlay {
+                left: 50%;
+                transform: translateX(-50%);
+                max-width: min(360px, 92vw);
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="viewerCanvas"></canvas>
+
+    <div class="overlay">
+        <div class="top-row">
+            <a class="back-link" href="index.html" title="Back to index">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Index</span>
+            </a>
+            <div class="share-code-pill" id="shareCodePill" hidden>
+                <span id="shareCodeLabel">—</span>
+                <button type="button" id="copyLinkButton" title="Copy view link">
+                    <i class="fa-solid fa-copy"></i>
+                </button>
+            </div>
+        </div>
+
+        <h1>Shared Room Preview</h1>
+        <div class="status-bar" id="statusBar">Loading shared layout…</div>
+
+        <div class="input-group" id="codeInputRow" hidden>
+            <input type="text" id="shareInput" placeholder="Enter share code" maxlength="32" autocomplete="off">
+            <button type="button" id="loadShareButton">Load</button>
+        </div>
+
+        <div class="share-meta" id="shareMeta" hidden>
+            <p id="sharerLine">Shared by Stellarion Setup My Room</p>
+            <p id="contactLine">Client contact not provided.</p>
+            <p class="note" id="noteLine">Relocation note unavailable.</p>
+            <p class="timestamp" id="timestampLine"></p>
+        </div>
+
+        <div class="asset-info" id="assetInfo" hidden>
+            <h2>Selected Item</h2>
+            <p class="asset-name" id="assetName">—</p>
+            <ul class="asset-meta" id="assetMeta"></ul>
+            <p class="asset-tip">Scroll or pinch to zoom. Click another furnishing to inspect it.</p>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+                "three/examples/jsm/controls/OrbitControls.js": "https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js",
+                "three/examples/jsm/loaders/FBXLoader.js": "https://unpkg.com/three@0.158.0/examples/jsm/loaders/FBXLoader.js",
+                "three/examples/jsm/loaders/GLTFLoader.js": "https://unpkg.com/three@0.158.0/examples/jsm/loaders/GLTFLoader.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+        import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+        import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+        const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:3000' : window.location.origin;
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('viewerCanvas'), antialias: true, alpha: true });
+        renderer.shadowMap.enabled = true;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+        renderer.domElement.style.touchAction = 'none';
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color('#050816');
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.set(6, 5, 10);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enableZoom = true;
+        controls.enablePan = true;
+        controls.screenSpacePanning = true;
+        controls.panSpeed = 0.6;
+
+        const BASE_HEMI_INTENSITY = 0.75;
+        const BASE_DIR_INTENSITY = 1.2;
+        const BASE_EXTRA_INTENSITY = 0.35;
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x20263a, BASE_HEMI_INTENSITY);
+        hemiLight.position.set(0, 6, 0);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, BASE_DIR_INTENSITY);
+        dirLight.position.set(8, 12, 10);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.set(1024, 1024);
+        scene.add(dirLight);
+
+        const extraLights = [];
+        const secondaryLightPositions = [
+            [-6, 8, -6],
+            [6, 8, -6],
+            [-6, 8, 6],
+            [6, 8, 6]
+        ];
+        secondaryLightPositions.forEach(([x, y, z]) => {
+            const spot = new THREE.SpotLight(0xffffff, BASE_EXTRA_INTENSITY, 25, Math.PI / 6, 0.35, 1.5);
+            spot.position.set(x, y, z);
+            spot.target.position.set(0, 0, 0);
+            spot.visible = false;
+            scene.add(spot);
+            scene.add(spot.target);
+            extraLights.push(spot);
+        });
+
+        const gridHelper = new THREE.GridHelper(20, 20, 0x3b82f6, 0x1f2937);
+        gridHelper.position.y = 0;
+        gridHelper.visible = false;
+        scene.add(gridHelper);
+
+        const boundingBox = new THREE.Box3();
+        const boundingSphere = new THREE.Sphere();
+        const tempVec = new THREE.Vector3();
+
+        const ROOM_BASE_SCALE = new THREE.Vector3(0.01, 0.01, 0.01);
+        const ROOM_BASE_ROTATION = new THREE.Euler(0, Math.PI, 0);
+
+        const roomGroup = new THREE.Group();
+        scene.add(roomGroup);
+
+        const assetsGroup = new THREE.Group();
+        scene.add(assetsGroup);
+
+        const FBX_LOADER = new FBXLoader();
+        const GLTF_LOADER = new GLTFLoader();
+
+        const MIN_SCALE = 0.05;
+        const MAX_SCALE = 20;
+        const DEFAULT_MODEL_SCALE = 10;
+
+        const ROOM_MODELS = [
+            'models/Rooms/Room1.fbx',
+            'models/Rooms/Room2.fbx',
+            'models/Rooms/Room3.fbx',
+            'models/Rooms/Room4.fbx',
+            'models/Rooms/Room5.fbx',
+            'models/Rooms/Room6.fbx'
+        ];
+
+        const BACKGROUND_THEMES = {
+            deepSpace: {
+                sceneColor: '#050816',
+                bodyBackground: 'radial-gradient(circle at 18% -8%, rgba(99, 102, 241, 0.25), transparent 62%), radial-gradient(circle at 78% 12%, rgba(56, 189, 248, 0.24), transparent 66%), #020617'
+            },
+            studio: {
+                sceneColor: '#0b1120',
+                bodyBackground: 'linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.83))'
+            },
+            daylight: {
+                sceneColor: '#b6d7ff',
+                bodyBackground: 'linear-gradient(180deg, rgba(148, 197, 255, 0.55), rgba(3, 7, 18, 0.2))'
+            },
+            sunset: {
+                sceneColor: '#28121f',
+                bodyBackground: 'linear-gradient(160deg, rgba(88, 28, 135, 0.85), rgba(251, 113, 133, 0.35))'
+            }
+        };
+
+        const statusBar = document.getElementById('statusBar');
+        const codeInputRow = document.getElementById('codeInputRow');
+        const shareInput = document.getElementById('shareInput');
+        const loadShareButton = document.getElementById('loadShareButton');
+        const shareMeta = document.getElementById('shareMeta');
+        const shareCodePill = document.getElementById('shareCodePill');
+        const shareCodeLabel = document.getElementById('shareCodeLabel');
+        const copyLinkButton = document.getElementById('copyLinkButton');
+        const sharerLine = document.getElementById('sharerLine');
+        const contactLine = document.getElementById('contactLine');
+        const noteLine = document.getElementById('noteLine');
+        const timestampLine = document.getElementById('timestampLine');
+        const assetInfoPanel = document.getElementById('assetInfo');
+        const assetNameEl = document.getElementById('assetName');
+        const assetMetaList = document.getElementById('assetMeta');
+
+        const VIEW_LINK_ORIGIN = window.location.origin.includes('localhost')
+            ? window.location.origin
+            : 'https://stellarion.studio';
+
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        const highlightHelper = new THREE.Box3Helper(new THREE.Box3(), 0x6366f1);
+        highlightHelper.visible = false;
+        scene.add(highlightHelper);
+
+        let hoveredAsset = null;
+        let selectedAsset = null;
+
+        const setStatus = (message, tone = 'info') => {
+            statusBar.textContent = message;
+            statusBar.classList.remove('success', 'error');
+            if (tone === 'success') {
+                statusBar.classList.add('success');
+            } else if (tone === 'error') {
+                statusBar.classList.add('error');
+            }
+        };
+
+        const updateCursor = () => {
+            renderer.domElement.style.cursor = hoveredAsset ? 'pointer' : 'grab';
+        };
+
+        controls.addEventListener('start', () => {
+            renderer.domElement.style.cursor = 'grabbing';
+        });
+
+        controls.addEventListener('end', () => {
+            updateCursor();
+        });
+
+        const normalizeShareCode = (value) => {
+            if (!value) return '';
+            return value.toString().trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        };
+
+        const formatDate = (value) => {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toLocaleString(undefined, {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            });
+        };
+
+        const buildShareLink = (code) => {
+            if (!code) return '';
+            return `${VIEW_LINK_ORIGIN.replace(/\/$/, '')}/view-room.html?code=${encodeURIComponent(code)}`;
+        };
+
+        const formatCurrency = (value) => {
+            if (!Number.isFinite(value)) return null;
+            try {
+                return new Intl.NumberFormat(undefined, {
+                    style: 'currency',
+                    currency: 'USD',
+                    maximumFractionDigits: 0
+                }).format(value);
+            } catch (error) {
+                return `$${value.toFixed(0)}`;
+            }
+        };
+
+        const formatVectorLabel = (values, decimals = 2) => {
+            if (!Array.isArray(values) || values.length < 3) return null;
+            const rounded = values.map(value => {
+                const numeric = Number.parseFloat(value);
+                return Number.isFinite(numeric) ? numeric.toFixed(decimals) : '—';
+            });
+            return rounded.join(', ');
+        };
+
+        const clearAssetInfo = () => {
+            assetInfoPanel.hidden = true;
+            assetNameEl.textContent = '—';
+            assetMetaList.innerHTML = '';
+        };
+
+        const addMetaRow = (icon, label, value) => {
+            if (!value) return;
+            const li = document.createElement('li');
+            const iconEl = document.createElement('i');
+            iconEl.className = `fa-solid ${icon}`;
+            li.appendChild(iconEl);
+            const textEl = document.createElement('span');
+            textEl.textContent = `${label}: ${value}`;
+            li.appendChild(textEl);
+            assetMetaList.appendChild(li);
+        };
+
+        const renderAssetInfo = (info) => {
+            if (!info) {
+                clearAssetInfo();
+                return;
+            }
+            assetInfoPanel.hidden = false;
+            assetNameEl.textContent = info.name || 'Shared Asset';
+            assetMetaList.innerHTML = '';
+            addMetaRow('fa-tags', 'Category', info.category || null);
+            addMetaRow('fa-warehouse', 'Library', info.librarySource || info.sourceUrl || null);
+            addMetaRow('fa-dollar-sign', 'Price', formatCurrency(info.price));
+            addMetaRow('fa-location-dot', 'Position', formatVectorLabel(info.position, 2));
+            addMetaRow('fa-arrows-rotate', 'Rotation', formatVectorLabel(info.rotation, 1));
+            addMetaRow('fa-ruler-combined', 'Scale', formatVectorLabel(info.scale, 2));
+        };
+
+        const resolveAssetRoot = (object) => {
+            let current = object;
+            while (current && current !== assetsGroup) {
+                if (current.userData && current.userData.assetInfo) {
+                    return current;
+                }
+                current = current.parent;
+            }
+            return null;
+        };
+
+        const updateHighlight = () => {
+            const target = hoveredAsset || selectedAsset;
+            if (!target) {
+                highlightHelper.visible = false;
+                return;
+            }
+            const box = highlightHelper.box;
+            box.makeEmpty();
+            box.setFromObject(target);
+            if (!Number.isFinite(box.min.x) || !Number.isFinite(box.max.x)) {
+                highlightHelper.visible = false;
+                return;
+            }
+            highlightHelper.visible = true;
+            highlightHelper.updateMatrix();
+            highlightHelper.updateMatrixWorld(true);
+        };
+
+        const updatePointerFromEvent = (event) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        };
+
+        const findAssetUnderPointer = () => {
+            raycaster.setFromCamera(pointer, camera);
+            const intersections = raycaster.intersectObjects(assetsGroup.children, true);
+            for (const hit of intersections) {
+                const asset = resolveAssetRoot(hit.object);
+                if (asset) {
+                    return asset;
+                }
+            }
+            return null;
+        };
+
+        const disposeObject = (object) => {
+            if (!object) return;
+            object.traverse(node => {
+                if (node.isMesh) {
+                    if (node.geometry) {
+                        node.geometry.dispose();
+                    }
+                    if (node.material) {
+                        if (Array.isArray(node.material)) {
+                            node.material.forEach(material => material && material.dispose && material.dispose());
+                        } else if (node.material.dispose) {
+                            node.material.dispose();
+                        }
+                    }
+                }
+                if (node.isTexture && node.dispose) {
+                    node.dispose();
+                }
+            });
+        };
+
+        const clearGroup = (group) => {
+            while (group.children.length > 0) {
+                const child = group.children.pop();
+                group.remove(child);
+                disposeObject(child);
+            }
+        };
+
+        const vectorFromArray = (values, fallback = new THREE.Vector3()) => {
+            if (!Array.isArray(values) || values.length < 3) {
+                return fallback.clone();
+            }
+            const parsed = values.map(v => Number.parseFloat(v));
+            return new THREE.Vector3(
+                Number.isFinite(parsed[0]) ? parsed[0] : fallback.x,
+                Number.isFinite(parsed[1]) ? parsed[1] : fallback.y,
+                Number.isFinite(parsed[2]) ? parsed[2] : fallback.z
+            );
+        };
+
+        const eulerFromDegreesArray = (values, fallback = new THREE.Euler()) => {
+            const fallbackDeg = new THREE.Vector3(
+                THREE.MathUtils.radToDeg(fallback.x),
+                THREE.MathUtils.radToDeg(fallback.y),
+                THREE.MathUtils.radToDeg(fallback.z)
+            );
+            const vec = vectorFromArray(values, fallbackDeg);
+            return new THREE.Euler(
+                THREE.MathUtils.degToRad(vec.x),
+                THREE.MathUtils.degToRad(vec.y),
+                THREE.MathUtils.degToRad(vec.z)
+            );
+        };
+
+        const scaleVectorFromArray = (values, fallback = new THREE.Vector3(1, 1, 1)) => {
+            if (!Array.isArray(values) || values.length < 3) {
+                return fallback.clone();
+            }
+            const parsed = values.map(v => Number.parseFloat(v));
+            return new THREE.Vector3(
+                Number.isFinite(parsed[0]) ? parsed[0] : fallback.x,
+                Number.isFinite(parsed[1]) ? parsed[1] : fallback.y,
+                Number.isFinite(parsed[2]) ? parsed[2] : fallback.z
+            );
+        };
+
+        const loadSceneAsset = (url) => {
+            if (!url || typeof url !== 'string') {
+                return Promise.reject(new Error('Asset URL missing'));
+            }
+            const trimmed = url.trim();
+            const lower = trimmed.toLowerCase();
+            if (lower.endsWith('.fbx')) {
+                return new Promise((resolve, reject) => {
+                    FBX_LOADER.load(trimmed, resolve, undefined, reject);
+                });
+            }
+            return new Promise((resolve, reject) => {
+                GLTF_LOADER.load(trimmed, gltf => {
+                    const sceneRef = gltf.scene || (Array.isArray(gltf.scenes) ? gltf.scenes[0] : null);
+                    if (!sceneRef) {
+                        reject(new Error('GLTF asset missing scene'));
+                        return;
+                    }
+                    resolve(sceneRef);
+                }, undefined, reject);
+            });
+        };
+
+        const applyBackgroundTheme = (key) => {
+            const theme = BACKGROUND_THEMES[key] || BACKGROUND_THEMES.deepSpace;
+            scene.background = new THREE.Color(theme.sceneColor || '#050816');
+            renderer.setClearColor(theme.sceneColor || '#050816', 1);
+            document.body.style.background = theme.bodyBackground || document.body.style.background;
+        };
+
+        const updateLightingIntensity = (percent = 100) => {
+            const raw = Number.parseFloat(percent);
+            const safePercent = Number.isFinite(raw) ? THREE.MathUtils.clamp(raw, 0, 200) : 100;
+            const factor = safePercent / 100;
+            hemiLight.intensity = BASE_HEMI_INTENSITY * factor;
+            dirLight.intensity = BASE_DIR_INTENSITY * factor;
+            extraLights.forEach(light => {
+                light.intensity = BASE_EXTRA_INTENSITY * factor;
+            });
+        };
+
+        const setExtraLightsVisibility = (visible) => {
+            extraLights.forEach(light => {
+                light.visible = Boolean(visible);
+            });
+        };
+
+        const frameScene = () => {
+            boundingBox.makeEmpty();
+            roomGroup.children.forEach(child => boundingBox.expandByObject(child));
+            assetsGroup.children.forEach(child => boundingBox.expandByObject(child));
+
+            if (boundingBox.isEmpty()) {
+                controls.target.set(0, 1, 0);
+                controls.minDistance = 1.5;
+                controls.maxDistance = 25;
+                camera.position.set(6, 5, 10);
+                camera.near = 0.1;
+                camera.far = 2000;
+                camera.updateProjectionMatrix();
+                controls.update();
+                return;
+            }
+
+            boundingBox.getCenter(tempVec);
+            controls.target.copy(tempVec);
+            boundingBox.getBoundingSphere(boundingSphere);
+
+            const radius = Math.max(boundingSphere.radius || 1, 0.5);
+            const halfFov = THREE.MathUtils.degToRad(camera.fov * 0.5);
+            const safeDistance = radius / Math.sin(halfFov);
+            const minDistance = Math.max(safeDistance * 0.2, 1.2);
+            const maxDistance = Math.max(safeDistance * 3.5, minDistance + 5);
+
+            controls.minDistance = minDistance;
+            controls.maxDistance = maxDistance;
+
+            const direction = new THREE.Vector3().subVectors(camera.position, controls.target);
+            if (direction.lengthSq() === 0) {
+                direction.set(1, 0.2, 1);
+            }
+            direction.normalize();
+
+            const targetDistance = THREE.MathUtils.clamp(safeDistance * 1.15, minDistance + 0.1, maxDistance - 0.1);
+            camera.position.copy(controls.target).add(direction.multiplyScalar(targetDistance));
+
+            camera.near = Math.max(0.1, targetDistance * 0.02);
+            camera.far = Math.max(camera.near + 500, targetDistance * 12);
+            camera.updateProjectionMatrix();
+
+            controls.update();
+        };
+
+        const applySnapshot = async (snapshot) => {
+            if (!snapshot) {
+                throw new Error('Shared layout missing snapshot payload.');
+            }
+
+            setStatus('Rendering shared layout…');
+            clearGroup(assetsGroup);
+            clearGroup(roomGroup);
+            hoveredAsset = null;
+            selectedAsset = null;
+            clearAssetInfo();
+            updateHighlight();
+            updateCursor();
+
+            const desiredRoom = (() => {
+                if (snapshot.room?.source && typeof snapshot.room.source === 'string' && snapshot.room.source.trim()) {
+                    return snapshot.room.source.trim();
+                }
+                if (snapshot.room?.name) {
+                    const match = snapshot.room.name.match(/room\s*(\d+)/i);
+                    if (match) {
+                        const index = Number.parseInt(match[1], 10) - 1;
+                        if (Number.isFinite(index) && index >= 0 && index < ROOM_MODELS.length) {
+                            return ROOM_MODELS[index];
+                        }
+                    }
+                }
+                return ROOM_MODELS[0];
+            })();
+
+            try {
+                const roomObject = await loadSceneAsset(desiredRoom);
+                roomObject.traverse(node => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+                roomObject.rotation.copy(ROOM_BASE_ROTATION);
+                roomObject.scale.copy(ROOM_BASE_SCALE);
+                roomGroup.add(roomObject);
+
+                if (snapshot.room) {
+                    roomObject.position.copy(vectorFromArray(snapshot.room.position, new THREE.Vector3()));
+                    const additiveRotation = eulerFromDegreesArray(snapshot.room.rotationDeg, new THREE.Euler());
+                    roomObject.rotation.x += additiveRotation.x;
+                    roomObject.rotation.y += additiveRotation.y;
+                    roomObject.rotation.z += additiveRotation.z;
+                    const roomScaleMultiplier = scaleVectorFromArray(snapshot.room.scale, new THREE.Vector3(1, 1, 1));
+                    roomObject.scale.multiply(roomScaleMultiplier);
+                } else {
+                    roomObject.rotation.copy(ROOM_BASE_ROTATION);
+                }
+            } catch (error) {
+                console.warn('Unable to load shared room model', desiredRoom, error);
+            }
+
+            if (snapshot.environment) {
+                applyBackgroundTheme(snapshot.environment);
+            } else {
+                applyBackgroundTheme('deepSpace');
+            }
+
+            if (snapshot.lighting) {
+                updateLightingIntensity(snapshot.lighting.brightnessPercent);
+                setExtraLightsVisibility(snapshot.lighting.extraLightsEnabled);
+            } else {
+                updateLightingIntensity(100);
+                setExtraLightsVisibility(false);
+            }
+
+            const assets = Array.isArray(snapshot.assets) ? snapshot.assets : [];
+            for (const asset of assets) {
+                try {
+                    const url = asset?.source || asset?.assetUrl;
+                    if (!url) {
+                        continue;
+                    }
+                    const object = await loadSceneAsset(url);
+                    object.traverse(node => {
+                        if (node.isMesh) {
+                            node.castShadow = true;
+                            node.receiveShadow = true;
+                        }
+                    });
+                    const position = vectorFromArray(asset.position, new THREE.Vector3());
+                    const rotation = eulerFromDegreesArray(asset.rotationDeg, new THREE.Euler());
+                    const scale = scaleVectorFromArray(asset.scale, new THREE.Vector3(DEFAULT_MODEL_SCALE, DEFAULT_MODEL_SCALE, DEFAULT_MODEL_SCALE));
+                    const clampComponent = value => THREE.MathUtils.clamp(value, MIN_SCALE, MAX_SCALE);
+                    scale.set(clampComponent(scale.x), clampComponent(scale.y), clampComponent(scale.z));
+                    object.position.copy(position);
+                    object.rotation.copy(rotation);
+                    object.scale.copy(scale);
+                    const parsedPrice = Number.parseFloat(asset.price);
+                    const safePrice = Number.isFinite(parsedPrice) ? parsedPrice : null;
+                    const assetInfo = {
+                        id: asset.id || asset.assetId || null,
+                        name: asset.name || 'Shared Asset',
+                        category: asset.category || null,
+                        price: safePrice,
+                        librarySource: asset.librarySource || null,
+                        sourceUrl: url,
+                        position: Array.isArray(asset.position) ? asset.position : [position.x, position.y, position.z],
+                        rotation: Array.isArray(asset.rotationDeg) ? asset.rotationDeg : [
+                            THREE.MathUtils.radToDeg(rotation.x),
+                            THREE.MathUtils.radToDeg(rotation.y),
+                            THREE.MathUtils.radToDeg(rotation.z)
+                        ],
+                        scale: Array.isArray(asset.scale) ? asset.scale : [scale.x, scale.y, scale.z]
+                    };
+                    object.userData.assetInfo = assetInfo;
+                    assetsGroup.add(object);
+                    object.updateMatrixWorld(true);
+                } catch (assetError) {
+                    console.warn('Failed to load shared asset', asset?.name || asset?.assetId || 'asset', assetError);
+                }
+            }
+
+            frameScene();
+            setStatus('Shared layout ready.', 'success');
+        };
+
+        const updateShareDetails = (code, data) => {
+            if (code) {
+                shareCodeLabel.textContent = code;
+                shareCodePill.hidden = false;
+            } else {
+                shareCodePill.hidden = true;
+            }
+
+            if (data) {
+                shareMeta.hidden = false;
+                const sharer = data.companyName || data.shareSource || 'Stellarion Setup My Room';
+                sharerLine.textContent = `Shared by ${sharer}`;
+                const contactBits = [];
+                if (data.contactName) contactBits.push(data.contactName);
+                if (data.contactEmail) contactBits.push(data.contactEmail);
+                contactLine.textContent = contactBits.length ? contactBits.join(' • ') : 'Client contact not provided.';
+                noteLine.textContent = data.notes ? data.notes : 'Relocation note unavailable.';
+                const formatted = formatDate(data.createdAt);
+                timestampLine.textContent = formatted ? `Shared on ${formatted}` : '';
+            } else {
+                shareMeta.hidden = true;
+            }
+        };
+
+        const fetchShare = async (code) => {
+            const normalized = normalizeShareCode(code);
+            if (!normalized) {
+                setStatus('Provide a share code to view the layout.', 'error');
+                updateShareDetails('', null);
+                delete copyLinkButton.dataset.shareLink;
+                hoveredAsset = null;
+                selectedAsset = null;
+                renderAssetInfo(null);
+                updateHighlight();
+                updateCursor();
+                return;
+            }
+
+            setStatus('Loading shared layout…');
+            delete copyLinkButton.dataset.shareLink;
+            hoveredAsset = null;
+            selectedAsset = null;
+            renderAssetInfo(null);
+            updateHighlight();
+            updateCursor();
+            try {
+                const response = await fetch(`${API_BASE}/api/room-share/${encodeURIComponent(normalized)}`);
+                const body = await response.json().catch(() => null);
+                if (!response.ok) {
+                    const message = body?.message || `Share request failed (${response.status})`;
+                    throw new Error(message);
+                }
+                const shareData = body?.data || null;
+                if (!shareData || !shareData.snapshot) {
+                    throw new Error('Shared layout payload incomplete.');
+                }
+                await applySnapshot(shareData.snapshot);
+                updateShareDetails(normalized, shareData);
+                const shareLink = buildShareLink(normalized);
+                copyLinkButton.dataset.shareLink = shareLink;
+            } catch (error) {
+                console.error('Unable to fetch shared layout', error);
+                clearGroup(assetsGroup);
+                clearGroup(roomGroup);
+                updateShareDetails('', null);
+                setStatus(error.message || 'Unable to load shared layout right now.', 'error');
+                delete copyLinkButton.dataset.shareLink;
+                 hoveredAsset = null;
+                 selectedAsset = null;
+                 renderAssetInfo(null);
+                 updateHighlight();
+                 updateCursor();
+            }
+        };
+
+        const determineInitialCode = () => {
+            const params = new URLSearchParams(window.location.search);
+            const fromQuery = normalizeShareCode(params.get('code'));
+            if (fromQuery) return fromQuery;
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            const viewIndex = parts.findIndex(part => part.toLowerCase().startsWith('view-room'));
+            if (viewIndex >= 0 && parts.length > viewIndex + 1) {
+                return normalizeShareCode(parts[viewIndex + 1]);
+            }
+            return '';
+        };
+
+        const resizeRenderer = () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            renderer.setSize(width, height, false);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        };
+
+        window.addEventListener('resize', resizeRenderer);
+        resizeRenderer();
+
+        const animate = () => {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        };
+        animate();
+
+        renderer.domElement.addEventListener('pointermove', (event) => {
+            updatePointerFromEvent(event);
+            hoveredAsset = findAssetUnderPointer();
+            updateHighlight();
+            updateCursor();
+        });
+
+        renderer.domElement.addEventListener('pointerleave', () => {
+            hoveredAsset = null;
+            updateHighlight();
+            updateCursor();
+        });
+
+        renderer.domElement.addEventListener('click', (event) => {
+            updatePointerFromEvent(event);
+            const asset = findAssetUnderPointer();
+            if (asset) {
+                selectedAsset = asset;
+                renderAssetInfo(asset.userData.assetInfo || null);
+            } else {
+                selectedAsset = null;
+                renderAssetInfo(null);
+            }
+            updateHighlight();
+            updateCursor();
+        });
+
+        renderer.domElement.addEventListener('dblclick', () => {
+            frameScene();
+        });
+
+        clearAssetInfo();
+        updateCursor();
+
+        loadShareButton.addEventListener('click', () => {
+            const code = normalizeShareCode(shareInput.value);
+            if (!code) {
+                setStatus('Enter a share code to continue.', 'error');
+                return;
+            }
+            const targetUrl = `/view-room.html?code=${encodeURIComponent(code)}`;
+            if (window.location.pathname + window.location.search !== targetUrl) {
+                window.history.replaceState({}, '', targetUrl);
+            }
+            fetchShare(code);
+        });
+
+        shareInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                loadShareButton.click();
+            }
+        });
+
+        copyLinkButton.addEventListener('click', async () => {
+            const link = copyLinkButton.dataset.shareLink;
+            if (!link) {
+                setStatus('No share link available to copy yet.', 'error');
+                return;
+            }
+            if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+                setStatus('Clipboard unavailable. Copy the link manually.', 'error');
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(link);
+                setStatus('Share link copied to clipboard.', 'success');
+            } catch (error) {
+                console.warn('Clipboard copy failed', error);
+                setStatus('Unable to copy link. Copy manually instead.', 'error');
+            }
+        });
+
+        const initialCode = determineInitialCode();
+        codeInputRow.hidden = false;
+        if (initialCode) {
+            shareInput.value = initialCode;
+            fetchShare(initialCode);
+        } else {
+            setStatus('Enter a share code to view the shared room.');
+        }
+    </script>
+</body>
+</html>

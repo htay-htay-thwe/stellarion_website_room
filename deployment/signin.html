@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Stellarion</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🛋️</text></svg>">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <!-- Ubuntu Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Condensed:wght@400&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif !important;
+            background: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 0;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 1000;
+            background: white;
+            border: 2px solid #e5e7eb;
+            color: #6b7280;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 90vh;
+            display: flex;
+        }
+        
+        .left-panel {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 90vh;
+            position: relative;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.9) 100%);
+            z-index: 1;
+        }
+
+        .left-panel > * {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .right-panel {
+            padding: 1.5rem;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 90vh;
+            overflow: hidden;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            background: linear-gradient(45deg, #ffffff, #e0e7ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+        }
+        
+        .hero-description {
+            font-size: 1rem;
+            line-height: 1.5;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-list {
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 8px 0;
+        }
+        
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            opacity: 0.9;
+        }
+        
+        .form-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .form-title h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-title p {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+            color: #1f2937;
+        }
+        
+        .form-control::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #0f172a;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+        }
+        
+        .password-field {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        
+        .submit-button:hover {
+            background: linear-gradient(135deg, #1e293b, #334155);
+        }
+        
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .forgot-password {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .forgot-password a {
+            color: #0f172a;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        
+        .signin-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .signin-button:hover {
+            background: white;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            margin: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981, #34d399);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .form-card {
+                margin: 10px;
+                border-radius: 15px;
+                max-height: 95vh;
+                flex-direction: column;
+            }
+            
+            .left-panel,
+            .right-panel {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+                height: auto;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <a href="index.html" class="back-button">
+        <i class="ti ti-arrow-left me-2"></i>Back to Home
+    </a>
+
+    <div class="main-container">
+        <div class="form-card">
+            <div class="row g-0 h-100">
+                <!-- Left Panel - Description -->
+                <div class="col-6">
+                    <div class="left-panel">
+                        <h1 class="hero-title">Welcome Back</h1>
+                        <h2 class="hero-subtitle">Sign in to Stellarion</h2>
+                        <p class="hero-description">
+                            Access your account to generate stunning 3D models, save your favorite furniture pieces, 
+                            and enjoy a personalized shopping experience with our revolutionary AR platform.
+                        </p>
+                        
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <i class="ti ti-3d-cube-sphere feature-icon"></i>
+                                <span>Generate 3D Models</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="ti ti-heart feature-icon"></i>
+                                <span>Save Favorites</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="ti ti-augmented-reality feature-icon"></i>
+                                <span>AR Visualization</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="ti ti-user feature-icon"></i>
+                                <span>Personal Dashboard</span>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="mb-3">Don't have an account?</p>
+                            <a href="register.html" class="signin-button">
+                                <i class="ti ti-user-plus"></i>Create Account
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Panel - Form -->
+                <div class="col-6">
+                    <div class="right-panel">
+                    <div class="form-title">
+                        <h2>Sign In</h2>
+                        <p>Enter your credentials to access your account</p>
+                    </div>
+
+                    <form id="signinForm">
+                        <div class="form-group">
+                            <input type="text" id="username" name="username" class="form-control" placeholder="Username or Email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="password-field">
+                                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                                <button type="button" id="togglePassword" class="password-toggle">
+                                    <i class="ti ti-eye" id="eyeIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="submitButton" class="submit-button">
+                            <i class="ti ti-login me-2"></i>Sign In
+                        </button>
+
+                        <div class="forgot-password">
+                            <a href="#" onclick="alert('Forgot password feature coming soon!')">Forgot your password?</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="success-modal">
+        <div class="modal-content">
+            <div class="success-icon">
+                <i class="ti ti-check"></i>
+            </div>
+            <h3 id="welcomeTitle">Welcome Back!</h3>
+            <p id="welcomeMessage">Successfully signed in to your account.</p>
+            <button id="closeModal" class="submit-button">
+                Continue
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Password toggle functionality
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            eyeIcon.className = type === 'password' ? 'ti ti-eye' : 'ti ti-eye-off';
+        });
+
+        // Form submission
+        const signinForm = document.getElementById('signinForm');
+        const submitButton = document.getElementById('submitButton');
+
+        signinForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            // Client-side validation
+            if (!username || !password) {
+                alert('Please enter both username/email and password');
+                return;
+            }
+
+            const data = {
+                login: username,  // Server expects 'login' field
+                password: password
+            };
+
+            try {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="ti ti-loader me-2"></i>Signing In...';
+
+                const response = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    
+                    // Show success modal with personalized message
+                    const user = result.user;
+                    const welcomeTitle = document.getElementById('welcomeTitle');
+                    const welcomeMessage = document.getElementById('welcomeMessage');
+                    const successModal = document.getElementById('successModal');
+                    
+                    welcomeTitle.textContent = `Welcome back, ${user.firstName || user.username}!`;
+                    welcomeMessage.textContent = `Great to see you again. You're now signed in to your Stellarion account.`;
+                    
+                    successModal.style.display = 'flex';
+                    
+                    // Handle modal close and redirect
+                    document.getElementById('closeModal').addEventListener('click', function() {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirect = urlParams.get('redirect');
+                        
+                        if (redirect === '3d-generator') {
+                            window.location.href = '3d-generator.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    });
+                } else {
+                    alert(result.message || 'Sign in failed');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="ti ti-login me-2"></i>Sign In';
+                }
+            } catch (error) {
+                console.error('Sign in error:', error);
+                alert('Sign in failed. Please try again.');
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="ti ti-login me-2"></i>Sign In';
+            }
+        });
+    </script>
+</body>
+</html>

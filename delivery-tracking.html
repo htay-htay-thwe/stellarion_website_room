@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Tracking - Stellarion</title>
+    <link rel="stylesheet" href="modern-styles.css">
+    <style>
+        body {
+            background: #f8fafc;
+            color: #0f172a;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        header {
+            background: #0f172a;
+            color: #fff;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a { color: #cbd5f5; text-decoration: none; font-weight: 600; }
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1.5rem 3rem;
+            display: grid;
+            gap: 2rem;
+        }
+        h1 { font-size: 2rem; margin: 0; }
+        .message {
+            padding: 0.9rem 1.1rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .message-info { background: #e0e7ff; color: #1d4ed8; }
+        .message-error { background: #fee2e2; color: #b91c1c; }
+        .message-success { background: #dcfce7; color: #166534; }
+        [hidden] { display: none !important; }
+        section {
+            background: #fff;
+            border-radius: 18px;
+            padding: 1.75rem;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+        .order-details dl {
+            display: grid;
+            grid-template-columns: minmax(120px, 1fr) minmax(160px, 2fr);
+            gap: 0.8rem 1.5rem;
+            margin: 0;
+        }
+        .order-details dt { font-weight: 600; color: #475569; }
+        .timeline {
+            position: relative;
+            padding-left: 1.5rem;
+            border-left: 3px solid #cbd5f5;
+            display: grid;
+            gap: 1.5rem;
+        }
+        .timeline-entry {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        .timeline-entry::before {
+            content: '';
+            position: absolute;
+            left: -1.6rem;
+            top: 0.35rem;
+            width: 0.9rem;
+            height: 0.9rem;
+            border-radius: 50%;
+            background: #cbd5f5;
+            box-shadow: 0 0 0 4px #fff;
+        }
+        .timeline-entry.completed::before {
+            background: #22c55e;
+        }
+        .timeline-entry h3 {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+        .timeline-entry time {
+            display: block;
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 0.2rem;
+        }
+        .timeline-entry p {
+            margin-top: 0.5rem;
+            color: #475569;
+        }
+        .order-items ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 1rem;
+        }
+        .order-items li {
+            display: flex;
+            justify-content: space-between;
+            gap: 1.2rem;
+            border-bottom: 1px dashed #cbd5f5;
+            padding-bottom: 0.9rem;
+        }
+        .order-items li:last-child { border-bottom: none; }
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 0.75rem; }
+            .order-details dl { grid-template-columns: 1fr; }
+            .timeline { padding-left: 1rem; }
+            .timeline-entry { padding-left: 1rem; }
+            .timeline-entry::before { left: -1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Delivery Tracking</h1>
+        <a href="index.html">Back to Catalogue</a>
+    </header>
+    <main>
+        <noscript>
+            <p class="message message-error">JavaScript is required to view delivery updates. Please enable it and refresh.</p>
+        </noscript>
+
+        <div class="message message-info" data-tracking-message hidden></div>
+
+        <section class="order-details" data-order-section hidden>
+            <h2>Order Details</h2>
+            <dl>
+                <dt>Order ID</dt>
+                <dd data-order-id>—</dd>
+                <dt>Status</dt>
+                <dd data-order-status>—</dd>
+                <dt>Total Amount</dt>
+                <dd data-order-total>$0.00</dd>
+                <dt>Payment Status</dt>
+                <dd data-payment-status>—</dd>
+                <dt>Placed At</dt>
+                <dd data-order-created>—</dd>
+            </dl>
+        </section>
+
+        <section class="order-items" data-items-section hidden>
+            <h2>Items</h2>
+            <ul data-order-items></ul>
+        </section>
+
+        <section class="order-timeline" data-timeline-section hidden>
+            <h2>Status Timeline</h2>
+            <div class="timeline" data-timeline></div>
+        </section>
+    </main>
+
+    <script src="assets/js/commerce-utils.js"></script>
+    <script>
+        (function initDeliveryTracking() {
+            if (!window.Commerce) {
+                console.error('Commerce helpers are missing.');
+                return;
+            }
+
+            const messageEl = document.querySelector('[data-tracking-message]');
+            const orderSection = document.querySelector('[data-order-section]');
+            const itemsSection = document.querySelector('[data-items-section]');
+            const timelineSection = document.querySelector('[data-timeline-section]');
+
+            const orderIdEl = document.querySelector('[data-order-id]');
+            const orderStatusEl = document.querySelector('[data-order-status]');
+            const orderTotalEl = document.querySelector('[data-order-total]');
+            const paymentStatusEl = document.querySelector('[data-payment-status]');
+            const orderCreatedEl = document.querySelector('[data-order-created]');
+            const itemsList = document.querySelector('[data-order-items]');
+            const timelineList = document.querySelector('[data-timeline]');
+
+            const showMessage = (text, type = 'info') => {
+                if (!messageEl) return;
+                messageEl.textContent = text;
+                messageEl.className = `message message-${type}`;
+                messageEl.hidden = !text;
+            };
+
+            const formatDateTime = (value) => {
+                if (!value) return '—';
+                const date = value instanceof Date ? value : new Date(value);
+                if (Number.isNaN(date.getTime())) return '—';
+                return date.toLocaleString();
+            };
+
+            const renderOrderDetails = (order) => {
+                orderIdEl.textContent = order.id;
+                orderStatusEl.textContent = order.status.replace(/_/g, ' ');
+                orderTotalEl.textContent = Commerce.formatCurrency(order.totalAmount);
+                paymentStatusEl.textContent = (order.paymentStatus || '').replace(/_/g, ' ') || 'pending';
+                orderCreatedEl.textContent = formatDateTime(order.createdAt);
+                orderSection.hidden = false;
+
+                if (order.items?.length) {
+                    itemsList.innerHTML = '';
+                    order.items.forEach((item) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <span><strong>${item.name || 'Untitled Model'}</strong><br><small>${item.quantity} × ${Commerce.formatCurrency(item.unitPrice)}</small></span>
+                            <span>${Commerce.formatCurrency(item.lineTotal)}</span>
+                        `;
+                        itemsList.appendChild(li);
+                    });
+                    itemsSection.hidden = false;
+                } else {
+                    itemsSection.hidden = true;
+                }
+            };
+
+            const renderTimeline = (timeline = []) => {
+                timelineList.innerHTML = '';
+                if (!timeline.length) {
+                    timelineSection.hidden = true;
+                    return;
+                }
+                timeline.forEach((step) => {
+                    const entry = document.createElement('div');
+                    entry.className = `timeline-entry${step.completed ? ' completed' : ''}`;
+                    entry.innerHTML = `
+                        <h3>${step.label}</h3>
+                        <time>${step.timestamp ? formatDateTime(step.timestamp) : 'Pending'}</time>
+                        ${step.details ? `<p>${step.details}</p>` : ''}
+                    `;
+                    timelineList.appendChild(entry);
+                });
+                timelineSection.hidden = false;
+            };
+
+            const fetchOrder = async (orderId) => {
+                try {
+                    showMessage('Loading order details…', 'info');
+                    const result = await Commerce.apiFetch(`/api/orders/${orderId}`);
+                    if (!result?.success) {
+                        throw new Error(result?.message || 'Unable to load order');
+                    }
+                    renderOrderDetails(result.order);
+                    renderTimeline(result.timeline || []);
+                    showMessage('', 'info');
+                } catch (error) {
+                    console.error('Delivery tracking failed', error);
+                    showMessage(error.message || 'Failed to load delivery information', 'error');
+                }
+            };
+
+            const bootstrap = () => {
+                const token = Commerce.getToken();
+                if (!token) {
+                    window.location.href = `signin.html?redirect=${encodeURIComponent(window.location.pathname)}`;
+                    return;
+                }
+                const params = new URLSearchParams(window.location.search);
+                let orderId = params.get('orderId');
+                if (!orderId) {
+                    orderId = sessionStorage.getItem('stellarion_last_order_id');
+                }
+                if (!orderId) {
+                    showMessage('No order selected. Provide an orderId query parameter.', 'error');
+                    return;
+                }
+                fetchOrder(orderId);
+            };
+
+            document.addEventListener('DOMContentLoaded', bootstrap);
+        })();
+    </script>
+</body>
+</html>

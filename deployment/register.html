@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Stellarion</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🛋️</text></svg>">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <!-- Ubuntu Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Condensed:wght@400&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif !important;
+            background: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 0;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 1000;
+            background: white;
+            border: 2px solid #e5e7eb;
+            color: #6b7280;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 90vh;
+            display: flex;
+        }
+        
+        .left-panel {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 90vh;
+            position: relative;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.9) 100%);
+            z-index: 1;
+        }
+
+        .left-panel > * {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .right-panel {
+            padding: 1.5rem;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 90vh;
+            overflow: hidden;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            background: linear-gradient(45deg, #ffffff, #e0e7ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+        }
+        
+        .hero-description {
+            font-size: 1rem;
+            line-height: 1.5;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-list {
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 8px 0;
+        }
+        
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            opacity: 0.9;
+        }
+        
+        .tab-content {
+            height: 90vh;
+            overflow: hidden;
+        }
+
+        .tab-switcher {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 6px;
+            margin-bottom: 1rem;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+        }
+        
+        .tab-button.active {
+            background: white;
+            color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-title {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .form-title h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+        
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+            color: #1f2937;
+        }
+        
+        .form-control::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #0f172a;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+        }
+        
+        .password-field {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        
+        .submit-button:hover {
+            background: linear-gradient(135deg, #1e293b, #334155);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        .checkbox-group input {
+            margin-top: 3px;
+        }
+        
+        .checkbox-group label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            line-height: 1.3;
+        }
+        
+        .checkbox-group a {
+            color: #0f172a;
+            text-decoration: none;
+        }
+        
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+        
+        .signin-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .signin-button:hover {
+            background: white;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            margin: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981, #34d399);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .form-card {
+                margin: 10px;
+                border-radius: 15px;
+                max-height: 95vh;
+                flex-direction: column;
+            }
+            
+            .left-panel,
+            .right-panel {
+                padding: 2rem 1.5rem;
+                min-height: auto;
+                height: auto;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .back-button {
+                top: 20px;
+                left: 20px;
+                padding: 10px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Back Button -->
+    <a href="index.html" class="back-button">
+        <i class="ti ti-arrow-left me-2"></i>Back to Home
+    </a>
+
+    <div class="main-container">
+        <div class="container">
+            <div class="form-card">
+                <div class="row g-0">
+                    
+                    <!-- Personal Registration Tab -->
+                    <div id="personalTab" class="tab-content w-100">
+                        <div class="row g-0">
+                            
+                            <!-- Left Panel - Description -->
+                            <div class="col-lg-6">
+                                <div class="left-panel">
+                                    <h1 class="hero-title">Join Stellarion</h1>
+                                    <h2 class="hero-subtitle">Transform Your Furniture Shopping Experience</h2>
+                                    <p class="hero-description">
+                                        Create your personal account to access our revolutionary AR furniture platform. 
+                                        Visualize furniture in your space before you buy, discover premium collections, 
+                                        and enjoy a personalized shopping experience like never before.
+                                    </p>
+                                    
+                                    <div class="feature-list">
+                                        <div class="feature-item">
+                                            <i class="ti ti-augmented-reality feature-icon"></i>
+                                            <span>Augmented Reality Preview</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="ti ti-heart feature-icon"></i>
+                                            <span>Save Your Favorites</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="ti ti-truck-delivery feature-icon"></i>
+                                            <span>Fast & Secure Delivery</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="ti ti-users feature-icon"></i>
+                                            <span>Community Reviews</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <p class="mb-3">Already have an account?</p>
+                                        <a href="#" class="signin-button">
+                                            <i class="ti ti-login"></i>Sign In
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Panel - Form -->
+                            <div class="col-lg-6">
+                                <div class="right-panel">
+                                    
+                                    <!-- Tab Switcher -->
+                                    <div class="tab-switcher">
+                                        <button type="button" class="tab-button active" onclick="switchTab('personal')">
+                                            <i class="ti ti-user me-2"></i>Personal Account
+                                        </button>
+                                        <button type="button" class="tab-button" onclick="switchTab('company')">
+                                            <i class="ti ti-building me-2"></i>Company Account
+                                        </button>
+                                    </div>
+
+                                    <form id="personalForm">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <input type="text" id="firstName" name="firstName" class="form-control" placeholder="First Name" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <input type="text" id="lastName" name="lastName" class="form-control" placeholder="Last Name" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <input type="email" id="email" name="email" class="form-control" placeholder="Email Address" required>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <input type="tel" id="phone" name="phone" class="form-control" placeholder="Phone Number (Optional)">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <div class="password-field">
+                                                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                                                <button type="button" id="togglePassword" class="password-toggle">
+                                                    <i class="ti ti-eye" id="eyeIcon"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirm Password" required>
+                                        </div>
+                                        
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="terms" name="terms" required>
+                                            <label for="terms">
+                                                I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>
+                                            </label>
+                                        </div>
+                                        
+                                        <button type="submit" class="submit-button">
+                                            <i class="ti ti-user-plus me-2"></i>Create Personal Account
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Company Registration Tab -->
+                    <div id="companyTab" class="tab-content w-100" style="display: none;">
+                        <div class="row g-0">
+                            
+                            <!-- Left Panel - Form -->
+                            <div class="col-lg-6">
+                                <div class="right-panel">
+                                    
+                                    <!-- Tab Switcher -->
+                                    <div class="tab-switcher">
+                                        <button type="button" class="tab-button" onclick="switchTab('personal')">
+                                            <i class="ti ti-user me-2"></i>Personal Account
+                                        </button>
+                                        <button type="button" class="tab-button active" onclick="switchTab('company')">
+                                            <i class="ti ti-building me-2"></i>Company Account
+                                        </button>
+                                    </div>
+
+                                    <form id="companyForm">
+                                        <div class="form-group">
+                                            <input type="text" id="companyName" name="companyName" class="form-control" placeholder="Company Name" required>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <input type="text" id="brandName" name="brandName" class="form-control" placeholder="Brand Name" required>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <input type="email" id="companyEmail" name="companyEmail" class="form-control" placeholder="Company Email" required>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <input type="tel" id="companyPhone" name="companyPhone" class="form-control" placeholder="Company Phone (Optional)">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <input type="url" id="website" name="website" class="form-control" placeholder="Website URL (Optional)">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <textarea id="description" name="description" class="form-control" rows="2" placeholder="Company Description (Optional)"></textarea>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <input type="text" id="city" name="city" class="form-control" placeholder="City (Optional)">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <input type="text" id="country" name="country" class="form-control" placeholder="Country (Optional)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <div class="password-field">
+                                                <input type="password" id="companyPassword" name="companyPassword" class="form-control" placeholder="Password" required>
+                                                <button type="button" id="toggleCompanyPassword" class="password-toggle">
+                                                    <i class="ti ti-eye" id="companyEyeIcon"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="companyTerms" name="companyTerms" required>
+                                            <label for="companyTerms">
+                                                I agree to the <a href="#">Business Terms</a> and <a href="#">Privacy Policy</a>
+                                            </label>
+                                        </div>
+                                        
+                                        <button type="submit" class="submit-button">
+                                            <i class="ti ti-building-store me-2"></i>Register Company
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Right Panel - Description -->
+                            <div class="col-lg-6">
+                                <div class="left-panel">
+                                    <h1 class="hero-title">Partner with Us</h1>
+                                    <h2 class="hero-subtitle">Grow Your Furniture Business</h2>
+                                    <p class="hero-description">
+                                        Join Stellarion's business network as a furniture company. Showcase your products 
+                                        with cutting-edge AR technology, reach new customers, and grow your business with our 
+                                        innovative platform designed specifically for furniture retailers and manufacturers.
+                                    </p>
+                                    
+                                    <div class="feature-list">
+                                        <div class="feature-item">
+                                            <i class="ti ti-chart-line feature-icon"></i>
+                                            <span>Increase Sales & Reach</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="ti ti-3d-cube-sphere feature-icon"></i>
+                                            <span>3D Product Showcase</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="ti ti-dashboard feature-icon"></i>
+                                            <span>Business Dashboard</span>
+                                        </div>
+                                        <div class="feature-item">
+                                            <i class="ti ti-users-group feature-icon"></i>
+                                            <span>Customer Analytics</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <p class="mb-3">Already registered your company?</p>
+                                        <a href="#" class="signin-button">
+                                            <i class="ti ti-login"></i>Business Login
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="success-modal">
+        <div class="modal-content">
+            <div class="success-icon">
+                <i class="ti ti-check"></i>
+            </div>
+            <h3>Account Created Successfully!</h3>
+            <p>Welcome to Stellarion. Your account has been created and is ready to use.</p>
+            <button id="closeModal" class="submit-button">
+                Get Started
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(type) {
+            const personalTab = document.getElementById('personalTab');
+            const companyTab = document.getElementById('companyTab');
+            
+            if (type === 'personal') {
+                personalTab.style.display = 'block';
+                companyTab.style.display = 'none';
+            } else {
+                personalTab.style.display = 'none';
+                companyTab.style.display = 'block';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check URL parameters for account type
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('type') === 'company') {
+                switchTab('company');
+            }
+            
+            // Password toggle functionality
+            function setupPasswordToggle(toggleId, passwordId, iconId) {
+                const toggleBtn = document.getElementById(toggleId);
+                const passwordInput = document.getElementById(passwordId);
+                const eyeIcon = document.getElementById(iconId);
+
+                if (toggleBtn && passwordInput && eyeIcon) {
+                    toggleBtn.addEventListener('click', function() {
+                        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        passwordInput.setAttribute('type', type);
+                        
+                        eyeIcon.className = type === 'password' ? 'ti ti-eye' : 'ti ti-eye-off';
+                    });
+                }
+            }
+
+            setupPasswordToggle('togglePassword', 'password', 'eyeIcon');
+            setupPasswordToggle('toggleCompanyPassword', 'companyPassword', 'companyEyeIcon');
+
+            // Form submissions
+            const personalForm = document.getElementById('personalForm');
+            const companyForm = document.getElementById('companyForm');
+
+            if (personalForm) {
+                personalForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(e.target);
+                    const data = {
+                        username: formData.get('username'),
+                        email: formData.get('email'),
+                        password: formData.get('password'),
+                        firstName: formData.get('firstName'),
+                        lastName: formData.get('lastName'),
+                        phone: formData.get('phone')
+                    };
+
+                    // Password confirmation check
+                    if (data.password !== formData.get('confirmPassword')) {
+                        alert('Passwords do not match!');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/api/users/register', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            localStorage.setItem('token', result.token);
+                            showSuccessModal();
+                        } else {
+                            alert(result.message || 'Registration failed');
+                        }
+                    } catch (error) {
+                        console.error('Registration error:', error);
+                        alert('Registration failed. Please try again.');
+                    }
+                });
+            }
+
+            if (companyForm) {
+                companyForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(e.target);
+                    const data = {
+                        companyName: formData.get('companyName'),
+                        brandName: formData.get('brandName'),
+                        contactEmail: formData.get('companyEmail'),
+                        contactPhone: formData.get('companyPhone'),
+                        websiteUrl: formData.get('website'),
+                        description: formData.get('description'),
+                        city: formData.get('city'),
+                        country: formData.get('country'),
+                        password: formData.get('companyPassword')
+                    };
+
+                    try {
+                        const response = await fetch('/api/company-registration/register', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            localStorage.setItem('token', result.token);
+                            showSuccessModal();
+                        } else {
+                            alert(result.message || 'Company registration failed');
+                        }
+                    } catch (error) {
+                        console.error('Company registration error:', error);
+                        alert('Company registration failed. Please try again.');
+                    }
+                });
+            }
+
+            // Success modal
+            function showSuccessModal() {
+                document.getElementById('successModal').style.display = 'flex';
+            }
+
+            const closeModalBtn = document.getElementById('closeModal');
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', function() {
+                    window.location.href = 'index.html';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

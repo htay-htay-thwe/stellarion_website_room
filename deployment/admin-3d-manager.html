@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Manager - Stellarion Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'system-ui', sans-serif; }
+        .model-viewer-preview {
+            width: 100%;
+            height: 300px;
+            background: #f5f5f5;
+            border: 2px dashed #ccc;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-cube text-blue-600"></i>
+                3D Model Manager
+            </h1>
+            <p class="text-gray-600">Update 3D models for your Stellarion furniture products</p>
+        </div>
+
+        <!-- Quick Guide -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-6 rounded">
+            <h2 class="text-xl font-bold text-blue-800 mb-3">
+                <i class="fas fa-info-circle"></i> Quick Guide
+            </h2>
+            <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                <li>Get a .glb file from TripoAI, Meshy, or other 3D service</li>
+                <li>Upload it to GitHub, Google Drive, or paste a public URL</li>
+                <li>Enter the URL in the input field below</li>
+                <li>Click "Update 3D Model" for that product</li>
+                <li>Refresh your main website to see changes</li>
+            </ol>
+        </div>
+
+        <!-- Model URL Tester -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-vial text-green-600"></i> Test 3D Model URL
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">3D Model URL (.glb)</label>
+                    <input 
+                        type="text" 
+                        id="testModelUrl" 
+                        placeholder="https://example.com/model.glb"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    >
+                </div>
+                <button 
+                    onclick="testModel()"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition">
+                    <i class="fas fa-play mr-2"></i>Test Model
+                </button>
+                <div id="testPreview" class="model-viewer-preview rounded-lg hidden">
+                    <!-- Model preview will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Products List -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-list text-purple-600"></i> Products & 3D Models
+            </h2>
+            <div id="productsList" class="space-y-4">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Export Code Button -->
+        <div class="mt-6 text-center">
+            <button 
+                onclick="exportUpdatedCode()"
+                class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-8 rounded-lg transition">
+                <i class="fas fa-download mr-2"></i>Export Updated Code
+            </button>
+        </div>
+    </div>
+
+    <!-- Model Viewer Library -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <script>
+        // Load products from script.js
+        const products = [
+            { id: 1, name: "Luxe Velvet Sofa", category: "living-room", image: "https://i.imgur.com/9YXqJ5K.jpeg", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Sofa/glTF-Binary/Sofa.glb" },
+            { id: 2, name: "Marble Coffee Table", category: "living-room", image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Table/glTF-Binary/Table.glb" },
+            { id: 3, name: "Canopy Bed Frame", category: "bedroom", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/BoomBox/glTF-Binary/BoomBox.glb" },
+            { id: 4, name: "Luxury Wardrobe", category: "bedroom", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Chair/glTF-Binary/Chair.glb" },
+            { id: 5, name: "Grand Dining Set", category: "dining", image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Table/glTF-Binary/Table.glb" },
+            { id: 6, name: "Designer Bar Stool", category: "dining", image: "https://images.unsplash.com/photo-1503602642458-232111445657?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/Chair.glb" },
+            { id: 7, name: "Executive Desk", category: "office", image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Table/glTF-Binary/Table.glb" },
+            { id: 8, name: "Ergonomic Chair", category: "office", image: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/Chair.glb" },
+            { id: 9, name: "Modern Bookshelf", category: "storage", image: "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Chair/glTF-Binary/Chair.glb" },
+            { id: 10, name: "Storage Cabinet", category: "storage", image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Chair/glTF-Binary/Chair.glb" },
+            { id: 11, name: "Teak Patio Set", category: "outdoor", image: "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Table/glTF-Binary/Table.glb" },
+            { id: 12, name: "Rattan Lounge Chair", category: "outdoor", image: "https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/Chair.glb" },
+            { id: 13, name: "Media Console", category: "living-room", image: "https://images.unsplash.com/photo-1565183928294-7d21b500c9f1?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Table/glTF-Binary/Table.glb" },
+            { id: 14, name: "Velvet Nightstand", category: "bedroom", image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/glTF-Sample-Models/2.0/Table/glTF-Binary/Table.glb" },
+            { id: 15, name: "Wingback Accent Chair", category: "living-room", image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&h=300&fit=crop", model3D: "https://modelviewer.dev/shared-assets/models/Chair.glb" }
+        ];
+
+        // Render products list
+        function renderProducts() {
+            const container = document.getElementById('productsList');
+            container.innerHTML = products.map(product => `
+                <div class="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition">
+                    <div class="flex items-start gap-6">
+                        <img src="${product.image}" alt="${product.name}" class="w-32 h-32 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">${product.name}</h3>
+                            <p class="text-sm text-gray-600 mb-4">
+                                <span class="bg-gray-200 px-3 py-1 rounded-full">${product.category}</span>
+                            </p>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Current 3D Model URL:</label>
+                            <input 
+                                type="text" 
+                                id="model-${product.id}" 
+                                value="${product.model3D}"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm mb-3"
+                            >
+                            <div class="flex gap-3">
+                                <button 
+                                    onclick="updateModel(${product.id})"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition">
+                                    <i class="fas fa-save mr-2"></i>Update 3D Model
+                                </button>
+                                <button 
+                                    onclick="previewModel(${product.id})"
+                                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">
+                                    <i class="fas fa-eye mr-2"></i>Preview
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Test model function
+        function testModel() {
+            const url = document.getElementById('testModelUrl').value;
+            if (!url) {
+                alert('Please enter a 3D model URL');
+                return;
+            }
+
+            const preview = document.getElementById('testPreview');
+            preview.classList.remove('hidden');
+            preview.innerHTML = `
+                <model-viewer
+                    src="${url}"
+                    alt="Test Model"
+                    auto-rotate
+                    camera-controls
+                    style="width: 100%; height: 100%;">
+                </model-viewer>
+            `;
+        }
+
+        // Update model function
+        function updateModel(productId) {
+            const input = document.getElementById(`model-${productId}`);
+            const newUrl = input.value;
+            
+            const product = products.find(p => p.id === productId);
+            product.model3D = newUrl;
+            
+            alert(`✅ 3D Model updated for: ${product.name}\n\nClick "Export Updated Code" below to get the new code.`);
+        }
+
+        // Preview model function
+        function previewModel(productId) {
+            const input = document.getElementById(`model-${productId}`);
+            const url = input.value;
+            const product = products.find(p => p.id === productId);
+            
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-bold">${product.name} - 3D Preview</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-3xl">&times;</button>
+                    </div>
+                    <div style="height: 500px;">
+                        <model-viewer
+                            src="${url}"
+                            alt="${product.name}"
+                            auto-rotate
+                            camera-controls
+                            shadow-intensity="1"
+                            style="width: 100%; height: 100%;">
+                        </model-viewer>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Export updated code
+        function exportUpdatedCode() {
+            const code = `// Updated Product Data with 3D Models\nconst products = ${JSON.stringify(products, null, 4)};`;
+            
+            const blob = new Blob([code], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'updated-products.js';
+            a.click();
+            
+            alert('✅ Code exported! Replace the products array in script.js with the downloaded file content.');
+        }
+
+        // Initialize
+        renderProducts();
+    </script>
+</body>
+</html>

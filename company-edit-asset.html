@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stellarion Studio | Edit Company Asset</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        surface: {
+                            50: 'rgba(15, 23, 42, 0.45)',
+                            100: 'rgba(15, 23, 42, 0.65)',
+                            200: 'rgba(15, 23, 42, 0.85)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Manrope', 'ui-sans-serif', 'system-ui'],
+                        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular']
+                    },
+                    boxShadow: {
+                        glow: '0 18px 45px -25px rgba(59, 130, 246, 0.55)'
+                    }
+                }
+            }
+        };
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+    <style>
+        :root {
+            --glass-bg: rgba(12, 18, 33, 0.88);
+            --glass-border: rgba(148, 163, 184, 0.15);
+        }
+
+        body {
+            font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont;
+            background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.18), transparent 45%),
+                radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.14), transparent 40%),
+                #030712;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .input-field {
+            background: rgba(9, 14, 24, 0.78);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            color: #f8fafc;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .input-field:focus {
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+            outline: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: rgba(79, 70, 229, 0.12);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            border-radius: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 42px -24px rgba(79, 70, 229, 0.85);
+        }
+
+        .btn-secondary {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            transition: border 0.2s ease, color 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(79, 70, 229, 0.55);
+            color: #c7d2fe;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --poster-color: transparent;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(71, 85, 105, 0.65);
+            border-radius: 999px;
+        }
+
+        .inventory-cell {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+        }
+
+        .inventory-table tbody tr:last-child .inventory-cell {
+            border-bottom: none;
+        }
+
+        .inventory-row-selected {
+            background: rgba(99, 102, 241, 0.18);
+        }
+
+        .inventory-row-selected .inventory-cell {
+            border-bottom-color: rgba(129, 140, 248, 0.35);
+        }
+
+        .status-pill {
+            padding: 0.35rem 0.7rem;
+        }
+
+        .status-live {
+            background: rgba(52, 211, 153, 0.16);
+            border-color: rgba(52, 211, 153, 0.38);
+            color: #6ee7b7;
+        }
+
+        .status-hidden {
+            background: rgba(71, 85, 105, 0.18);
+            border-color: rgba(71, 85, 105, 0.38);
+            color: #94a3b8;
+        }
+
+        .status-draft {
+            background: rgba(251, 191, 36, 0.16);
+            border-color: rgba(251, 191, 36, 0.38);
+            color: #facc15;
+        }
+
+        .status-archived {
+            background: rgba(248, 113, 113, 0.18);
+            border-color: rgba(248, 113, 113, 0.4);
+            color: #fca5a5;
+        }
+
+        .status-pending {
+            background: rgba(96, 165, 250, 0.16);
+            border-color: rgba(96, 165, 250, 0.4);
+            color: #bfdbfe;
+        }
+
+        .status-review {
+            background: rgba(129, 140, 248, 0.16);
+            border-color: rgba(129, 140, 248, 0.4);
+            color: #c7d2fe;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="relative flex flex-col xl:flex-row min-h-screen">
+        <aside class="w-full xl:w-[420px] glass border-r border-white/10 flex flex-col">
+            <header class="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-black/30">
+                <div class="flex items-center gap-3">
+                    <a href="company-3d-generator.html" class="w-9 h-9 rounded-xl border border-white/10 bg-surface-50 flex items-center justify-center text-slate-200 hover:bg-indigo-600/40 transition" aria-label="Back to generator">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </a>
+                    <div>
+                        <div class="text-slate-300 text-xs uppercase tracking-[0.28em]">Company Tools</div>
+                        <h1 class="text-lg font-semibold tracking-tight text-white">Edit Asset Metadata</h1>
+                    </div>
+                </div>
+                <div class="text-right text-xs text-slate-400">
+                    <div id="companyNameLabel" class="font-medium text-slate-200">Partner Studio</div>
+                    <div id="companyIdLabel">ID -</div>
+                </div>
+            </header>
+
+            <section class="px-6 py-5 border-b border-white/10 bg-black/20">
+                <div class="glass rounded-2xl p-4 border border-white/10">
+                    <div class="flex items-center justify-between text-[11px] text-slate-400 uppercase tracking-[0.32em] font-semibold mb-3">
+                        <span>Asset Lookup</span>
+                        <button id="refreshCurrent" class="text-xs font-semibold text-indigo-300 hover:text-indigo-100 transition" type="button">
+                            Refresh
+                        </button>
+                    </div>
+                    <div class="space-y-3 text-xs text-slate-300">
+                        <div class="flex gap-2">
+                            <input id="assetIdInput" class="input-field rounded-xl px-3 py-2 w-full" type="text" placeholder="Model ID or slug" aria-label="Model identifier" />
+                            <button id="loadAssetBtn" class="btn-secondary px-4 py-2" type="button">Load</button>
+                        </div>
+                        <p class="text-[11px] leading-relaxed text-slate-400">
+                            Paste an asset id from the company marketplace list or use <span class="font-semibold text-indigo-300">?id=</span> in the URL.
+                        </p>
+                        <div class="flex items-center justify-between text-[10px] uppercase tracking-[0.32em] text-slate-500 pt-1">
+                            <span>Status</span>
+                            <span id="assetStatusLabel" class="badge">No Asset Loaded</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                <section class="glass border border-white/10 rounded-2xl p-5 space-y-4">
+                    <header class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-sm font-semibold uppercase tracking-[0.28em] text-slate-200">Basic Info</h2>
+                            <p class="text-xs text-slate-400 mt-1">Edit the public-facing details for marketplace shoppers.</p>
+                        </div>
+                        <button id="toggleAvailabilityBtn" class="btn-secondary px-4 py-2 text-xs hidden" type="button"></button>
+                    </header>
+
+                    <div class="grid grid-cols-1 gap-3">
+                        <label class="flex flex-col gap-1 text-xs text-slate-300">
+                            Name
+                            <input id="assetName" class="input-field rounded-lg px-3 py-2" type="text" placeholder="e.g. Aurora Lounge Chair" />
+                        </label>
+                        <label class="flex flex-col gap-1 text-xs text-slate-300">
+                            Category
+                            <input id="assetCategory" class="input-field rounded-lg px-3 py-2" type="text" placeholder="Living room" />
+                        </label>
+                        <label class="flex flex-col gap-1 text-xs text-slate-300">
+                            Price (USD)
+                            <input id="assetPrice" class="input-field rounded-lg px-3 py-2" type="number" step="0.01" min="0" placeholder="320" />
+                        </label>
+                        <label class="flex flex-col gap-1 text-xs text-slate-300">
+                            Short Description
+                            <textarea id="assetDescription" class="input-field rounded-lg px-3 py-3 resize-y min-h-[80px]" placeholder="Premium bouclé fabric with polished steel legs"></textarea>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="glass border border-white/10 rounded-2xl p-5 space-y-4">
+                    <header>
+                        <h2 class="text-sm font-semibold uppercase tracking-[0.28em] text-slate-200">Asset URLs</h2>
+                        <p class="text-xs text-slate-400 mt-1">Move updated files into storage and drop the new addresses here.</p>
+                    </header>
+                    <div class="space-y-3 text-xs text-slate-300">
+                        <label class="flex flex-col gap-1">
+                            GLB URL
+                            <input id="assetGlbUrl" class="input-field rounded-lg px-3 py-2" type="url" placeholder="https://.../chair.glb" />
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            USDZ URL
+                            <input id="assetUsdzUrl" class="input-field rounded-lg px-3 py-2" type="url" placeholder="https://.../chair.usdz" />
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            Thumbnail URL
+                            <input id="assetThumbnailUrl" class="input-field rounded-lg px-3 py-2" type="url" placeholder="https://.../chair-thumb.jpg" />
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            Additional Assets (JSON)
+                            <textarea id="assetAdditionalJson" class="input-field font-mono rounded-lg px-3 py-3 resize-y min-h-[80px]" placeholder='{"glb":"https://..."}'></textarea>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="glass border border-white/10 rounded-2xl p-5 space-y-4">
+                    <header>
+                        <h2 class="text-sm font-semibold uppercase tracking-[0.28em] text-slate-200">Placement Metadata</h2>
+                        <p class="text-xs text-slate-400 mt-1">Height offsets, tags, and retail toggles feed directly into the room planner.</p>
+                    </header>
+                    <div class="grid grid-cols-2 gap-3 text-xs text-slate-300">
+                        <label class="flex flex-col gap-1">
+                            Height Offset (Y)
+                            <input id="assetHeightOffset" class="input-field rounded-lg px-3 py-2" type="number" step="0.01" placeholder="0" />
+                        </label>
+                        <label class="flex flex-col gap-1">
+                            Active
+                            <select id="assetActive" class="input-field rounded-lg px-3 py-2">
+                                <option value="true">Yes, show in marketplace</option>
+                                <option value="false">No, hide temporarily</option>
+                            </select>
+                        </label>
+                        <label class="flex flex-col gap-1 col-span-2">
+                            Tags (comma separated)
+                            <input id="assetTags" class="input-field rounded-lg px-3 py-2" type="text" placeholder="modern, velvet, blue" />
+                        </label>
+                    </div>
+                </section>
+
+                <section class="flex flex-col gap-3">
+                    <button id="saveAssetBtn" class="btn-primary w-full py-3 text-sm" type="button">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i>Save Changes
+                    </button>
+                    <button id="duplicateAssetBtn" class="btn-secondary w-full py-3 text-sm" type="button">
+                        <i class="fa-solid fa-clone mr-2"></i>Duplicate Asset
+                    </button>
+                    <button id="deleteAssetBtn" class="btn-secondary w-full py-3 text-sm text-rose-300 hover:text-rose-200 hover:border-rose-400/60" type="button">
+                        <i class="fa-solid fa-trash mr-2"></i>Archive Asset
+                    </button>
+                </section>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col">
+            <section class="border-b border-white/10 bg-black/30">
+                <div class="px-6 py-5">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-sm font-semibold uppercase tracking-[0.28em] text-slate-200">Company Assets</h2>
+                            <p class="text-xs text-slate-400 mt-1">Select a model below to load it into the editor.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="refreshAssetTableBtn" class="btn-secondary px-4 py-2 text-xs flex items-center gap-2" type="button">
+                                <i class="fa-solid fa-rotate-right text-sm"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="glass border border-white/10 rounded-2xl mt-4 overflow-hidden">
+                        <div id="assetTableLoader" class="px-6 py-10 text-center text-sm text-slate-400">
+                            Loading assets...
+                        </div>
+                        <div id="assetTableEmpty" class="px-6 py-10 text-center text-sm text-slate-500 hidden">
+                            No assets found for this company yet. Start by generating or uploading a product.
+                        </div>
+                        <div id="assetTableScroll" class="overflow-x-auto hidden">
+                            <table id="assetTable" class="inventory-table min-w-full text-sm text-slate-200">
+                                <thead class="bg-white/5 text-[11px] uppercase tracking-[0.24em] text-slate-400">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left font-semibold">Name</th>
+                                        <th class="px-4 py-3 text-left font-semibold">Category</th>
+                                        <th class="px-4 py-3 text-right font-semibold">Price</th>
+                                        <th class="px-4 py-3 text-left font-semibold">Status</th>
+                                        <th class="px-4 py-3 text-left font-semibold">Updated</th>
+                                        <th class="px-4 py-3 text-right font-semibold">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assetTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="flex-1 relative bg-[#050816]">
+                <div id="viewerPlaceholder" class="absolute inset-0 flex items-center justify-center">
+                    <div class="glass border border-white/10 rounded-3xl px-8 py-10 text-center shadow-glow max-w-xl mx-auto">
+                        <div class="badge mb-4"><i class="fa-solid fa-cube"></i> Model Viewer</div>
+                        <h2 class="text-xl font-semibold text-white">Load a company asset to preview it in real time.</h2>
+                        <p class="text-slate-400 text-sm mt-2">Update metadata, pricing, and delivery formats. The planner will refresh immediately once saved.</p>
+                    </div>
+                </div>
+                <model-viewer id="viewer" class="w-full h-full" camera-controls autoplay ar shadow-intensity="1.1" shadow-softness="0.9" exposure="1.25"></model-viewer>
+            </div>
+            <footer class="glass border-t border-white/10 px-6 py-4 flex items-center justify-between text-xs text-slate-400">
+                <div class="flex items-center gap-3">
+                    <span>Last Updated</span>
+                    <span id="assetUpdatedAt" class="badge bg-surface-50/60 border-white/10">Pending</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button id="openPreviewBtn" class="btn-secondary px-4 py-2" type="button">Open Marketplace Listing</button>
+                    <span class="text-slate-500">Stellarion Studio • Company Workspace</span>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <div id="toastStack" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:3000' : window.location.origin;
+        const viewer = document.getElementById('viewer');
+        const viewerPlaceholder = document.getElementById('viewerPlaceholder');
+        const assetStatusLabel = document.getElementById('assetStatusLabel');
+        const companyNameLabel = document.getElementById('companyNameLabel');
+        const companyIdLabel = document.getElementById('companyIdLabel');
+        const assetUpdatedAt = document.getElementById('assetUpdatedAt');
+        const openPreviewBtn = document.getElementById('openPreviewBtn');
+        const toggleAvailabilityBtn = document.getElementById('toggleAvailabilityBtn');
+        const assetIdInput = document.getElementById('assetIdInput');
+        const assetTableBody = document.getElementById('assetTableBody');
+        const assetTableLoader = document.getElementById('assetTableLoader');
+        const assetTableEmpty = document.getElementById('assetTableEmpty');
+        const assetTableScroll = document.getElementById('assetTableScroll');
+        const refreshAssetTableBtn = document.getElementById('refreshAssetTableBtn');
+
+        const BUSINESS_ENDPOINT = {
+            GET_ONE: id => `${API_BASE}/api/company-models/${encodeURIComponent(id)}`,
+            UPDATE: id => `${API_BASE}/api/company-models/${encodeURIComponent(id)}`,
+            DUPLICATE: id => `${API_BASE}/api/company-models/${encodeURIComponent(id)}/duplicate`,
+            DELETE: id => `${API_BASE}/api/company-models/${encodeURIComponent(id)}`
+        };
+
+        let activeAssetId = null;
+        let currentAsset = null;
+        let isSaving = false;
+        let activeCompanyProfileId = null;
+        let assetInventory = [];
+        let assetTableLoading = false;
+        let assetTableSelectedId = null;
+
+        const formControls = {
+            name: document.getElementById('assetName'),
+            category: document.getElementById('assetCategory'),
+            price: document.getElementById('assetPrice'),
+            description: document.getElementById('assetDescription'),
+            glb: document.getElementById('assetGlbUrl'),
+            usdz: document.getElementById('assetUsdzUrl'),
+            thumb: document.getElementById('assetThumbnailUrl'),
+            additional: document.getElementById('assetAdditionalJson'),
+            offset: document.getElementById('assetHeightOffset'),
+            active: document.getElementById('assetActive'),
+            tags: document.getElementById('assetTags')
+        };
+
+        const usdFormatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        });
+
+        const timestampFormatter = new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+
+        const loadAssetBtn = document.getElementById('loadAssetBtn');
+        if (loadAssetBtn) {
+            loadAssetBtn.addEventListener('click', () => {
+                const candidate = assetIdInput?.value.trim() || '';
+                if (!candidate) {
+                    pushToast('Enter a model id to load.', 'error');
+                    return;
+                }
+                loadAsset(candidate);
+            });
+        }
+
+        const refreshCurrentBtn = document.getElementById('refreshCurrent');
+        if (refreshCurrentBtn) {
+            refreshCurrentBtn.addEventListener('click', () => {
+                if (!activeAssetId) {
+                    pushToast('No asset loaded yet.', 'error');
+                    return;
+                }
+                loadAsset(activeAssetId, { silent: false, force: true });
+            });
+        }
+
+        if (refreshAssetTableBtn) {
+            refreshAssetTableBtn.addEventListener('click', () => {
+                fetchAssetInventory({ force: true, silent: false, preserveSelection: true });
+            });
+        }
+
+        if (assetTableBody) {
+            assetTableBody.addEventListener('click', event => {
+                const targetRow = event.target.closest('tr[data-asset-id]');
+                if (!targetRow) {
+                    return;
+                }
+                const selectedId = targetRow.dataset.assetId;
+                if (!selectedId) {
+                    return;
+                }
+                if (assetIdInput) {
+                    assetIdInput.value = selectedId;
+                }
+                const isSameAsset = activeAssetId && String(activeAssetId) === selectedId;
+                selectTableRow(selectedId);
+                loadAsset(selectedId, { silent: Boolean(isSameAsset) });
+                if (typeof targetRow.scrollIntoView === 'function') {
+                    targetRow.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+            });
+        }
+
+        document.getElementById('saveAssetBtn').addEventListener('click', persistAssetChanges);
+        document.getElementById('duplicateAssetBtn').addEventListener('click', duplicateAsset);
+        document.getElementById('deleteAssetBtn').addEventListener('click', deleteAsset);
+        toggleAvailabilityBtn.addEventListener('click', toggleAvailability);
+
+        openPreviewBtn.addEventListener('click', () => {
+            if (!currentAsset?.slug && !currentAsset?.id) {
+                pushToast('Load an asset to open its marketplace page.', 'error');
+                return;
+            }
+            const slug = currentAsset.slug || currentAsset.id;
+            const url = `${API_BASE}/marketplace/${slug}`;
+            window.open(url, '_blank', 'noopener');
+        });
+
+        viewer.addEventListener('load', () => {
+            viewerPlaceholder.classList.add('hidden');
+        });
+
+        viewer.addEventListener('error', () => {
+            pushToast('Unable to render model preview. Check the GLB/Proxy URL.', 'error');
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            hydrateCompanyIdentity();
+            try {
+                await fetchAssetInventory({ silent: true, preserveSelection: true });
+            } catch (error) {
+                console.warn('Initial asset inventory fetch failed', error);
+            }
+            const preselectedId = new URLSearchParams(window.location.search).get('id');
+            if (preselectedId) {
+                if (assetIdInput) {
+                    assetIdInput.value = preselectedId;
+                }
+                loadAsset(preselectedId);
+            }
+        });
+
+        function resolveCompanyProfileId() {
+            if (Number.isFinite(activeCompanyProfileId)) {
+                return activeCompanyProfileId;
+            }
+
+            const sessionStored = Number.parseInt(sessionStorage.getItem('companyProfileId') || '', 10);
+            if (Number.isFinite(sessionStored)) {
+                activeCompanyProfileId = sessionStored;
+                return sessionStored;
+            }
+
+            const localStored = Number.parseInt(localStorage.getItem('companyProfileId') || '', 10);
+            if (Number.isFinite(localStored)) {
+                activeCompanyProfileId = localStored;
+                return localStored;
+            }
+
+            return null;
+        }
+
+        async function fetchAssetInventory({ force = false, silent = true, preserveSelection = true } = {}) {
+            if (assetTableLoading && !force) {
+                return;
+            }
+            if (!assetTableBody || !assetTableLoader || !assetTableScroll) {
+                return;
+            }
+
+            assetTableLoading = true;
+            assetTableLoader.textContent = 'Loading assets...';
+            assetTableLoader.classList.remove('hidden');
+            if (assetTableEmpty) {
+                assetTableEmpty.classList.add('hidden');
+            }
+            assetTableScroll.classList.add('hidden');
+
+            try {
+                const query = new URLSearchParams();
+                const companyProfileId = resolveCompanyProfileId();
+                if (companyProfileId) {
+                    query.set('companyProfileId', companyProfileId);
+                }
+
+                const url = `${API_BASE}/api/company-models${query.toString() ? `?${query.toString()}` : ''}`;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Fetch company assets failed (${response.status})`);
+                }
+
+                const payload = await response.json();
+                const models = Array.isArray(payload?.models) ? payload.models : [];
+                assetInventory = models.map(normalizeCompanyAsset).filter(Boolean);
+                renderAssetTable({ preserveSelection });
+                if (!silent) {
+                    pushToast('Asset catalog refreshed.', 'success');
+                }
+            } catch (error) {
+                console.error('Asset inventory fetch failed', error);
+                assetInventory = [];
+                renderAssetTable({ preserveSelection: false });
+                pushToast(error.message || 'Unable to load company assets.', 'error');
+            } finally {
+                assetTableLoading = false;
+                assetTableLoader.classList.add('hidden');
+            }
+        }
+
+        function renderAssetTable({ preserveSelection = true } = {}) {
+            if (!assetTableBody || !assetTableScroll) {
+                return;
+            }
+
+            assetTableBody.innerHTML = '';
+
+            if (!Array.isArray(assetInventory) || assetInventory.length === 0) {
+                assetTableScroll.classList.add('hidden');
+                if (assetTableEmpty) {
+                    assetTableEmpty.classList.remove('hidden');
+                }
+                if (!preserveSelection) {
+                    selectTableRow(null);
+                }
+                return;
+            }
+
+            assetTableScroll.classList.remove('hidden');
+            if (assetTableEmpty) {
+                assetTableEmpty.classList.add('hidden');
+            }
+
+            const fragment = document.createDocumentFragment();
+            assetInventory.forEach(asset => {
+                const row = document.createElement('tr');
+                row.dataset.assetId = String(asset.id);
+                row.className = 'hover:bg-indigo-500/10 transition-colors cursor-pointer';
+
+                const identifier = asset.slug || (asset.id ? `#${asset.id}` : '');
+                row.innerHTML = `
+                    <td class="inventory-cell px-4 py-3">
+                        <div class="font-medium text-slate-100">${escapeHtml(asset.name || 'Untitled')}</div>
+                        ${identifier ? `<div class="text-[11px] uppercase tracking-[0.18em] text-slate-500 mt-1">${escapeHtml(identifier)}</div>` : ''}
+                    </td>
+                    <td class="inventory-cell px-4 py-3 text-sm text-slate-300">
+                        ${escapeHtml(asset.category || 'Uncategorized')}
+                        ${asset.style ? `<div class="text-[11px] text-slate-500 mt-1 tracking-[0.14em] uppercase">${escapeHtml(asset.style)}</div>` : ''}
+                    </td>
+                    <td class="inventory-cell px-4 py-3 text-right text-sm font-semibold text-slate-200">
+                        ${formatCurrency(asset.price)}
+                    </td>
+                    <td class="inventory-cell px-4 py-3 text-sm">
+                        ${renderStatusPill(asset)}
+                    </td>
+                    <td class="inventory-cell px-4 py-3 text-xs text-slate-400">
+                        ${formatTimestamp(asset.updated_at || asset.created_at)}
+                    </td>
+                    <td class="inventory-cell px-4 py-3 text-right">
+                        <button class="btn-secondary px-3 py-1.5 text-xs" type="button" data-action="edit-asset">Edit</button>
+                    </td>
+                `;
+
+                fragment.appendChild(row);
+            });
+
+            assetTableBody.appendChild(fragment);
+            const targetId = preserveSelection ? (activeAssetId ?? assetTableSelectedId) : null;
+            selectTableRow(targetId);
+        }
+
+        function normalizeCompanyAsset(record) {
+            if (!record || typeof record !== 'object') {
+                return null;
+            }
+
+            const urls = parseModelUrls(record.model_urls);
+            const remote = urls?.remote || {};
+            const local = urls?.local || {};
+            const fallbackGlb = record.model_url || urls?.glb || urls?.gltf || remote.glb || local.glb || null;
+            const fallbackUsdz = urls?.usdz || remote.usdz || urls?.usd || null;
+            const fallbackThumb = record.preview_url || urls?.thumbnail || record.image_url || null;
+            const normalizedStatus = typeof record.status === 'string' ? record.status.toLowerCase() : null;
+            const active = normalizedStatus ? !['archived', 'hidden', 'inactive'].includes(normalizedStatus) : record.active !== false;
+
+            return {
+                ...record,
+                price: toFloat(record.price),
+                wholesale_price: toFloat(record.wholesale_price),
+                msrp: toFloat(record.msrp),
+                inventory: Number.isFinite(Number(record.inventory)) ? Number(record.inventory) : null,
+                glb_url: fallbackGlb,
+                usdz_url: fallbackUsdz,
+                thumbnail_url: fallbackThumb,
+                model_urls: urls,
+                status_normalized: normalizedStatus,
+                active
+            };
+        }
+
+        function parseModelUrls(value) {
+            if (!value) {
+                return {};
+            }
+            if (typeof value === 'object') {
+                return value;
+            }
+            if (typeof value === 'string') {
+                return safeParseJSON(value);
+            }
+            return {};
+        }
+
+        function renderStatusPill(asset) {
+            const normalized = (asset?.status_normalized || asset?.status || (asset?.active ? 'active' : 'hidden') || '').toString().toLowerCase();
+            const palette = {
+                active: { label: 'Live', className: 'status-live' },
+                live: { label: 'Live', className: 'status-live' },
+                published: { label: 'Live', className: 'status-live' },
+                hidden: { label: 'Hidden', className: 'status-hidden' },
+                inactive: { label: 'Hidden', className: 'status-hidden' },
+                archived: { label: 'Archived', className: 'status-archived' },
+                draft: { label: 'Draft', className: 'status-draft' },
+                pending: { label: 'Pending', className: 'status-pending' },
+                processing: { label: 'Processing', className: 'status-pending' },
+                reviewing: { label: 'Review', className: 'status-review' },
+                review: { label: 'Review', className: 'status-review' }
+            };
+
+            const fallbackKey = asset?.active === false ? 'hidden' : 'active';
+            const entry = palette[normalized] || palette[fallbackKey] || { label: 'Pending', className: 'status-pending' };
+            return `<span class="badge status-pill ${entry.className}">${entry.label}</span>`;
+        }
+
+        function formatCurrency(value) {
+            if (value === null || value === undefined) {
+                return 'N/A';
+            }
+            const numeric = Number(value);
+            if (!Number.isFinite(numeric)) {
+                return 'N/A';
+            }
+            try {
+                return usdFormatter.format(numeric);
+            } catch (error) {
+                return `$${numeric.toFixed(2)}`;
+            }
+        }
+
+        function formatTimestamp(value) {
+            if (!value) {
+                return 'N/A';
+            }
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return 'N/A';
+            }
+            try {
+                return timestampFormatter.format(date);
+            } catch (error) {
+                return date.toLocaleString();
+            }
+        }
+
+        function escapeHtml(value) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+            return value.toString().replace(/[&<>"']/g, char => {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return map[char] || char;
+            });
+        }
+
+        function selectTableRow(assetId) {
+            if (!assetTableBody) {
+                return;
+            }
+            assetTableSelectedId = assetId !== null && assetId !== undefined ? String(assetId) : null;
+            const rows = assetTableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const shouldSelect = assetTableSelectedId && row.dataset.assetId === assetTableSelectedId;
+                row.classList.toggle('inventory-row-selected', Boolean(shouldSelect));
+            });
+        }
+
+        function hydrateCompanyIdentity() {
+            let resolvedId = resolveCompanyProfileId();
+            try {
+                const raw = localStorage.getItem('companyProfilePayload') || sessionStorage.getItem('companyProfilePayload');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed?.brand_name) {
+                        companyNameLabel.textContent = parsed.brand_name;
+                    }
+                    const parsedId = Number.parseInt(parsed?.company_id ?? parsed?.company_profile_id ?? '', 10);
+                    if (Number.isFinite(parsedId)) {
+                        activeCompanyProfileId = parsedId;
+                        resolvedId = parsedId;
+                    }
+                }
+            } catch (error) {
+                console.warn('Cannot hydrate company identity', error);
+            }
+
+            if (!Number.isFinite(resolvedId)) {
+                const fallback = Number.parseInt(localStorage.getItem('companyProfileId') || sessionStorage.getItem('companyProfileId') || '', 10);
+                if (Number.isFinite(fallback)) {
+                    activeCompanyProfileId = fallback;
+                    resolvedId = fallback;
+                }
+            }
+
+            companyIdLabel.textContent = Number.isFinite(resolvedId) ? `ID ${resolvedId}` : 'ID -';
+        }
+
+        async function loadAsset(id, { force = false, silent = false } = {}) {
+            if (!force && id === activeAssetId && currentAsset) {
+                if (!silent) pushToast('Asset already loaded.', 'info');
+                return;
+            }
+
+            try {
+                updateStatusLabel('Loading...', 'info');
+                const response = await fetch(BUSINESS_ENDPOINT.GET_ONE(id));
+                if (!response.ok) {
+                    throw new Error(`Fetch failed with status ${response.status}`);
+                }
+                const payload = await response.json();
+                const asset = payload?.model || payload;
+                if (!asset || typeof asset !== 'object') {
+                    throw new Error('Malformed response: missing model payload');
+                }
+                const normalizedAsset = normalizeCompanyAsset(asset) || asset;
+                currentAsset = normalizedAsset;
+                activeAssetId = normalizedAsset.id || id;
+                if (assetIdInput) {
+                    assetIdInput.value = activeAssetId;
+                }
+                selectTableRow(activeAssetId);
+                populateForm(normalizedAsset);
+                updatePreview(normalizedAsset);
+                updateStatusLabel(normalizedAsset.active ? 'Live' : 'Hidden', normalizedAsset.active ? 'success' : 'warning');
+                pushToast('Asset data loaded.', 'success');
+            } catch (error) {
+                console.error('Asset load failed', error);
+                pushToast(error.message || 'Failed to fetch asset', 'error');
+                updateStatusLabel('Load Failed', 'error');
+            }
+        }
+
+        function populateForm(asset) {
+            formControls.name.value = asset.name || '';
+            formControls.category.value = asset.category || '';
+            formControls.price.value = toNumberString(asset.price);
+            formControls.description.value = asset.description || asset.summary || '';
+
+            const urls = asset.model_urls || asset.assets || {};
+            formControls.glb.value = asset.glb_url || urls.glb || urls.gltf || '';
+            formControls.usdz.value = asset.usdz_url || urls.usdz || '';
+            formControls.thumb.value = asset.thumbnail_url || asset.preview_url || '';
+            formControls.additional.value = safeStringify(asset.model_urls || asset.assets);
+
+            formControls.offset.value = Number.isFinite(Number(asset.meta_height_offset)) ? Number(asset.meta_height_offset) : '';
+            formControls.active.value = asset.active === false ? 'false' : 'true';
+            formControls.tags.value = Array.isArray(asset.tags) ? asset.tags.join(', ') : asset.tags || '';
+
+            assetUpdatedAt.textContent = asset.updated_at ? new Date(asset.updated_at).toLocaleString() : 'Pending';
+            toggleAvailabilityBtn.classList.remove('hidden');
+            toggleAvailabilityBtn.textContent = asset.active === false ? 'Mark as Live' : 'Hide Asset';
+            toggleAvailabilityBtn.dataset.nextState = asset.active === false ? 'true' : 'false';
+            if (assetIdInput) {
+                assetIdInput.value = asset.id || activeAssetId || '';
+            }
+            selectTableRow(activeAssetId);
+        }
+
+        function updatePreview(asset) {
+            const assetUrls = asset.model_urls || asset.assets || {};
+            const glbUrl = asset.glb_url || assetUrls.glb || assetUrls.gltf || null;
+            const proxied = glbUrl ? `${API_BASE}/api/proxy-model?url=${encodeURIComponent(glbUrl)}` : null;
+            if (glbUrl || proxied) {
+                viewer.setAttribute('src', proxied || glbUrl);
+            }
+            if (asset.background_color) {
+                viewer.style.background = asset.background_color;
+            }
+            if (asset.thumbnail_url) {
+                viewer.setAttribute('poster', asset.thumbnail_url);
+            }
+            viewerPlaceholder.classList.toggle('hidden', Boolean(glbUrl));
+        }
+
+        async function persistAssetChanges() {
+            if (!activeAssetId) {
+                pushToast('Load an asset before saving.', 'error');
+                return;
+            }
+            if (isSaving) return;
+            const payload = buildPayloadFromForm();
+            if (!payload.name) {
+                pushToast('Name is required.', 'error');
+                return;
+            }
+            isSaving = true;
+            updateStatusLabel('Saving...', 'info');
+            try {
+                const response = await fetch(BUSINESS_ENDPOINT.UPDATE(activeAssetId), {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    throw new Error(`Save failed (${response.status})`);
+                }
+                const updated = await response.json();
+                const normalizedUpdated = normalizeCompanyAsset(updated?.model || updated) || updated?.model || updated;
+                currentAsset = normalizedUpdated;
+                populateForm(normalizedUpdated);
+                updateStatusLabel('Saved', 'success');
+                pushToast('Asset metadata updated.', 'success');
+                await fetchAssetInventory({ force: true, silent: true, preserveSelection: true });
+            } catch (error) {
+                console.error('Save error', error);
+                pushToast(error.message || 'Unable to save asset changes.', 'error');
+                updateStatusLabel('Save Failed', 'error');
+            } finally {
+                isSaving = false;
+            }
+        }
+
+        async function duplicateAsset() {
+            if (!activeAssetId) {
+                pushToast('Load an asset to duplicate it.', 'error');
+                return;
+            }
+            try {
+                const response = await fetch(BUSINESS_ENDPOINT.DUPLICATE(activeAssetId), {
+                    method: 'POST'
+                });
+                if (!response.ok) {
+                    throw new Error(`Duplicate failed (${response.status})`);
+                }
+                const payload = await response.json();
+                pushToast(payload?.message || 'Asset duplicated. Refresh the marketplace list to see it.', 'success');
+                await fetchAssetInventory({ force: true, silent: true, preserveSelection: true });
+            } catch (error) {
+                console.error('Duplicate error', error);
+                pushToast(error.message || 'Unable to duplicate asset.', 'error');
+            }
+        }
+
+        async function deleteAsset() {
+            if (!activeAssetId) {
+                pushToast('Load an asset to archive it.', 'error');
+                return;
+            }
+            if (!confirm('Archive this asset? It will be hidden from the marketplace until restored.')) {
+                return;
+            }
+            try {
+                const response = await fetch(BUSINESS_ENDPOINT.DELETE(activeAssetId), {
+                    method: 'DELETE'
+                });
+                if (!response.ok) {
+                    throw new Error(`Archive failed (${response.status})`);
+                }
+                pushToast('Asset archived. It will no longer appear in the marketplace.', 'success');
+                resetForm();
+                await fetchAssetInventory({ force: true, silent: true, preserveSelection: false });
+            } catch (error) {
+                console.error('Archive error', error);
+                pushToast(error.message || 'Unable to archive asset.', 'error');
+            }
+        }
+
+        async function toggleAvailability() {
+            if (!activeAssetId) return;
+            const nextState = toggleAvailabilityBtn.dataset.nextState !== 'false';
+            const payload = { active: nextState };
+            try {
+                const response = await fetch(BUSINESS_ENDPOINT.UPDATE(activeAssetId), {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    throw new Error(`Toggle failed (${response.status})`);
+                }
+                const updated = await response.json();
+                const normalizedToggle = normalizeCompanyAsset(updated?.model || updated) || updated?.model || updated;
+                currentAsset = normalizedToggle;
+                populateForm(normalizedToggle);
+                pushToast(nextState ? 'Asset is now live in the marketplace.' : 'Asset hidden from marketplace.', 'success');
+                await fetchAssetInventory({ force: true, silent: true, preserveSelection: true });
+            } catch (error) {
+                console.error('Toggle error', error);
+                pushToast(error.message || 'Unable to toggle availability.', 'error');
+            }
+        }
+
+        function buildPayloadFromForm() {
+            const parsedAdditional = safeParseJSON(formControls.additional.value);
+            return {
+                name: formControls.name.value.trim(),
+                category: formControls.category.value.trim(),
+                price: toFloat(formControls.price.value),
+                description: formControls.description.value.trim(),
+                thumbnail_url: formControls.thumb.value.trim() || null,
+                meta_height_offset: toFloat(formControls.offset.value),
+                active: formControls.active.value !== 'false',
+                tags: formControls.tags.value.split(',').map(tag => tag.trim()).filter(Boolean),
+                model_urls: {
+                    glb: formControls.glb.value.trim() || null,
+                    usdz: formControls.usdz.value.trim() || null,
+                    thumbnail: formControls.thumb.value.trim() || null,
+                    ...parsedAdditional
+                }
+            };
+        }
+
+        function resetForm() {
+            activeAssetId = null;
+            currentAsset = null;
+            assetUpdatedAt.textContent = 'Pending';
+            toggleAvailabilityBtn.classList.add('hidden');
+            updateStatusLabel('No Asset Loaded', 'info');
+            Object.values(formControls).forEach(control => {
+                if (control) control.value = '';
+            });
+            if (assetIdInput) {
+                assetIdInput.value = '';
+            }
+            assetTableSelectedId = null;
+            selectTableRow(null);
+            viewer.removeAttribute('src');
+            viewerPlaceholder.classList.remove('hidden');
+        }
+
+        function updateStatusLabel(text, tone) {
+            const palette = {
+                success: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/40',
+                error: 'bg-rose-500/10 text-rose-300 border-rose-400/40',
+                warning: 'bg-amber-400/10 text-amber-200 border-amber-400/40',
+                info: 'bg-indigo-500/10 text-indigo-200 border-indigo-400/40'
+            };
+            assetStatusLabel.textContent = text;
+            assetStatusLabel.className = `badge ${palette[tone] || palette.info}`;
+        }
+
+        function pushToast(message, tone = 'info') {
+            const container = document.getElementById('toastStack');
+            const palette = {
+                success: 'bg-emerald-500/15 border border-emerald-400/30 text-emerald-200',
+                error: 'bg-rose-500/15 border border-rose-400/30 text-rose-200',
+                info: 'bg-sky-500/15 border border-sky-400/30 text-sky-200'
+            };
+            const toast = document.createElement('div');
+            toast.className = `glass px-4 py-3 rounded-2xl text-sm font-medium pointer-events-auto shadow-glow ${palette[tone] || palette.info}`;
+            toast.innerHTML = `<div class="flex items-center gap-3"><i class="fa-solid ${tone === 'error' ? 'fa-circle-xmark' : tone === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i><span>${message}</span></div>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3200);
+        }
+
+        function safeParseJSON(value) {
+            if (!value || typeof value !== 'string') {
+                return {};
+            }
+            try {
+                return JSON.parse(value);
+            } catch (error) {
+                console.warn('Failed to parse JSON input', error);
+                return {};
+            }
+        }
+
+        function safeStringify(value) {
+            if (!value) return '';
+            try {
+                return JSON.stringify(value, null, 2);
+            } catch (error) {
+                return '';
+            }
+        }
+
+        function toFloat(value) {
+            const numeric = parseFloat(value);
+            return Number.isFinite(numeric) ? numeric : null;
+        }
+
+        function toNumberString(value) {
+            const numeric = parseFloat(value);
+            return Number.isFinite(numeric) ? numeric : '';
+        }
+    </script>
+</body>
+</html>

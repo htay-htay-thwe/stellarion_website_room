@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellarion Studio | 3D Generator</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        background: '#030712', 
+                        surface: '#0b101b',    
+                        primary: { DEFAULT: '#6366f1', hover: '#4f46e5' }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+    <style>
+        :root {
+            --glass-bg: rgba(11, 16, 27, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        /* --- FIXED DOTS PATTERN --- */
+        body {
+            background-color: #030712;
+            /* 1. Wider dots (60px) 2. Lower opacity (0.05) */
+            background-image: 
+                radial-gradient(#4b5563 1px, transparent 1px),
+                radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
+            background-size: 60px 60px, 100% 100%, 100% 100%; /* Dots are now wide */
+            background-attachment: fixed;
+            color: #e2e8f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .input-field {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            outline: none;
+        }
+
+        /* Modern Button - No Border */
+        .btn-modern {
+            border: 0 !important;
+            outline: none !important;
+            box-shadow: 0 4px 20px -5px rgba(99, 102, 241, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.6);
+        }
+
+        .back-button {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.85);
+            color: #e2e8f0;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .back-button:hover {
+            background: rgba(99, 102, 241, 0.45);
+            transform: translateY(-1px);
+        }
+        .btn-loading {
+            cursor: wait !important;
+            opacity: 0.85;
+        }
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+            margin-left: 6px;
+        }
+        .loading-dots span {
+            width: 5px;
+            height: 5px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.85);
+            animation: dotPulse 1s infinite ease-in-out;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotPulse {
+            0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+            40% { opacity: 1; transform: translateY(-2px); }
+        }
+
+        #viewer-wrapper {
+            background: radial-gradient(circle at top, rgba(99, 102, 241, 0.08), transparent 55%) #050816;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .viewer-toolbar {
+            min-width: 180px;
+            background: rgba(8, 11, 19, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(18px);
+        }
+        .bg-option {
+            width: 28px;
+            height: 28px;
+            border-radius: 9px;
+            border: 2px solid transparent;
+            transition: transform 0.15s, border 0.15s;
+            outline: none;
+        }
+        .bg-option:hover {
+            transform: translateY(-2px);
+        }
+        .bg-option.active {
+            border-color: rgba(255, 255, 255, 0.75);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
+        }
+        
+        model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+
+<body class="flex flex-col md:flex-row h-screen overflow-hidden selection:bg-indigo-500/30">
+
+    <aside class="w-full md:w-[420px] flex flex-col glass z-20 border-r border-white/5 relative flex-shrink-0 h-full shadow-2xl">
+        
+        <div class="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-black/30 backdrop-blur-md">
+            <div class="flex items-center gap-3">
+                <button type="button" class="back-button" onclick="goBack()" aria-label="Go back">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-cube text-white text-sm"></i>
+                </div>
+                <h1 class="font-bold text-lg tracking-tight text-white">Stellarion</h1>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <div id="navUserName" class="text-xs font-bold text-white">Guest</div>
+                    <div class="text-[10px] text-indigo-400">Welcome</div>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-xs text-white font-bold shadow-inner">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="settingsPanel" class="hidden bg-[#0b101b] border-b border-white/10 p-4 animate-[fadeIn_0.2s]">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Meshy API Key</label>
+            <div class="flex gap-2">
+                <input type="password" id="apiKeyInput" class="w-full input-field rounded-lg px-3 py-2 text-xs" placeholder="sk-ms-...">
+                <button onclick="saveSettings()" class="bg-indigo-600 text-white px-3 rounded-lg text-xs font-bold btn-modern">Save</button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scroll">
+            
+            <section id="step-upload" class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xs font-bold text-indigo-400 uppercase tracking-widest">1. Source</h2>
+                    <button onclick="toggleSettings()" class="text-[10px] text-slate-500 hover:text-white transition"><i class="fa-solid fa-gear"></i> API Key</button>
+                </div>
+                
+                <div id="dropZone" onclick="document.getElementById('fileInput').click()" class="group relative border-2 border-dashed border-slate-700 rounded-xl p-8 text-center hover:border-indigo-500 hover:bg-indigo-500/5 transition-all cursor-pointer bg-slate-900/50">
+                    <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                    
+                    <div id="uploadPrompt">
+                        <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center group-hover:scale-110 group-hover:border-indigo-500/50 transition-transform shadow-xl">
+                            <i class="fa-solid fa-cloud-arrow-up text-slate-400 group-hover:text-indigo-400 text-lg"></i>
+                        </div>
+                        <p class="text-xs text-slate-300 font-bold">Click to Upload Image</p>
+                    </div>
+
+                    <div id="imagePreview" class="hidden absolute inset-0 bg-[#0b101b] z-10 p-2 rounded-xl">
+                        <img id="previewImg" class="w-full h-full object-contain rounded-lg border border-white/5 bg-black">
+                        <button onclick="resetUpload(event)" class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-lg flex items-center justify-center shadow-lg hover:bg-red-600 btn-modern transition-colors">
+                            <i class="fa-solid fa-times text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <p class="text-[11px] leading-relaxed text-slate-500/80">
+                For best results upload a clear product photo with a solid background. Need a quick cleanup?
+                <a href="remove_bg.html" class="text-indigo-400 hover:text-indigo-200 underline">Remove the background here</a> before uploading.
+            </p>
+
+            <section id="step-config" class="space-y-4 opacity-50 pointer-events-none transition-opacity duration-300">
+                <h2 class="text-xs font-bold text-indigo-400 uppercase tracking-widest">2. Parameters</h2>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-1 font-bold">Art Style</label>
+                        <select id="artStyle" class="w-full input-field rounded-lg px-2 py-2 text-xs font-medium cursor-pointer">
+                            <option value="realistic">Realistic (PBR)</option>
+                            <option value="cartoon">Cartoon</option>
+                            <option value="low-poly">Low Poly</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-1 font-bold">Poly Count</label>
+                        <select id="polyCount" class="w-full input-field rounded-lg px-2 py-2 text-xs font-medium cursor-pointer">
+                            <option value="high">High Detail</option>
+                            <option value="medium" selected>Balanced</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <input type="text" id="texturePrompt" placeholder="Texture Prompt (e.g. Rusty metal)" class="w-full input-field rounded-lg px-3 py-2 text-xs">
+                    <input type="text" id="negativePrompt" placeholder="Negative Prompt (e.g. Shadows)" class="w-full input-field rounded-lg px-3 py-2 text-xs">
+                </div>
+
+                <button id="btnGenerate" onclick="startGeneration()" class="btn-modern w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-3 rounded-xl text-sm font-bold tracking-wide flex items-center justify-center gap-2 hover:brightness-110">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate 3D Model
+                </button>
+            </section>
+
+            <div id="consoleSection" class="hidden space-y-2">
+                <div id="consoleArea" class="glass p-3 rounded-lg border border-white/5 max-h-[100px] overflow-y-auto custom-scroll font-mono text-[10px] space-y-1 text-slate-400"></div>
+                
+                <div class="w-full bg-slate-800 rounded-full h-2.5 border border-white/5 overflow-hidden">
+                    <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-[9px] text-slate-500 uppercase font-bold">
+                    <span>Processing</span>
+                    <span id="progressText">0%</span>
+                </div>
+            </div>
+            
+            <section id="step-save" class="hidden pt-6 border-t border-white/10 animate-[fadeIn_0.5s]">
+                <div class="flex items-center gap-2 mb-4 text-emerald-400">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <h3 class="font-bold text-sm">Ready to Save</h3>
+                </div>
+                
+                <div class="space-y-3 mb-4">
+                    <input type="text" id="modelName" placeholder="Asset Name" class="w-full input-field rounded-lg px-3 py-2 text-xs font-bold">
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="dbCategory" class="w-full input-field rounded-lg px-2 py-2 text-xs">
+                            <option value="furniture">Furniture</option>
+                            <option value="prop">Prop</option>
+                            <option value="character">Character</option>
+                        </select>
+                        <input type="number" id="dbPrice" placeholder="Price ($)" class="w-full input-field rounded-lg px-3 py-2 text-xs">
+                    </div>
+                    <textarea id="dbDesc" placeholder="Description..." rows="2" class="w-full input-field rounded-lg px-3 py-2 text-xs"></textarea>
+                    <input type="text" id="modelLocalUrl" placeholder="Local model URL (auto-filled)" class="w-full input-field rounded-lg px-3 py-2 text-xs text-slate-300" readonly>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="saveToLibrary()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-xl text-xs font-bold btn-modern flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-database"></i> Save to DB
+                    </button>
+                     <button onclick="downloadModel()" class="w-1/3 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-xl text-xs font-bold btn-modern flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i> .OBJ
+                    </button>
+                </div>
+            </section>
+
+        </div>
+    </aside>
+
+    <main class="flex-1 relative">
+        <div id="canvas-placeholder" class="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
+            <div class="text-center p-8 bg-slate-950/40 backdrop-blur-md rounded-3xl border border-white/10 shadow-2xl">
+                <div class="relative inline-block mb-4">
+                    <div class="absolute inset-0 bg-indigo-500/30 blur-2xl rounded-full animate-pulse-slow"></div>
+                    <i class="fa-solid fa-cube text-6xl text-indigo-100 relative z-10 animate-[float_4s_ease-in-out_infinite]"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white mb-1">3D Viewport</h2>
+                <p class="text-slate-400 text-xs">Upload an image to visualize</p>
+            </div>
+        </div>
+
+        <div id="viewer-wrapper" class="w-full h-full opacity-0 transition-opacity duration-700 relative z-20">
+            <model-viewer 
+                id="modelViewer"
+                camera-controls 
+                auto-rotate 
+                shadow-intensity="1.5" 
+                shadow-softness="1"
+                exposure="1.2"
+                environment-image="neutral"
+                ar
+                class="w-full h-full"
+                crossorigin="anonymous">
+            </model-viewer>
+
+            <div class="viewer-toolbar absolute top-6 right-6 px-4 py-3 rounded-2xl shadow-xl">
+                <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Background</div>
+                <div class="flex items-center gap-2 mt-2">
+                    <button type="button" class="bg-option active" data-background="midnight" style="background: #0f172a" aria-label="Midnight blue background"></button>
+                    <button type="button" class="bg-option" data-background="studio" style="background: #f8fafc" aria-label="White studio background"></button>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 glass px-4 py-2 rounded-full flex gap-4 border border-white/10 bg-black/40">
+                <button onclick="toggleRotate()" class="text-white/70 hover:text-white transition"><i class="fa-solid fa-sync"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:3000' : window.location.origin;
+        let currentUser = { id: 1, name: 'Guest' };
+        let apiKey = localStorage.getItem('meshy_api_key') || '';
+        let uploadedImageBase64 = null;
+        let currentTaskId = null;
+        let currentUrls = { glb: null, obj: null, proxy: null, thumbnail: null };
+        let currentLocalPaths = {};
+        const BACKGROUND_OPTIONS = {
+            midnight: {
+                wrapperBackground: 'radial-gradient(circle at top, rgba(37, 99, 235, 0.12), transparent 55%) #020617',
+                viewerBackground: '#07152b',
+                environment: 'neutral',
+                exposure: 1.2
+            },
+            studio: {
+                wrapperBackground: '#f8fafc',
+                viewerBackground: '#f8fafc',
+                environment: 'neutral',
+                exposure: 1.0
+            }
+        };
+        let activeBackground = 'midnight';
+        let generateBtn;
+        let generateBtnDefaultClass = '';
+        let generateBtnDefaultHTML = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateBtn = document.getElementById('btnGenerate');
+            if (generateBtn) {
+                generateBtnDefaultClass = generateBtn.className;
+                generateBtnDefaultHTML = generateBtn.innerHTML;
+            }
+            initBackgroundPicker();
+            setViewerBackground(activeBackground);
+
+            const storedUser = localStorage.getItem('user');
+            if(storedUser) {
+                try {
+                    const u = JSON.parse(storedUser);
+                    currentUser.id = u.id;
+                    document.getElementById('navUserName').innerText = u.firstName || 'User';
+                } catch(e) {}
+            }
+            if(apiKey) document.getElementById('apiKeyInput').value = apiKey;
+            
+            // FIX: Suppress Viewer Error
+            document.getElementById('modelViewer').addEventListener('error', (e) => {
+                if(!currentUrls.glb) e.preventDefault();
+            });
+        });
+
+        function goBack() {
+            if (document.referrer && document.referrer !== window.location.href) {
+                history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function initBackgroundPicker() {
+            const buttons = document.querySelectorAll('[data-background]');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-background');
+                    setViewerBackground(target);
+                });
+            });
+        }
+
+        function setViewerBackground(id) {
+            const option = BACKGROUND_OPTIONS[id] || BACKGROUND_OPTIONS.midnight;
+            activeBackground = id in BACKGROUND_OPTIONS ? id : 'midnight';
+
+            const viewerWrapper = document.getElementById('viewer-wrapper');
+            const viewer = document.getElementById('modelViewer');
+            if (viewerWrapper && option.wrapperBackground) {
+                viewerWrapper.style.background = option.wrapperBackground;
+            }
+            if (viewer && option.viewerBackground !== undefined) {
+                viewer.style.background = option.viewerBackground;
+                viewer.style.backgroundColor = option.viewerBackground === 'transparent' ? 'transparent' : option.viewerBackground;
+            }
+            if (viewer && option.environment) {
+                viewer.setAttribute('environment-image', option.environment);
+            }
+            if (viewer && option.exposure) {
+                viewer.setAttribute('exposure', option.exposure);
+            }
+
+            document.querySelectorAll('[data-background]').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-background') === activeBackground);
+            });
+        }
+
+        function setGenerateButtonState(state) {
+            if (!generateBtn) return;
+
+            if (state === 'loading') {
+                generateBtn.disabled = true;
+                generateBtn.className = `${generateBtnDefaultClass} btn-loading`;
+                generateBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Generating<span class="loading-dots"><span></span><span></span><span></span></span>';
+                return;
+            }
+
+            if (state === 'completed') {
+                generateBtn.disabled = false;
+                generateBtn.className = 'btn-modern w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl text-sm font-bold tracking-wide flex items-center justify-center gap-2';
+                generateBtn.innerHTML = '<i class="fa-solid fa-check"></i> Completed';
+                return;
+            }
+
+            generateBtn.disabled = false;
+            generateBtn.className = generateBtnDefaultClass;
+            generateBtn.innerHTML = generateBtnDefaultHTML;
+        }
+
+        function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('hidden'); }
+        function saveSettings() {
+            apiKey = document.getElementById('apiKeyInput').value.trim();
+            localStorage.setItem('meshy_api_key', apiKey);
+            toggleSettings();
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedImageBase64 = e.target.result;
+                document.getElementById('previewImg').src = uploadedImageBase64;
+                document.getElementById('uploadPrompt').classList.add('hidden');
+                document.getElementById('imagePreview').classList.remove('hidden');
+                document.getElementById('step-config').classList.remove('opacity-50', 'pointer-events-none');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function resetUpload(e) {
+            e.stopPropagation();
+            uploadedImageBase64 = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadPrompt').classList.remove('hidden');
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('step-config').classList.add('opacity-50', 'pointer-events-none');
+            currentUrls = { glb: null, obj: null, proxy: null, thumbnail: null };
+            currentLocalPaths = {};
+            const localInput = document.getElementById('modelLocalUrl');
+            if(localInput) localInput.value = '';
+            setGenerateButtonState('default');
+        }
+
+        async function startGeneration() {
+            if(!apiKey) { toggleSettings(); return showToast('API Key missing', 'error'); }
+            if(!uploadedImageBase64) { return showToast('Upload an image first', 'error'); }
+            
+            setGenerateButtonState('loading');
+            document.getElementById('consoleSection').classList.remove('hidden');
+            
+            const payload = {
+                "image_url": uploadedImageBase64,
+                "enable_pbr": true,          // FIX: Ensure Textures
+                "should_remesh": true,
+                "should_texture": true,      // FIX: Ensure Textures
+                "texture_prompt": document.getElementById('texturePrompt').value || undefined
+            };
+
+            log("Uploading to Meshy...");
+
+            try {
+                const res = await fetch("https://api.meshy.ai/openapi/v1/image-to-3d", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if(!res.ok) throw new Error(data.message);
+                
+                currentTaskId = data.result;
+                pollStatus();
+            } catch(e) {
+                setGenerateButtonState('default');
+                showToast(e.message, 'error');
+            }
+        }
+
+        async function pollStatus() {
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch(`https://api.meshy.ai/openapi/v1/image-to-3d/${currentTaskId}`, {
+                        headers: { "Authorization": `Bearer ${apiKey}` }
+                    });
+                    const data = await res.json();
+                    
+                    // UPDATE PROGRESS BAR
+                    const p = data.progress || 0;
+                    document.getElementById('progressBar').style.width = `${p}%`;
+                    document.getElementById('progressText').innerText = `${p}%`;
+                    log(`Progress: ${data.status}`);
+
+                    if(data.status === "SUCCEEDED") {
+                        clearInterval(interval);
+                        handleSuccess(data);
+                    } else if(data.status === "FAILED") {
+                        clearInterval(interval);
+                        setGenerateButtonState('default');
+                        showToast("Task Failed", "error");
+                    }
+                } catch(e) {
+                    clearInterval(interval);
+                    setGenerateButtonState('default');
+                    showToast('Unable to check task status', 'error');
+                }
+            }, 2500);
+        }
+
+        function handleSuccess(data) {
+            currentUrls.glb = data.model_urls?.glb || null; 
+            currentUrls.obj = data.model_urls?.obj || null;
+            currentUrls.thumbnail = data.thumbnail_url || null;
+            currentUrls.proxy = currentUrls.glb 
+                ? `${API_BASE}/api/proxy-model?url=${encodeURIComponent(currentUrls.glb)}`
+                : null;
+            currentLocalPaths = {};
+            const localInput = document.getElementById('modelLocalUrl');
+            if(localInput) localInput.value = '';
+            
+            const viewer = document.getElementById('modelViewer');
+            viewer.src = currentUrls.proxy || currentUrls.glb; // Viewer uses CORS-safe proxy when possible
+            viewer.addEventListener('error', () => {
+                if(currentUrls.glb && viewer.src !== currentUrls.glb) {
+                    viewer.src = currentUrls.glb;
+                }
+            }, { once: true });
+            setViewerBackground(activeBackground);
+            
+            document.getElementById('canvas-placeholder').classList.add('hidden');
+            document.getElementById('viewer-wrapper').classList.remove('opacity-0');
+            document.getElementById('step-save').classList.remove('hidden');
+            
+            setGenerateButtonState('completed');
+        }
+
+        async function saveToLibrary() {
+            const btn = event.target.closest('button');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+            btn.disabled = true;
+
+            const dbPayload = {
+                user_id: currentUser.id,
+                taskId: currentTaskId,
+                name: document.getElementById('modelName').value || 'Untitled',
+                description: document.getElementById('dbDesc').value || '',
+                category: document.getElementById('dbCategory').value,
+                price: parseFloat(document.getElementById('dbPrice').value) || 0,
+                modelUrl: currentUrls.obj || currentUrls.glb,
+                previewUrl: currentUrls.thumbnail,
+                imageUrl: currentUrls.thumbnail,
+                downloadUrl: currentUrls.glb,
+                modelUrls: {
+                    glb: currentUrls.glb,
+                    obj: currentUrls.obj,
+                    proxy: currentUrls.proxy,
+                    thumbnail: currentUrls.thumbnail
+                }
+            };
+
+            let responseBody = {};
+            try {
+                const storedToken = localStorage.getItem('authToken');
+                const authHeader = storedToken 
+                    ? (storedToken.startsWith('Bearer ') ? storedToken : `Bearer ${storedToken}`)
+                    : 'Bearer guest';
+                const res = await fetch(`${API_BASE}/api/models/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': authHeader
+                    },
+                    body: JSON.stringify(dbPayload)
+                });
+                responseBody = await res.json().catch(() => ({}));
+
+                if(!res.ok) {
+                    throw new Error(responseBody?.message || "Server Error");
+                }
+
+                currentLocalPaths = responseBody?.localUrls || {};
+                const localInput = document.getElementById('modelLocalUrl');
+                if(localInput) {
+                    localInput.value = currentLocalPaths.glb || '';
+                }
+
+                showToast(responseBody?.message || "Saved to Database", "success");
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
+            } catch(e) {
+                console.warn("Save fallback", e);
+                showToast(e.message || "Backend Offline", "error");
+                btn.innerHTML = '<i class="fa-solid fa-database"></i> Save to DB';
+                currentLocalPaths = {};
+                const localInput = document.getElementById('modelLocalUrl');
+                if(localInput) localInput.value = '';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function downloadModel() {
+            const link = document.createElement('a');
+            const localInput = document.getElementById('modelLocalUrl');
+            const localPath = currentLocalPaths.glb || (localInput?.value?.trim() || '');
+
+            if(localPath) {
+                const normalized = localPath.startsWith('http') ? localPath : `${API_BASE}${localPath.startsWith('/') ? localPath : `/${localPath}`}`;
+                link.href = normalized;
+                const baseName = document.getElementById('modelName').value || 'model';
+                const ext = normalized.split('.').pop()?.split('?')[0] || 'glb';
+                link.download = `${baseName}.${ext}`;
+                link.click();
+                return;
+            }
+
+            if(currentUrls.obj) {
+                link.href = currentUrls.obj;
+                link.download = `${document.getElementById('modelName').value || 'model'}.obj`;
+                link.click();
+                return;
+            }
+
+            if(currentUrls.glb) {
+                link.href = `${API_BASE}/api/download/${currentTaskId}?url=${encodeURIComponent(currentUrls.glb)}`;
+                link.download = `${document.getElementById('modelName').value || 'model'}.glb`;
+                link.click();
+                return;
+            }
+
+            showToast('Model file not ready yet', 'error');
+        }
+
+        function log(msg) {
+            const el = document.getElementById('consoleArea');
+            el.innerHTML += `<div>> ${msg}</div>`;
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function showToast(msg, type) {
+            const c = document.getElementById('toastContainer');
+            const d = document.createElement('div');
+            d.className = `px-4 py-3 rounded-xl shadow-lg backdrop-blur text-white text-xs font-bold border border-white/10 ${type==='error'?'bg-red-500/90':'bg-emerald-500/90'}`;
+            d.innerText = msg;
+            c.appendChild(d);
+            setTimeout(() => d.remove(), 3000);
+        }
+        
+        function toggleRotate() {
+            const v = document.getElementById('modelViewer');
+            v.hasAttribute('auto-rotate') ? v.removeAttribute('auto-rotate') : v.setAttribute('auto-rotate', '');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellarion - 3D Models Table</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: #fff;
+            color: #1e293b;
+        }
+        .table-container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(30,41,59,0.07);
+            padding: 2rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        th {
+            background: #2563eb;
+            color: #fff;
+            font-weight: 600;
+            padding: 0.75rem 0.5rem;
+            border-bottom: 2px solid #1e293b;
+        }
+        td {
+            padding: 0.65rem 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .model-thumb {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #2563eb;
+        }
+        .header {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .btn {
+            background: #2563eb;
+            color: #fff;
+            border-radius: 8px;
+            padding: 0.5rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #1e293b;
+        }
+    </style>
+</head>
+<body>
+    <div class="table-container">
+        <div class="header">All 3D Models</div>
+        <table id="modelsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Thumbnail</th>
+                    <th>Download</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Model rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        async function fetchModels() {
+            const tbody = document.querySelector('#modelsTable tbody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
+
+            try {
+                const response = await fetch('/api/models/all');
+                const payload = await response.json();
+
+                if (!payload?.success) {
+                    throw new Error(payload?.message || 'Request failed');
+                }
+
+                const models = Array.isArray(payload.models) ? payload.models : [];
+
+                if (models.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No models found.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                models.forEach(model => {
+                    const thumb = model.thumbnail_url || '/assets/logo/logo.png';
+                    const localGlb = model.local_urls?.glb;
+                    const remoteGlb = model.download_url;
+                    const downloadHref = localGlb
+                        ? (localGlb.startsWith('http') ? localGlb : `${localGlb}`)
+                        : remoteGlb;
+
+                    const createdAt = model.created_at
+                        ? new Date(model.created_at).toLocaleString()
+                        : '—';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${model.id}</td>
+                        <td>${model.name || 'Untitled'}</td>
+                        <td><img src="${thumb}" class="model-thumb" alt="thumb"></td>
+                        <td>${downloadHref ? `<a href="${downloadHref}" class="btn" target="_blank">Download</a>` : 'Unavailable'}</td>
+                        <td>${model.status || 'unknown'}</td>
+                        <td>${createdAt}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Failed to load models:', error);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: #dc2626;">Failed to load models.</td></tr>';
+            }
+        }
+        fetchModels();
+    </script>
+</body>
+</html>

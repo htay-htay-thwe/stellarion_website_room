@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Stellarion</title>
+    <link rel="icon" href="assets/logo/logo/stellarion.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+    <style>
+        :root {
+            --page-bg: #f1f5f9;
+            --surface: #ffffff;
+            --border: rgba(15, 23, 42, 0.08);
+            --text: #111827;
+            --muted: #6b7280;
+            --muted-bg: #e5e7eb;
+            --accent: #1d4ed8;
+            --accent-dark: #1e3a8a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Manrope', sans-serif;
+            background: var(--page-bg);
+            color: var(--text);
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+            text-decoration: none;
+            font-weight: 600;
+            color: var(--muted);
+            transition: transform 0.2s ease, color 0.2s ease;
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            color: var(--text);
+        }
+
+        header.page-hero {
+            padding: 140px 32px 120px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 35%, #0f172a 100%);
+            color: #f8fafc;
+            text-align: center;
+        }
+
+        .hero-inner {
+            width: min(1200px, 100%);
+            margin: 0 auto;
+        }
+
+        .hero-inner span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hero-inner h1 {
+            margin: 18px 0 16px;
+            font-size: clamp(2.4rem, 5vw, 3.6rem);
+            font-weight: 700;
+        }
+
+        .hero-inner p {
+            margin: 0;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: rgba(248, 250, 252, 0.85);
+        }
+
+        main {
+            padding: 0 24px 72px;
+        }
+
+        .registration-wrapper {
+            width: 100%;
+            margin: -80px 0 0;
+            background: var(--surface);
+            border-radius: 24px;
+            box-shadow: 0 35px 65px rgba(15, 23, 42, 0.15);
+            border: 1px solid var(--border);
+            padding: 48px clamp(20px, 5vw, 56px);
+            display: grid;
+            gap: 32px;
+        }
+
+        .tabs-header {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tabs-header h2 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .tabs-header p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .tab-switcher {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            background: var(--muted-bg);
+            padding: 6px;
+            border-radius: 12px;
+            gap: 6px;
+        }
+
+        .tab-switcher button {
+            border: none;
+            background: transparent;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .tab-switcher button.active {
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: 0 12px 25px rgba(15, 23, 42, 0.12);
+        }
+
+        .form-panels {
+            display: grid;
+            gap: 0;
+        }
+
+        form[data-tab] {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+
+        form[data-tab].active {
+            display: grid;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 22px;
+        }
+
+        .form-grid.two-columns {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"],
+        input[type="url"],
+        textarea {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            font-size: 0.96rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 110px;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: rgba(29, 78, 216, 0.7);
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .checkbox-row a {
+            color: var(--accent-dark);
+            text-decoration: none;
+        }
+
+        .checkbox-row a:hover {
+            text-decoration: underline;
+        }
+
+        .form-actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .primary-button {
+            padding: 15px 18px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(120deg, var(--accent), var(--accent-dark));
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 36px rgba(30, 64, 175, 0.25);
+        }
+
+        .primary-button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .form-hint {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .logo-upload {
+            display: grid;
+            gap: 12px;
+        }
+
+        .logo-dropzone {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px dashed rgba(29, 78, 216, 0.45);
+            background: rgba(29, 78, 216, 0.08);
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .logo-dropzone:hover,
+        .logo-dropzone:focus-within {
+            border-color: rgba(29, 78, 216, 0.75);
+            background: rgba(29, 78, 216, 0.12);
+        }
+
+        .logo-drop-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: rgba(29, 78, 216, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-dark);
+            font-size: 1.25rem;
+        }
+
+        .logo-drop-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .logo-drop-text strong {
+            font-size: 0.95rem;
+        }
+
+        .logo-drop-text span {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .logo-preview {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-preview img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            padding: 8px;
+        }
+
+        .logo-preview button {
+            border: none;
+            background: transparent;
+            color: #ef4444;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .error-text {
+            color: #dc2626;
+            font-size: 0.85rem;
+        }
+
+        .hero-side-list {
+            display: grid;
+            gap: 16px;
+            margin: 32px 0 0;
+            list-style: none;
+            padding: 0;
+        }
+
+        .hero-side-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+        }
+
+        .success-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.6);
+            z-index: 50;
+        }
+
+        .success-modal.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 38px;
+            width: min(400px, calc(100% - 36px));
+            text-align: center;
+            box-shadow: 0 24px 55px rgba(15, 23, 42, 0.24);
+            display: grid;
+            gap: 16px;
+        }
+
+        .modal-icon {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #34d399, #10b981);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.7rem;
+        }
+
+        .modal-card button {
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(120deg, var(--accent), var(--accent-dark));
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        @media (max-width: 720px) {
+            header.page-hero {
+                padding: 120px 18px 100px;
+            }
+
+            .hero-inner span {
+                font-size: 0.78rem;
+            }
+
+            main {
+                padding: 0 16px 56px;
+            }
+
+            .registration-wrapper {
+                padding: 40px 20px;
+            }
+
+            .form-grid.two-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .back-button {
+                position: static;
+                margin: 18px auto 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button"><i class="ti ti-arrow-left"></i><span>Back to home</span></a>
+    <header class="page-hero" data-aos="fade-down">
+        <div class="hero-inner" id="heroContent">
+            <span id="heroEyebrow"><i class="ti ti-stars"></i> For Shoppers</span>
+            <h1 id="heroTitle">Design your perfect space before you buy</h1>
+            <p id="heroDescription">Create a personal account to unlock immersive previews, curated recommendations, and saved projects you can revisit any time.</p>
+            <ul class="hero-side-list" id="heroList">
+                <li><i class="ti ti-augmented-reality"></i><span>Preview furniture in real scale with AR</span></li>
+                <li><i class="ti ti-heart"></i><span>Save favorites and design boards</span></li>
+                <li><i class="ti ti-share-3"></i><span>Share interactive layouts instantly</span></li>
+            </ul>
+        </div>
+    </header>
+    <main>
+        <section class="registration-wrapper" data-aos="zoom-in" data-aos-delay="150">
+            <div class="tabs-header">
+                <h2>Create your Stellarion account</h2>
+                <p id="heroStats">Start fresh or bring your brand—switch tabs to see tailored benefits.</p>
+            </div>
+            <div class="tab-switcher" role="tablist">
+                <button type="button" data-tab-button="personal" class="active" role="tab" aria-selected="true">Personal account</button>
+                <button type="button" data-tab-button="company" role="tab" aria-selected="false">Company account</button>
+            </div>
+            <div class="form-panels">
+                <form id="personalForm" data-tab="personal" class="active" novalidate data-aos="fade-up" data-aos-delay="200">
+                    <div class="form-grid two-columns">
+                        <div class="form-field">
+                            <label for="firstName">First name</label>
+                            <input type="text" id="firstName" name="firstName" autocomplete="given-name" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="lastName">Last name</label>
+                            <input type="text" id="lastName" name="lastName" autocomplete="family-name" required>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" autocomplete="username" required>
+                        </div>
+                    </div>
+                    <div class="form-grid two-columns">
+                        <div class="form-field">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" autocomplete="email" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="phone">Phone (optional)</label>
+                            <input type="tel" id="phone" name="phone" autocomplete="tel">
+                        </div>
+                    </div>
+                    <div class="form-grid two-columns">
+                        <div class="form-field password-field">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" autocomplete="new-password" required>
+                            <button type="button" class="toggle-password" data-toggle="password" aria-label="Toggle password"><i class="ti ti-eye"></i></button>
+                        </div>
+                        <div class="form-field">
+                            <label for="confirmPassword">Confirm password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required>
+                        </div>
+                    </div>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>.</label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="primary-button" data-submit-button>Sign up as a personal user</button>
+                        <div class="form-hint">Already have an account? <a href="signin.html">Sign in here</a>.</div>
+                    </div>
+                </form>
+                <form id="companyForm" data-tab="company" novalidate data-aos="fade-up" data-aos-delay="200">
+                    <div class="form-grid two-columns">
+                        <div class="form-field">
+                            <label for="companyName">Company name</label>
+                            <input type="text" id="companyName" name="companyName" autocomplete="organization" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="brandName">Brand name</label>
+                            <input type="text" id="brandName" name="brandName" required>
+                        </div>
+                    </div>
+                    <div class="form-grid two-columns">
+                        <div class="form-field">
+                            <label for="companyEmail">Primary email</label>
+                            <input type="email" id="companyEmail" name="companyEmail" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="companyPhone">Phone (optional)</label>
+                            <input type="tel" id="companyPhone" name="companyPhone">
+                        </div>
+                    </div>
+                    <div class="form-grid two-columns">
+                        <div class="form-field">
+                            <label for="website">Website (optional)</label>
+                            <input type="url" id="website" name="website" placeholder="https://">
+                        </div>
+                        <div class="form-field">
+                            <label for="logoUrl">Logo URL (optional)</label>
+                            <input type="url" id="logoUrl" name="logoUrl" placeholder="https://">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="description">Brand story (optional)</label>
+                            <textarea id="description" name="description" placeholder="Tell shoppers what sets your brand apart."></textarea>
+                        </div>
+                    </div>
+                    <div class="form-grid two-columns">
+                        <div class="form-field">
+                            <label for="city">City (optional)</label>
+                            <input type="text" id="city" name="city" autocomplete="address-level2">
+                        </div>
+                        <div class="form-field">
+                            <label for="country">Country (optional)</label>
+                            <input type="text" id="country" name="country" autocomplete="country-name">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-field password-field">
+                            <label for="companyPassword">Password</label>
+                            <input type="password" id="companyPassword" name="companyPassword" autocomplete="new-password" required>
+                            <button type="button" class="toggle-password" data-toggle="companyPassword" aria-label="Toggle password"><i class="ti ti-eye"></i></button>
+                        </div>
+                        <div class="form-field">
+                            <label for="companyConfirmPassword">Confirm password</label>
+                            <input type="password" id="companyConfirmPassword" name="companyConfirmPassword" autocomplete="new-password" required>
+                        </div>
+                    </div>
+                    <div class="logo-upload" id="logoUpload">
+                        <label class="logo-dropzone" for="companyLogo" role="button" tabindex="0">
+                            <span class="logo-drop-icon"><i class="ti ti-photo-plus"></i></span>
+                            <span class="logo-drop-text">
+                                <strong>Upload a company logo</strong>
+                                <span id="logoFileName">PNG, JPG, WEBP or SVG up to 5&nbsp;MB</span>
+                            </span>
+                        </label>
+                        <input type="file" id="companyLogo" name="companyLogo" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
+                        <div class="logo-preview" id="logoPreview" hidden>
+                            <img id="logoPreviewImage" alt="Company logo preview">
+                            <button type="button" id="removeLogo">Remove logo</button>
+                        </div>
+                        <div class="error-text" id="logoError" role="alert" hidden></div>
+                    </div>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="companyTerms" required>
+                        <label for="companyTerms">I agree to the <a href="#">Seller Terms</a> and confirm I am authorized to represent this company.</label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="primary-button" data-submit-button>Apply as a partner brand</button>
+                        <div class="form-hint">Already manage a showroom? <a href="signin.html?type=company">Access the partner portal</a>.</div>
+                    </div>
+                </form>
+            </div>
+            <a id="heroCta" href="signin.html" class="primary-button" style="justify-self:start;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(120deg,#2563eb,#1e3a8a);"><i class="ti ti-login"></i><span>Already have an account?</span></a>
+        </section>
+    </main>
+    <div id="successModal" class="success-modal" role="dialog" aria-modal="true">
+        <div class="modal-card" data-aos="zoom-in">
+            <div class="modal-icon"><i class="ti ti-check"></i></div>
+            <h3>Account created</h3>
+            <p>Your Stellarion account is ready. We have stored your session so you can dive right in.</p>
+            <button type="button" id="closeModal">Continue to dashboard</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 650,
+            easing: 'ease-out-cubic',
+            once: true
+        });
+
+        const tabConfigs = {
+            personal: {
+                eyebrowIcon: 'ti ti-stars',
+                eyebrow: 'For Shoppers',
+                title: 'Design your perfect space before you buy',
+                description: 'Create a personal account to unlock immersive previews, curated recommendations, and saved projects you can revisit any time.',
+                list: [
+                    'Preview furniture in real scale with our AR viewer',
+                    'Save rooms, favorites, and design inspiration boards',
+                    'Share interactive layouts with family or clients'
+                ],
+                icons: ['ti ti-augmented-reality', 'ti ti-heart', 'ti ti-share-3'],
+                stats: 'Trusted by over 2,500 design lovers worldwide',
+                cta: { href: 'signin.html', text: 'Already have an account?' }
+            },
+            company: {
+                eyebrowIcon: 'ti ti-building-store',
+                eyebrow: 'For Brands',
+                title: 'Showcase your catalog in immersive 3D',
+                description: 'Join Stellarion to offer interactive product previews, real-time analytics, and effortless asset management for your team.',
+                list: [
+                    'Upload logos, hero renders, and 3D models in one place',
+                    'Track engagement with a dedicated partner dashboard',
+                    'Feature your catalog in curated AR-ready collections'
+                ],
+                icons: ['ti ti-3d-cube-sphere', 'ti ti-device-analytics', 'ti ti-badge'],
+                stats: 'We onboard new brands in under 48 hours',
+                cta: { href: 'signin.html?type=company', text: 'Already a partner? Sign in' }
+            }
+        };
+
+        const heroEyebrow = document.getElementById('heroEyebrow');
+        const heroTitle = document.getElementById('heroTitle');
+        const heroDescription = document.getElementById('heroDescription');
+        const heroList = document.getElementById('heroList');
+        const heroStats = document.getElementById('heroStats');
+        const heroCta = document.getElementById('heroCta');
+
+        const tabs = document.querySelectorAll('[data-tab-button]');
+        const forms = document.querySelectorAll('form[data-tab]');
+
+        const modal = document.getElementById('successModal');
+        const closeModalButton = document.getElementById('closeModal');
+
+        const logoInput = document.getElementById('companyLogo');
+        const logoPreview = document.getElementById('logoPreview');
+        const logoPreviewImage = document.getElementById('logoPreviewImage');
+        const logoError = document.getElementById('logoError');
+        const removeLogoButton = document.getElementById('removeLogo');
+        const logoFileName = document.getElementById('logoFileName');
+        const logoDropzone = document.querySelector('.logo-dropzone');
+
+        const defaultLogoHelperText = 'PNG, JPG, WEBP or SVG up to 5 MB';
+
+        if (logoFileName) {
+            logoFileName.textContent = defaultLogoHelperText;
+        }
+
+        let logoDataUrl = null;
+
+        function setActiveTab(target) {
+            tabs.forEach((button) => {
+                const isActive = button.getAttribute('data-tab-button') === target;
+                button.classList.toggle('active', isActive);
+                button.setAttribute('aria-selected', isActive);
+            });
+
+            forms.forEach((form) => {
+                const isActive = form.getAttribute('data-tab') === target;
+                form.classList.toggle('active', isActive);
+            });
+
+            const config = tabConfigs[target];
+            heroEyebrow.innerHTML = `<i class="${config.eyebrowIcon || 'ti ti-stars'}"></i> ${config.eyebrow}`;
+            heroTitle.textContent = config.title;
+            heroDescription.textContent = config.description;
+            heroStats.textContent = config.stats;
+            heroCta.href = config.cta.href;
+            heroCta.lastElementChild.textContent = config.cta.text;
+            heroList.innerHTML = '';
+            config.list.forEach((item, index) => {
+                const li = document.createElement('li');
+                const icon = document.createElement('i');
+                icon.className = config.icons[index] || 'ti ti-circle-dot';
+                li.appendChild(icon);
+                const span = document.createElement('span');
+                span.textContent = item;
+                li.appendChild(span);
+                heroList.appendChild(li);
+            });
+        }
+
+        tabs.forEach((button) => {
+            button.addEventListener('click', () => {
+                setActiveTab(button.getAttribute('data-tab-button'));
+            });
+        });
+
+        function handlePasswordToggle(event) {
+            if (!event.target.closest('[data-toggle]')) {
+                return;
+            }
+            const toggle = event.target.closest('[data-toggle]');
+            const fieldId = toggle.getAttribute('data-toggle');
+            const input = document.getElementById(fieldId);
+            if (!input) {
+                return;
+            }
+            const isPassword = input.getAttribute('type') === 'password';
+            input.setAttribute('type', isPassword ? 'text' : 'password');
+            const icon = toggle.querySelector('i');
+            if (icon) {
+                icon.className = isPassword ? 'ti ti-eye-off' : 'ti ti-eye';
+            }
+        }
+
+        document.addEventListener('click', handlePasswordToggle);
+
+        async function handlePersonalSubmit(event) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const submitButton = form.querySelector('[data-submit-button]');
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+            const password = form.password.value.trim();
+            const confirmPassword = form.confirmPassword.value.trim();
+            if (password !== confirmPassword) {
+                alert('Passwords do not match.');
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+                return;
+            }
+            const payload = {
+                username: form.username.value.trim(),
+                email: form.email.value.trim(),
+                password,
+                firstName: form.firstName.value.trim(),
+                lastName: form.lastName.value.trim(),
+                phone: form.phone.value.trim() || null
+            };
+            try {
+                const response = await fetch('/api/users/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    if (result.token) {
+                        localStorage.setItem('token', result.token);
+                    }
+                    modal.classList.add('open');
+                } else {
+                    alert(result.message || 'Registration failed.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Something went wrong. Please try again.');
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            }
+        }
+
+        function validateLogoFile(file) {
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+            if (!allowedTypes.includes(file.type)) {
+                throw new Error('Unsupported file type. Please upload PNG, JPG, WEBP, or SVG.');
+            }
+            const maxSizeBytes = 5 * 1024 * 1024;
+            if (file.size > maxSizeBytes) {
+                throw new Error('Logo is too large. Please upload a file under 5 MB.');
+            }
+        }
+
+        function resetLogoState() {
+            logoDataUrl = null;
+            if (logoPreview) {
+                logoPreview.hidden = true;
+            }
+            if (logoError) {
+                logoError.hidden = true;
+                logoError.textContent = '';
+            }
+            if (logoPreviewImage) {
+                logoPreviewImage.removeAttribute('src');
+            }
+            if (logoInput) {
+                logoInput.value = '';
+            }
+            if (logoFileName) {
+                logoFileName.textContent = defaultLogoHelperText;
+            }
+        }
+
+        function handleLogoChange() {
+            if (!logoInput || !logoInput.files || !logoInput.files[0]) {
+                resetLogoState();
+                return;
+            }
+            const file = logoInput.files[0];
+            try {
+                validateLogoFile(file);
+            } catch (error) {
+                resetLogoState();
+                if (logoError) {
+                    logoError.hidden = false;
+                    logoError.textContent = error.message;
+                }
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                logoDataUrl = reader.result;
+                if (logoPreview && logoPreviewImage) {
+                    logoPreview.hidden = false;
+                    logoPreviewImage.src = logoDataUrl;
+                }
+                if (logoError) {
+                    logoError.hidden = true;
+                }
+                if (logoFileName) {
+                    logoFileName.textContent = file.name;
+                }
+            };
+            reader.onerror = () => {
+                resetLogoState();
+                if (logoError) {
+                    logoError.hidden = false;
+                    logoError.textContent = 'We could not read that file. Please try another image.';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        if (logoInput) {
+            logoInput.addEventListener('change', handleLogoChange);
+        }
+
+        if (removeLogoButton) {
+            removeLogoButton.addEventListener('click', () => {
+                resetLogoState();
+            });
+        }
+
+        if (logoDropzone && logoInput) {
+            logoDropzone.addEventListener('keydown', (event) => {
+                if (event.key === ' ' || event.key === 'Enter') {
+                    event.preventDefault();
+                    logoInput.click();
+                }
+            });
+        }
+
+        async function handleCompanySubmit(event) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const submitButton = form.querySelector('[data-submit-button]');
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+            const password = form.companyPassword.value.trim();
+            const confirmPassword = form.companyConfirmPassword.value.trim();
+            if (password !== confirmPassword) {
+                alert('Passwords do not match.');
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+                return;
+            }
+            const payload = {
+                companyName: form.companyName.value.trim(),
+                brandName: form.brandName.value.trim(),
+                contactEmail: form.companyEmail.value.trim(),
+                contactPhone: form.companyPhone.value.trim() || null,
+                websiteUrl: form.website.value.trim() || null,
+                description: form.description.value.trim() || null,
+                city: form.city.value.trim() || null,
+                country: form.country.value.trim() || null,
+                password,
+                logoUrl: form.logoUrl.value.trim() || null,
+                logoData: logoDataUrl
+            };
+            try {
+                const response = await fetch('/api/company-registration/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    if (result.token) {
+                        localStorage.setItem('token', result.token);
+                    }
+                    modal.classList.add('open');
+                } else {
+                    alert(result.message || 'Company registration failed.');
+                }
+            } catch (error) {
+                console.error('Company registration error:', error);
+                alert('Something went wrong. Please try again.');
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            }
+        }
+
+        const personalForm = document.getElementById('personalForm');
+        const companyForm = document.getElementById('companyForm');
+
+        if (personalForm) {
+            personalForm.addEventListener('submit', handlePersonalSubmit);
+        }
+
+        if (companyForm) {
+            companyForm.addEventListener('submit', handleCompanySubmit);
+        }
+
+        if (closeModalButton) {
+            closeModalButton.addEventListener('click', () => {
+                modal.classList.remove('open');
+                window.location.href = 'index.html';
+            });
+        }
+
+        const initialTab = new URLSearchParams(window.location.search).get('type') === 'company' ? 'company' : 'personal';
+        setActiveTab(initialTab);
+
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modal.classList.contains('open')) {
+                modal.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

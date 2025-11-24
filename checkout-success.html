@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You - Stellarion</title>
+    <link rel="stylesheet" href="modern-styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #334155 100%);
+            color: #f8fafc;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+        }
+        .card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.45);
+        }
+        h1 {
+            font-size: 2.3rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+        .order-id {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.1rem;
+            border-radius: 999px;
+            background: rgba(226, 232, 240, 0.15);
+            color: #bfdbfe;
+            font-weight: 600;
+        }
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
+        a.button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            font-weight: 600;
+            color: #0f172a;
+            background: #facc15;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        a.button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(250, 204, 21, 0.35);
+        }
+        a.secondary {
+            background: rgba(226, 232, 240, 0.18);
+            color: #f8fafc;
+        }
+        a.secondary:hover {
+            box-shadow: 0 12px 24px rgba(148, 163, 184, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <h1>Thank you for your order!</h1>
+        <p>Your models are now queued for delivery. We sent a confirmation email with the order details.</p>
+        <p class="order-id" data-order-id>Order ID: —</p>
+        <div class="actions">
+            <a href="#" class="button" data-track-button>Track Delivery</a>
+            <a href="index.html" class="button secondary">Continue browsing</a>
+        </div>
+    </main>
+
+    <script>
+        (function initSuccessPage() {
+            const params = new URLSearchParams(window.location.search);
+            let orderId = params.get('orderId');
+            if (!orderId) {
+                orderId = sessionStorage.getItem('stellarion_last_order_id');
+            }
+            if (!orderId) {
+                orderId = 'Pending';
+            }
+            const display = document.querySelector('[data-order-id]');
+            const trackButton = document.querySelector('[data-track-button]');
+            display.textContent = `Order ID: ${orderId}`;
+            if (trackButton && orderId && orderId !== 'Pending') {
+                trackButton.href = `delivery-tracking.html?orderId=${encodeURIComponent(orderId)}`;
+            } else if (trackButton) {
+                trackButton.href = 'delivery-tracking.html';
+            }
+        })();
+    </script>
+</body>
+</html>

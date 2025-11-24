@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Stellarion</title>
+    <link rel="stylesheet" href="modern-styles.css">
+    <style>
+        body {
+            background: #f8fafc;
+            color: #0f172a;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        header {
+            background: #0f172a;
+            color: #fff;
+            padding: 1.4rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a { color: #cbd5f5; text-decoration: none; font-weight: 600; }
+        main {
+            max-width: 960px;
+            margin: 2rem auto;
+            padding: 0 1.5rem 3rem;
+            display: grid;
+            gap: 2rem;
+        }
+        h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+        .message {
+            padding: 0.9rem 1.1rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .message-info { background: #e0e7ff; color: #1d4ed8; }
+        .message-error { background: #fee2e2; color: #b91c1c; }
+        .message-success { background: #dcfce7; color: #166534; }
+        [hidden] { display: none !important; }
+        section {
+            background: #fff;
+            border-radius: 18px;
+            padding: 1.75rem;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+        .cart-summary ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        form {
+            display: grid;
+            gap: 1rem;
+        }
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        input, textarea, select {
+            padding: 0.75rem 0.9rem;
+            border-radius: 12px;
+            border: 1px solid #cbd5f5;
+            font-size: 0.95rem;
+        }
+        textarea { resize: vertical; min-height: 100px; }
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            border: none;
+            padding: 0.7rem 1.6rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: #2563eb;
+            color: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+        .inline-help {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .actions {
+                justify-content: stretch;
+            }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Checkout</h1>
+        <a href="cart.html">Back to Cart</a>
+    </header>
+    <main>
+        <noscript>
+            <p class="message message-error">JavaScript is required to submit checkout details. Please enable it and refresh.</p>
+        </noscript>
+
+        <div class="message message-info" data-checkout-message hidden></div>
+
+        <section class="cart-summary">
+            <h2>Order Summary</h2>
+            <ul data-order-items></ul>
+            <hr style="margin: 1.5rem 0; border: 0; border-top: 1px dashed #cbd5f5;">
+            <div class="summary-item">
+                <span>Total</span>
+                <strong data-order-total>$0.00</strong>
+            </div>
+        </section>
+
+        <section>
+            <h2>Shipping &amp; Payment</h2>
+            <form data-checkout-form>
+                <div class="form-row" style="display:grid; gap:1rem; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
+                    <label>
+                        Full Name
+                        <input type="text" name="fullName" placeholder="Jane Doe" required>
+                    </label>
+                    <label>
+                        Email
+                        <input type="email" name="email" placeholder="jane@example.com" required>
+                    </label>
+                    <label>
+                        Phone
+                        <input type="tel" name="phone" placeholder="+1 (555) 123-4567">
+                    </label>
+                </div>
+                <label>
+                    Address Line 1
+                    <input type="text" name="address1" placeholder="123 Market Street" required>
+                </label>
+                <label>
+                    Address Line 2
+                    <input type="text" name="address2" placeholder="Apartment, suite, etc. (optional)">
+                </label>
+                <div class="form-row" style="display:grid; gap:1rem; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));">
+                    <label>
+                        City
+                        <input type="text" name="city" required>
+                    </label>
+                    <label>
+                        State/Province
+                        <input type="text" name="state">
+                    </label>
+                    <label>
+                        Postal Code
+                        <input type="text" name="postalCode" required>
+                    </label>
+                    <label>
+                        Country
+                        <input type="text" name="country" required>
+                    </label>
+                </div>
+                <label>
+                    Preferred Delivery Notes
+                    <textarea name="notes" placeholder="e.g. Leave package at the front desk."></textarea>
+                </label>
+                <label>
+                    Payment Method
+                    <select name="paymentMethod" required>
+                        <option value="card">Credit / Debit Card (processed securely)</option>
+                        <option value="bank-transfer">Bank Transfer</option>
+                        <option value="invoice">Invoice Me</option>
+                    </select>
+                    <span class="inline-help">No payment is processed within this demo. Select the option you prefer.</span>
+                </label>
+                <div class="actions">
+                    <button type="submit" class="btn" data-submit-button>Place Order</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <script src="assets/js/commerce-utils.js"></script>
+    <script>
+        (function initCheckoutPage() {
+            if (!window.Commerce) {
+                console.error('Commerce helpers are missing.');
+                return;
+            }
+
+            const messageEl = document.querySelector('[data-checkout-message]');
+            const itemsList = document.querySelector('[data-order-items]');
+            const totalEl = document.querySelector('[data-order-total]');
+            const form = document.querySelector('[data-checkout-form]');
+            const submitButton = document.querySelector('[data-submit-button]');
+
+            let cartSnapshot = null;
+            let userId = null;
+
+            const showMessage = (text, type = 'info') => {
+                if (!messageEl) return;
+                messageEl.textContent = text;
+                messageEl.className = `message message-${type}`;
+                messageEl.hidden = !text;
+            };
+
+            const renderSummary = (cart) => {
+                if (!cart || !itemsList || !totalEl) {
+                    return;
+                }
+                itemsList.innerHTML = '';
+                cart.items.forEach((item) => {
+                    const li = document.createElement('li');
+                    li.className = 'summary-item';
+                    li.innerHTML = `
+                        <span><strong>${item.name || 'Untitled Model'}</strong><br><small>${item.quantity} × ${Commerce.formatCurrency(item.unitPrice)}</small></span>
+                        <span>${Commerce.formatCurrency(item.lineTotal)}</span>
+                    `;
+                    itemsList.appendChild(li);
+                });
+                totalEl.textContent = Commerce.formatCurrency(cart.totals?.subtotal || 0);
+            };
+
+            const loadCart = async () => {
+                const cached = sessionStorage.getItem('stellarion_checkout_cart');
+                if (cached) {
+                    try {
+                        cartSnapshot = JSON.parse(cached);
+                        if (cartSnapshot?.items?.length) {
+                            renderSummary(cartSnapshot);
+                            return;
+                        }
+                    } catch (error) {
+                        console.warn('Unable to parse cached checkout cart.', error);
+                    }
+                }
+
+                try {
+                    showMessage('Loading cart summary…', 'info');
+                    const response = await Commerce.apiFetch(`/api/cart/${userId}`);
+                    if (!response?.success) {
+                        throw new Error(response?.message || 'Unable to load cart');
+                    }
+                    cartSnapshot = response.cart;
+                    if (!cartSnapshot.items || cartSnapshot.items.length === 0) {
+                        showMessage('Your cart is empty. Add an item before checking out.', 'error');
+                        sessionStorage.removeItem('stellarion_checkout_cart');
+                        return;
+                    }
+                    renderSummary(cartSnapshot);
+                    sessionStorage.setItem('stellarion_checkout_cart', JSON.stringify(cartSnapshot));
+                    showMessage('', 'info');
+                } catch (error) {
+                    console.error('Checkout cart load failed', error);
+                    showMessage(error.message || 'Failed to load cart summary', 'error');
+                }
+            };
+
+            const buildShippingPayload = (formData) => ({
+                fullName: formData.get('fullName'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                address: {
+                    line1: formData.get('address1'),
+                    line2: formData.get('address2'),
+                    city: formData.get('city'),
+                    state: formData.get('state'),
+                    postalCode: formData.get('postalCode'),
+                    country: formData.get('country')
+                }
+            });
+
+            const handleSubmit = async (event) => {
+                event.preventDefault();
+                if (!cartSnapshot || !cartSnapshot.items || cartSnapshot.items.length === 0) {
+                    showMessage('Your cart is empty. Add an item before checking out.', 'error');
+                    return;
+                }
+                const formData = new FormData(form);
+                const payload = {
+                    userId,
+                    shippingAddress: buildShippingPayload(formData),
+                    paymentMethod: formData.get('paymentMethod'),
+                    notes: formData.get('notes')?.trim() || null
+                };
+
+                try {
+                    Commerce.setLoadingState(submitButton, true, { text: 'Placing order…' });
+                    showMessage('Creating your order…', 'info');
+                    const result = await Commerce.apiFetch('/api/checkout', {
+                        method: 'POST',
+                        body: payload
+                    });
+                    if (!result?.success) {
+                        throw new Error(result?.message || 'Checkout failed');
+                    }
+                    const orderId = result.orderId;
+                    sessionStorage.setItem('stellarion_last_order_id', orderId);
+                    sessionStorage.removeItem('stellarion_checkout_cart');
+                    showMessage('Order created successfully!', 'success');
+                    window.location.href = `checkout-success.html?orderId=${orderId}`;
+                } catch (error) {
+                    console.error('Checkout submission failed', error);
+                    showMessage(error.message || 'Unable to place order', 'error');
+                } finally {
+                    Commerce.setLoadingState(submitButton, false);
+                }
+            };
+
+            const bootstrap = () => {
+                const token = Commerce.getToken();
+                if (!token) {
+                    window.location.href = `signin.html?redirect=${encodeURIComponent(window.location.pathname)}`;
+                    return;
+                }
+                userId = Commerce.getActiveUserId();
+                if (!userId) {
+                    showMessage('Unable to determine your user account. Please sign in again.', 'error');
+                    return;
+                }
+                form?.addEventListener('submit', handleSubmit);
+                loadCart();
+            };
+
+            document.addEventListener('DOMContentLoaded', bootstrap);
+        })();
+    </script>
+</body>
+</html>

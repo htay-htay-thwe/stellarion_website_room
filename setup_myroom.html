@@ -1,0 +1,3601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellarion Studio | Setup My Room</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            --panel-bg: rgba(12, 17, 27, 0.85);
+            --panel-border: rgba(255, 255, 255, 0.05);
+            --accent: #6366f1;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top, rgba(99, 102, 241, 0.08), transparent 55%) #030712;
+            color: #e2e8f0;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            grid-template-rows: 100vh;
+            gap: 0;
+            overflow: hidden;
+        }
+
+        aside {
+            padding: 24px;
+            backdrop-filter: blur(18px);
+            background: var(--panel-bg);
+            border-right: 1px solid var(--panel-border);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2 {
+            margin: 0 0 12px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18rem;
+            color: rgba(226, 232, 240, 0.65);
+        }
+
+        .room-selector {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 16px;
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(99, 102, 241, 0.18);
+            background: rgba(15, 23, 42, 0.75);
+            box-shadow: 0 20px 50px -30px rgba(15, 23, 42, 0.9);
+        }
+
+        .room-nav {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            background: rgba(30, 41, 59, 0.9);
+            color: rgba(226, 232, 240, 0.85);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s, color 0.2s;
+        }
+
+        .room-nav:hover {
+            transform: translateY(-2px);
+            background: rgba(99, 102, 241, 0.25);
+            color: #fff;
+        }
+
+        .room-display {
+            border-radius: 16px;
+            padding: 24px 18px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(76, 29, 149, 0.25));
+            border: 1px solid rgba(99, 102, 241, 0.28);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            color: rgba(226, 232, 240, 0.9);
+            min-height: 120px;
+            text-align: center;
+        }
+
+        .room-display i {
+            font-size: 1.6rem;
+            color: rgba(99, 102, 241, 0.9);
+        }
+
+        .room-display span {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.16rem;
+            text-transform: uppercase;
+        }
+
+        .lighting-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.75);
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.18);
+            padding: 16px;
+        }
+
+        .lighting-controls input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+        .lighting-value {
+            font-size: 0.75rem;
+            color: rgba(148, 163, 184, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.16rem;
+            text-align: center;
+        }
+
+        main {
+            position: relative;
+            overflow: hidden;
+            background: #04050a;
+        }
+
+        #sceneCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .toolbar {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(12, 17, 27, 0.82);
+            border: 1px solid var(--panel-border);
+            border-radius: 999px;
+            padding: 10px 18px;
+            backdrop-filter: blur(16px);
+            font-size: 0.8rem;
+            box-shadow: 0 12px 30px -20px rgba(15, 23, 42, 0.9);
+        }
+
+        .toolbar button {
+            background: none;
+            border: none;
+            color: rgba(226, 232, 240, 0.75);
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12rem;
+            padding: 6px 12px;
+            border-radius: 999px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .toolbar button:hover,
+        .toolbar button.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #fff;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(12, 17, 27, 0.82);
+            border: 1px solid var(--panel-border);
+            color: rgba(226, 232, 240, 0.8);
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.08rem;
+            text-transform: uppercase;
+            transition: background 0.2s, color 0.2s;
+            backdrop-filter: blur(14px);
+        }
+
+        .back-button:hover {
+            background: rgba(99, 102, 241, 0.18);
+            color: #fff;
+        }
+
+        .inventory-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            min-height: 260px;
+        }
+
+        .inventory-columns {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(260px, 1fr));
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .inventory-column {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background: rgba(11, 15, 27, 0.65);
+            border: 1px solid rgba(99, 102, 241, 0.18);
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 18px 38px -28px rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+        }
+
+        .inventory-column-header {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .inventory-column-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.1rem;
+            text-transform: uppercase;
+            color: #c7d2fe;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .inventory-column-title i {
+            color: rgba(129, 140, 248, 0.85);
+        }
+
+        .inventory-column-caption {
+            font-size: 0.68rem;
+            color: rgba(148, 163, 184, 0.65);
+            letter-spacing: 0.04rem;
+        }
+
+        .model-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            padding: 4px 0;
+            flex: 1;
+            align-content: start;
+        }
+
+        .model-list .empty-state {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 1200px) {
+            .inventory-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .model-list {
+                grid-template-columns: 1fr;
+            }
+            .ai-floating-button {
+                bottom: 96px;
+                right: 24px;
+            }
+        }
+
+        .model-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+            padding: 18px 20px;
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid transparent;
+            cursor: grab;
+            transition: transform 0.18s, border 0.18s;
+            width: 100%;
+            min-height: 230px;
+        }
+
+        .model-card:active {
+            cursor: grabbing;
+        }
+
+        .model-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(99, 102, 241, 0.6);
+        }
+
+        .model-thumb {
+            width: 110px;
+            height: 110px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: rgba(9, 13, 21, 0.9);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+        }
+
+        .model-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+            font-size: 0.75rem;
+        }
+
+        .model-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.08rem;
+            text-transform: uppercase;
+        }
+
+        .model-badge.user {
+            background: rgba(99, 102, 241, 0.18);
+            color: rgba(129, 140, 248, 0.95);
+        }
+
+        .model-badge.company {
+            background: rgba(16, 185, 129, 0.18);
+            color: rgba(110, 231, 183, 0.95);
+        }
+
+        .model-price {
+            color: rgba(245, 158, 11, 0.9);
+            font-weight: 600;
+        }
+
+        .model-meta strong {
+            font-size: 0.82rem;
+            color: #f8fafc;
+        }
+
+        .empty-state {
+            text-align: center;
+            font-size: 0.8rem;
+            color: rgba(148, 163, 184, 0.75);
+            margin: 0 auto;
+            padding: 16px 0;
+        }
+
+        .model-list::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .model-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.55), rgba(59, 130, 246, 0.45));
+            border-radius: 999px;
+        }
+
+        .model-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .drop-hint {
+            margin-top: auto;
+            font-size: 0.7rem;
+            color: rgba(148, 163, 184, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .drop-hint i {
+            color: rgba(99, 102, 241, 0.85);
+        }
+
+        .inventory-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 4px 0 8px;
+            margin-top: auto;
+        }
+
+        .inventory-pagination button {
+            background: rgba(27, 38, 59, 0.88);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: rgba(226, 232, 240, 0.78);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14rem;
+            padding: 8px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.18s ease, color 0.18s ease, border 0.18s ease, transform 0.18s ease;
+            min-width: 52px;
+        }
+
+        .inventory-pagination button:hover:not([disabled]) {
+            background: rgba(99, 102, 241, 0.28);
+            border-color: rgba(99, 102, 241, 0.45);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .inventory-pagination button[disabled] {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .inventory-pagination button.active {
+            background: rgba(99, 102, 241, 0.4);
+            border-color: rgba(99, 102, 241, 0.6);
+            color: #fff;
+            box-shadow: 0 12px 30px -18px rgba(99, 102, 241, 0.65);
+        }
+
+        .inventory-strip-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .inventory-strip-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16rem;
+            color: rgba(226, 232, 240, 0.75);
+            gap: 16px;
+        }
+
+        .inventory-strip-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: rgba(248, 250, 252, 0.9);
+        }
+
+        .inventory-strip-title i {
+            color: rgba(129, 140, 248, 0.9);
+        }
+
+        .inventory-strip-caption {
+            font-size: 0.7rem;
+            color: rgba(148, 163, 184, 0.65);
+            letter-spacing: 0.08rem;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            left: calc(320px + 24px);
+            right: 32px;
+            bottom: 32px;
+            background: linear-gradient(165deg, rgba(13, 18, 31, 0.94), rgba(20, 30, 50, 0.92));
+            border: 1px solid rgba(99, 102, 241, 0.24);
+            border-radius: 26px;
+            padding: 22px 26px;
+            box-shadow: 0 28px 60px -32px rgba(8, 12, 24, 0.9), 0 0 0 1px rgba(15, 23, 42, 0.55);
+            display: flex;
+            gap: 24px;
+            transform: translateY(calc(100% + 48px));
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.35s cubic-bezier(.16, 1, .3, 1), opacity 0.25s ease;
+            z-index: 30;
+        }
+
+        .bottom-bar.open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .bottom-bar .ai-section {
+            flex: 0 0 320px;
+            margin-bottom: 0;
+        }
+
+        .bottom-bar .ai-section-copy {
+            font-size: 0.7rem;
+        }
+
+        .bottom-bar .ai-output {
+            max-height: 240px;
+        }
+
+        .inventory-toggle {
+            position: fixed;
+            right: 36px;
+            bottom: 36px;
+            width: 56px;
+            height: 56px;
+            border-radius: 999px;
+            background: linear-gradient(145deg, rgba(79, 70, 229, 0.82), rgba(129, 140, 248, 0.62));
+            border: 1px solid rgba(99, 102, 241, 0.55);
+            color: #f8fafc;
+            font-size: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 16px 32px -20px rgba(79, 70, 229, 0.8);
+            z-index: 40;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+        }
+
+        .inventory-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 22px 46px -20px rgba(99, 102, 241, 0.85);
+        }
+
+        .inventory-toggle.active {
+            background: linear-gradient(145deg, rgba(96, 165, 250, 0.9), rgba(129, 140, 248, 0.75));
+            box-shadow: 0 24px 56px -22px rgba(59, 130, 246, 0.85);
+        }
+
+        .inventory-toggle i {
+            pointer-events: none;
+        }
+
+        .ai-floating-button {
+            position: fixed;
+            right: 36px;
+            bottom: 112px;
+            width: 56px;
+            height: 56px;
+            border-radius: 999px;
+            background: linear-gradient(145deg, rgba(14, 116, 144, 0.85), rgba(56, 189, 248, 0.65));
+            border: 1px solid rgba(34, 211, 238, 0.55);
+            color: #f0f9ff;
+            font-size: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 18px 40px -24px rgba(14, 116, 144, 0.9);
+            z-index: 42;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, filter 0.22s ease;
+        }
+
+        .ai-floating-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 26px 54px -22px rgba(14, 165, 233, 0.85);
+            filter: saturate(1.15);
+        }
+
+        .ai-floating-button.active {
+            background: linear-gradient(145deg, rgba(6, 182, 212, 0.9), rgba(56, 189, 248, 0.78));
+            box-shadow: 0 28px 60px -24px rgba(8, 145, 178, 0.85);
+        }
+
+        .ai-floating-button i {
+            pointer-events: none;
+        }
+
+        .share-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 11, 20, 0.76);
+            backdrop-filter: blur(18px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 60;
+            padding: 24px;
+            transition: opacity 0.25s ease;
+        }
+
+        .share-backdrop.open {
+            display: flex;
+        }
+
+        .share-dialog {
+            width: min(460px, 100%);
+            background: linear-gradient(160deg, rgba(13, 19, 33, 0.95), rgba(29, 38, 62, 0.9));
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 20px;
+            box-shadow: 0 28px 80px -32px rgba(8, 11, 22, 0.85);
+            padding: 24px;
+            color: #e2e8f0;
+            position: relative;
+        }
+
+        .share-dialog header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .share-dialog-title {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.08rem;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .share-dialog-title i {
+            color: rgba(129, 140, 248, 0.85);
+        }
+
+        .share-dialog-close {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            color: rgba(226, 232, 240, 0.8);
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
+        }
+
+        .share-dialog-close:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.45);
+            color: #fff;
+        }
+
+        .share-dialog p {
+            margin: 0 0 18px;
+            font-size: 0.78rem;
+            line-height: 1.6;
+            color: rgba(148, 163, 184, 0.82);
+        }
+
+        .share-dialog form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .share-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .share-field label {
+            font-size: 0.72rem;
+            letter-spacing: 0.14rem;
+            text-transform: uppercase;
+            color: rgba(203, 213, 225, 0.75);
+            font-weight: 600;
+        }
+
+        .share-field input,
+        .share-field textarea {
+            background: rgba(12, 19, 33, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            color: #f8fafc;
+            padding: 10px 14px;
+            font-size: 0.82rem;
+            transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            font-family: inherit;
+        }
+
+        .share-field input:focus,
+        .share-field textarea:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.6);
+            background: rgba(17, 24, 39, 0.96);
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.35);
+        }
+
+        .share-company-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(110, 231, 183, 0.92);
+            background: rgba(16, 185, 129, 0.18);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            padding: 6px 12px;
+            border-radius: 999px;
+        }
+
+        .share-dialog-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .share-status {
+            font-size: 0.72rem;
+            color: rgba(148, 163, 184, 0.85);
+            min-height: 18px;
+        }
+
+        .share-action-buttons {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .share-submit {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.85), rgba(59, 130, 246, 0.8));
+            border: 1px solid rgba(99, 102, 241, 0.45);
+            border-radius: 14px;
+            color: #f8fafc;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.14rem;
+            text-transform: uppercase;
+            padding: 11px 22px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .share-submit:hover:not([disabled]) {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 38px -24px rgba(79, 70, 229, 0.7);
+        }
+
+        .share-submit[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .share-copy {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.6);
+            color: rgba(226, 232, 240, 0.85);
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: background 0.2s ease, border 0.2s ease;
+        }
+
+        .share-copy:hover {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.35);
+        }
+
+        .share-result {
+            margin-top: 8px;
+            font-size: 0.74rem;
+            color: rgba(190, 242, 100, 0.85);
+            word-break: break-word;
+        }
+
+        @media (max-width: 1400px) {
+            .bottom-bar {
+                padding: 20px 22px;
+            }
+
+            .bottom-bar .ai-section {
+                flex: 0 0 280px;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .bottom-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .bottom-bar .ai-section {
+                flex: none;
+            }
+
+            .inventory-strip-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+        }
+
+        .transform-panel {
+            background: linear-gradient(160deg, rgba(17, 24, 39, 0.92), rgba(30, 41, 59, 0.85));
+            border: 1px solid rgba(99, 102, 241, 0.22);
+            border-radius: 20px;
+            padding: 20px 20px 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 18px 42px rgba(8, 13, 27, 0.55), 0 0 0 1px rgba(15, 23, 42, 0.6);
+            transition: opacity 0.2s, filter 0.2s;
+            backdrop-filter: blur(18px);
+        }
+
+        .transform-panel.disabled {
+            opacity: 0.55;
+            filter: grayscale(0.35) brightness(0.9);
+        }
+
+        .transform-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .transform-header-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.18);
+            color: rgba(129, 140, 248, 0.95);
+        }
+
+        .transform-header-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .transform-header-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #f8fafc;
+            letter-spacing: 0.08rem;
+            text-transform: uppercase;
+        }
+
+        .transform-header-subtitle {
+            font-size: 0.7rem;
+            color: rgba(148, 163, 184, 0.75);
+            letter-spacing: 0.04rem;
+        }
+
+        .transform-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .transform-controls button {
+            background: rgba(27, 38, 59, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 12px;
+            color: rgba(226, 232, 240, 0.85);
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12rem;
+            padding: 9px 16px;
+            transition: background 0.18s, color 0.18s, border 0.18s, transform 0.18s;
+        }
+
+        .transform-controls button:hover,
+        .transform-controls button.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: #fff;
+            border-color: rgba(99, 102, 241, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .transform-controls button.is-disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .transform-controls .target-switch,
+        .transform-controls .mode-switch,
+        .transform-controls .axis-switch,
+        .transform-controls .value-display {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .transform-controls .value-display {
+            align-items: center;
+            justify-content: center;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px dashed rgba(148, 163, 184, 0.35);
+            border-radius: 14px;
+            padding: 8px 12px;
+        }
+
+        .transform-controls .room-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .transform-controls .lock-room.active {
+            background: rgba(96, 165, 250, 0.25);
+            border-color: rgba(96, 165, 250, 0.5);
+        }
+
+        .transform-controls .step-label {
+            font-size: 0.78rem;
+            color: rgba(226, 232, 240, 0.88);
+            flex: 1 1 auto;
+            text-align: center;
+        }
+
+        .transform-hint {
+            font-size: 0.66rem;
+            color: rgba(148, 163, 184, 0.62);
+            text-align: center;
+            margin: 6px 0 0;
+        }
+
+        .environment-select {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 12px;
+            color: rgba(226, 232, 240, 0.85);
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            outline: none;
+            transition: border 0.2s, background 0.2s;
+        }
+
+        .environment-select:focus {
+            border-color: rgba(99, 102, 241, 0.55);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .floating-transform-panel {
+            position: absolute;
+            top: 110px;
+            right: 32px;
+            width: 260px;
+            z-index: 5;
+            pointer-events: auto;
+            backdrop-filter: blur(16px);
+        }
+
+        @media (max-width: 1400px) {
+            .floating-transform-panel {
+                top: 120px;
+                right: 24px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .floating-transform-panel {
+                position: fixed;
+                top: 110px;
+                right: 24px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .floating-transform-panel {
+                position: static;
+                width: auto;
+                margin: 16px;
+            }
+        }
+
+        .ai-section {
+            background: rgba(15, 23, 42, 0.78);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ai-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.14rem;
+            color: rgba(226, 232, 240, 0.8);
+        }
+
+        .ai-section-header i {
+            color: rgba(99, 102, 241, 0.85);
+            margin-right: 8px;
+        }
+
+        .ai-section-copy {
+            margin: 0;
+            font-size: 0.72rem;
+            line-height: 1.45;
+            color: rgba(148, 163, 184, 0.8);
+        }
+
+        .ai-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(99, 102, 241, 0.45);
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.32), rgba(129, 140, 248, 0.22));
+            color: #f8fafc;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .ai-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px -18px rgba(99, 102, 241, 0.8);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.45), rgba(129, 140, 248, 0.35));
+        }
+
+        .ai-button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .ai-output {
+            min-height: 80px;
+            max-height: 220px;
+            border-radius: 14px;
+            border: 1px dashed rgba(99, 102, 241, 0.3);
+            background: rgba(30, 41, 59, 0.55);
+            padding: 12px;
+            font-size: 0.74rem;
+            line-height: 1.5;
+            color: rgba(226, 232, 240, 0.85);
+            overflow-y: auto;
+        }
+
+        .ai-output.loading {
+            position: relative;
+            color: rgba(148, 163, 184, 0.75);
+        }
+
+        .ai-output.loading::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid rgba(99, 102, 241, 0.35);
+            border-top-color: rgba(99, 102, 241, 0.95);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <h1><i class="fa-solid fa-house"></i>Setup My Room</h1>
+        <section>
+            <h2>Select Room</h2>
+            <p style="margin:0 0 16px; font-size:0.75rem; color:rgba(148, 163, 184, 0.75);">Use the arrows to browse rooms. Switching rooms keeps your layout intact.</p>
+            <div class="room-selector">
+                <button type="button" class="room-nav" id="roomPrev" aria-label="Previous room">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="room-display" id="roomPreview">
+                    <i class="fa-solid fa-house-circle-check"></i>
+                    <span id="roomLabel">Room 1</span>
+                </div>
+                <button type="button" class="room-nav" id="roomNext" aria-label="Next room">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+        <section>
+            <h2>Environment</h2>
+            <p style="margin:0 0 16px; font-size:0.75rem; color:rgba(148, 163, 184, 0.75);">Set the scene background to match your desired mood.</p>
+            <select id="backgroundSelect" class="environment-select">
+                <option value="deepSpace">Deep Space</option>
+                <option value="studio">Studio Grey</option>
+                <option value="daylight">Daylight Loft</option>
+                <option value="sunset">Sunset Glow</option>
+            </select>
+        </section>
+        <section>
+            <h2>Lighting</h2>
+            <p style="margin:0 0 16px; font-size:0.75rem; color:rgba(148, 163, 184, 0.75);">Fine-tune ambient brightness for the scene.</p>
+            <div class="lighting-controls">
+                <input type="range" id="lightingSlider" min="40" max="180" value="100" />
+                <div class="lighting-value"><span id="lightingValue">100%</span> brightness</div>
+            </div>
+        </section>
+    </aside>
+
+    <main>
+        
+        <canvas id="sceneCanvas"></canvas>
+        <div class="toolbar">
+            <button type="button" id="toggleGrid" class="active">Grid</button>
+            <button type="button" id="toggleLights">Lights</button>
+            <button type="button" id="focusRoom">Focus</button>
+            <button type="button" id="resetScene">Reset</button>
+            <button type="button" id="shareRoomButton"><i class="fa-solid fa-share-from-square"></i> Share</button>
+        </div>
+    </main>
+
+    <div class="bottom-bar" id="bottomBar" aria-hidden="true">
+        <section class="ai-section">
+            <div class="ai-section-header">
+                <span><i class="fa-solid fa-comments"></i>Chat Recommend</span>
+                <button type="button" id="aiAnalyze" class="ai-button">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    Get Ideas
+                </button>
+            </div>
+            <p class="ai-section-copy">Ask Gemini for layout tips, furniture pairings, and quick staging advice without leaving the scene.</p>
+            <div class="ai-output" id="aiOutput">No conversation yet. Drag in assets, then tap “Get Ideas” for tailored suggestions.</div>
+        </section>
+        <div class="inventory-panel">
+            <div class="inventory-columns">
+                <section class="inventory-column">
+                    <header class="inventory-column-header">
+                        <span class="inventory-column-title"><i class="fa-solid fa-user"></i>User Creations</span>
+                        <span class="inventory-column-caption">Your generated assets ready to stage.</span>
+                    </header>
+                    <div id="userModelList" class="model-list"></div>
+                    <nav class="inventory-pagination" id="userPagination" role="navigation" aria-label="User library pages"></nav>
+                </section>
+                <section class="inventory-column">
+                    <header class="inventory-column-header">
+                        <span class="inventory-column-title"><i class="fa-solid fa-store"></i>Marketplace Picks</span>
+                        <span class="inventory-column-caption">Partner furnishings with pricing details.</span>
+                    </header>
+                    <div id="companyModelList" class="model-list"></div>
+                    <nav class="inventory-pagination" id="companyPagination" role="navigation" aria-label="Marketplace pages"></nav>
+                </section>
+            </div>
+            <div class="drop-hint"><i class="fa-solid fa-hand-pointer"></i>Drag a model into the room to place it. Use right-click + drag to orbit.</div>
+        </div>
+    </div>
+
+    <button type="button" class="inventory-toggle" id="inventoryToggle" aria-label="Toggle asset library" aria-expanded="false">
+        <i class="fa-solid fa-box-open"></i>
+    </button>
+
+    <button type="button" class="ai-floating-button" id="aiFloatingButton" aria-label="Run layout assistant">
+        <i class="fa-solid fa-robot"></i>
+    </button>
+
+    <div class="share-backdrop" id="shareBackdrop" aria-hidden="true">
+        <div class="share-dialog" role="dialog" aria-modal="true" aria-labelledby="shareDialogTitle">
+            <header>
+                <div class="share-dialog-title" id="shareDialogTitle">
+                    <i class="fa-solid fa-house-circle-check"></i>
+                    Share Layout With Relocation Team
+                </div>
+                <button type="button" class="share-dialog-close" id="shareDialogClose" aria-label="Close share dialog">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </header>
+            <p>
+                Send your current room layout, furniture positions, and lighting setup directly to our trusted partner,
+                <span class="share-company-badge"><i class="fa-solid fa-people-carry-box"></i> House Relocation Company</span>.
+                They will receive a detailed snapshot to plan the move.
+            </p>
+            <form id="shareRoomForm">
+                <div class="share-field">
+                    <label for="shareContactName">Your Name</label>
+                    <input type="text" id="shareContactName" name="contactName" placeholder="e.g. Jordan Smith" autocomplete="name">
+                </div>
+                <div class="share-field">
+                    <label for="shareContactEmail">Contact Email</label>
+                    <input type="email" id="shareContactEmail" name="contactEmail" placeholder="relocation updates will arrive here" autocomplete="email" required>
+                </div>
+                <div class="share-field">
+                    <label for="shareNotes">Additional Notes</label>
+                    <textarea id="shareNotes" name="notes" rows="3" placeholder="Add handoff notes for the relocation team (optional)"></textarea>
+                </div>
+                <div class="share-dialog-actions">
+                    <div class="share-status" id="shareStatus">Layout snapshot includes furniture locations and room transforms.</div>
+                    <div class="share-action-buttons">
+                        <button type="button" class="share-copy" id="shareCopyButton" hidden>
+                            <i class="fa-solid fa-copy"></i>
+                            Copy Share Code
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="share-submit" id="shareSubmitButton">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    Send Layout Package
+                </button>
+                <div class="share-result" id="shareResult" hidden></div>
+            </form>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+                "three/examples/jsm/controls/OrbitControls.js": "https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js",
+                "three/examples/jsm/controls/TransformControls.js": "https://unpkg.com/three@0.158.0/examples/jsm/controls/TransformControls.js",
+                "three/examples/jsm/loaders/FBXLoader.js": "https://unpkg.com/three@0.158.0/examples/jsm/loaders/FBXLoader.js",
+                "three/examples/jsm/loaders/GLTFLoader.js": "https://unpkg.com/three@0.158.0/examples/jsm/loaders/GLTFLoader.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+        import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
+        import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+        import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+        const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:3000' : window.location.origin;
+        const AI_ANALYSIS_ENDPOINT = `${API_BASE}/api/ai/layout-check`;
+        const SHARE_IMPORT_STORAGE_KEY = 'stellarionSharedLayoutImport';
+        const ROOM_MODELS = [
+            'models/Rooms/Room1.fbx',
+            'models/Rooms/Room2.fbx',
+            'models/Rooms/Room3.fbx',
+            'models/Rooms/Room4.fbx',
+            'models/Rooms/Room5.fbx',
+            'models/Rooms/Room6.fbx'
+        ];
+
+        const roomPrevBtn = document.getElementById('roomPrev');
+        const roomNextBtn = document.getElementById('roomNext');
+        const roomPreview = document.getElementById('roomPreview');
+        const roomLabel = document.getElementById('roomLabel');
+        const canvas = document.getElementById('sceneCanvas');
+        const userModelList = document.getElementById('userModelList');
+        const companyModelList = document.getElementById('companyModelList');
+        const toggleGridBtn = document.getElementById('toggleGrid');
+        const toggleLightsBtn = document.getElementById('toggleLights');
+        const focusBtn = document.getElementById('focusRoom');
+        const resetBtn = document.getElementById('resetScene');
+        const backgroundSelect = document.getElementById('backgroundSelect');
+        const mainElement = document.querySelector('main');
+        const lightingSlider = document.getElementById('lightingSlider');
+        const lightingValue = document.getElementById('lightingValue');
+        const aiAnalyzeBtn = document.getElementById('aiAnalyze');
+        const aiOutput = document.getElementById('aiOutput');
+        const bottomBar = document.getElementById('bottomBar');
+        const inventoryToggle = document.getElementById('inventoryToggle');
+        const aiFloatingButton = document.getElementById('aiFloatingButton');
+        const shareRoomButton = document.getElementById('shareRoomButton');
+        const shareBackdrop = document.getElementById('shareBackdrop');
+        const shareDialogClose = document.getElementById('shareDialogClose');
+        const shareRoomForm = document.getElementById('shareRoomForm');
+        const shareSubmitButton = document.getElementById('shareSubmitButton');
+        const shareStatus = document.getElementById('shareStatus');
+        const shareResult = document.getElementById('shareResult');
+        const shareCopyButton = document.getElementById('shareCopyButton');
+        const shareContactName = document.getElementById('shareContactName');
+        const shareContactEmail = document.getElementById('shareContactEmail');
+        const shareNotes = document.getElementById('shareNotes');
+        const shareCancelButton = document.getElementById('shareCancel');
+        const shareSubmitDefaultHTML = shareSubmitButton ? shareSubmitButton.innerHTML : '';
+        const userPaginationContainer = document.getElementById('userPagination');
+        const companyPaginationContainer = document.getElementById('companyPagination');
+        if (userPaginationContainer) {
+            userPaginationContainer.hidden = true;
+        }
+        if (companyPaginationContainer) {
+            companyPaginationContainer.hidden = true;
+        }
+        let transformPanel = null;
+        let targetButtons = [];
+        let modeButtons = [];
+        let axisButtons = [];
+        let lockRoomButton = null;
+        let selectedModel = null;
+        let transformMode = 'translate';
+        let transformAxis = 'x';
+        let transformTarget = 'asset';
+        const MIN_SCALE = 0.05;
+        const MAX_SCALE = 20;
+        const DEFAULT_MODEL_SCALE = 10;
+        const BASE_HEMI_INTENSITY = 0.75;
+        const BASE_DIR_INTENSITY = 1.2;
+        const BASE_EXTRA_INTENSITY = 0.35;
+        let roomLocked = false;
+        let isTransforming = false;
+        let scaleBaseline = null;
+        let currentRoomIndex = 0;
+        let userLibraryModels = [];
+        let companyLibraryModels = [];
+        let currentUserPage = 1;
+        let currentCompanyPage = 1;
+        const USER_ITEMS_PER_PAGE = 2;
+        const COMPANY_ITEMS_PER_PAGE = 2;
+        const FALLBACK_THUMBNAIL = 'assets/logo/logo/stellarion.png';
+        const usdFormatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            maximumFractionDigits: 0
+        });
+        const modelMetadataRegistry = new Map();
+        const AUTO_ANALYSIS_DEBOUNCE_MS = 1200;
+        const AUTO_REMOTE_COOLDOWN_MS = 30000;
+        let autoAnalysisTimeout = null;
+        let lastRemoteAnalysisAt = 0;
+        let isAiAnalysisRunning = false;
+
+        function formatPrice(value) {
+            const numeric = typeof value === 'number' ? value : Number.parseFloat(value);
+            if (!Number.isFinite(numeric)) {
+                return null;
+            }
+            return usdFormatter.format(numeric);
+        }
+
+        function registerModelMetadata(entry) {
+            if (!entry || (entry.id === undefined || entry.id === null)) {
+                return;
+            }
+            const identifier = String(entry.id);
+            const parsedPrice = Number.parseFloat(entry.price);
+            modelMetadataRegistry.set(identifier, {
+                id: identifier,
+                name: entry.name || 'Asset',
+                category: entry.category || null,
+                price: Number.isFinite(parsedPrice) ? parsedPrice : null,
+                source: entry.source || null
+            });
+        }
+
+        function getMetadataById(modelId) {
+            if (modelId === undefined || modelId === null) {
+                return null;
+            }
+            return modelMetadataRegistry.get(String(modelId)) || null;
+        }
+
+        function safeParseJSON(value) {
+            if (!value) {
+                return null;
+            }
+            if (typeof value === 'object') {
+                return value;
+            }
+            if (typeof value !== 'string') {
+                return null;
+            }
+            try {
+                return JSON.parse(value);
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function resolveModelAssets(model = {}) {
+            const parsed = safeParseJSON(model.model_urls) || {};
+            const local = parsed.local || {};
+            const remote = parsed.remote || {};
+            const proxy = parsed.proxy || null;
+            const pickFirstUrl = (...candidates) => candidates.find(url => typeof url === 'string' && url.trim().length > 0) || null;
+            const download = pickFirstUrl(
+                model.download_url,
+                model.model_url,
+                model.gltf_url,
+                model.glb_url,
+                model.asset_url,
+                model.asset_download_url,
+                parsed.download,
+                parsed.url,
+                parsed.glb,
+                parsed.gltf,
+                local.glb,
+                local.gltf,
+                local.usdz,
+                remote.glb,
+                remote.gltf,
+                remote.usdz,
+                proxy,
+                remote.obj
+            );
+            const thumbnail = pickFirstUrl(
+                model.thumbnail_url,
+                model.preview_url,
+                model.image_url,
+                parsed.thumbnail,
+                parsed.preview,
+                parsed.thumbnail_url,
+                remote.thumbnail,
+                local.thumbnail
+            );
+            return { download, thumbnail };
+        }
+
+        function resolveStoredUserId() {
+            const storageSources = [
+                { storage: sessionStorage, keys: ['user', 'companyUser'] },
+                { storage: localStorage, keys: ['user', 'companyUser'] }
+            ];
+
+            for (const { storage, keys } of storageSources) {
+                if (!storage) continue;
+                for (const key of keys) {
+                    let raw = null;
+                    try {
+                        raw = storage.getItem(key);
+                    } catch (error) {
+                        console.warn('Storage access unavailable', key, error);
+                        continue;
+                    }
+                    if (!raw) continue;
+                    try {
+                        const parsed = JSON.parse(raw);
+                        const candidate = parsed?.id ?? parsed?.userId ?? parsed?.user?.id;
+                        const numeric = Number.parseInt(candidate, 10);
+                        if (Number.isFinite(numeric)) {
+                            return numeric;
+                        }
+                    } catch (error) {
+                        console.warn('Unable to parse stored user record', key, error);
+                    }
+                }
+            }
+
+            try {
+                const fallbackSession = Number.parseInt(sessionStorage.getItem('userId'), 10);
+                if (Number.isFinite(fallbackSession)) {
+                    return fallbackSession;
+                }
+            } catch (error) {
+                console.warn('Session storage access denied for userId', error);
+            }
+
+            try {
+                const fallbackLocal = Number.parseInt(localStorage.getItem('userId'), 10);
+                if (Number.isFinite(fallbackLocal)) {
+                    return fallbackLocal;
+                }
+            } catch (error) {
+                console.warn('Local storage access denied for userId', error);
+            }
+            return null;
+        }
+
+        async function fetchUserModels(userId) {
+            if (!Number.isFinite(userId)) {
+                return [];
+            }
+            try {
+                const response = await fetch(`${API_BASE}/api/models/user/${userId}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch user models: ${response.status}`);
+                }
+                const payload = await response.json();
+                if (!payload?.success || !Array.isArray(payload.models)) {
+                    return [];
+                }
+                return payload.models
+                    .map(model => {
+                        const assets = resolveModelAssets(model);
+                        if (!assets.download) {
+                            return null;
+                        }
+                        const numericPrice = Number.parseFloat(model.price);
+                        const sanitized = {
+                            id: model.id,
+                            name: model.name || 'My Model',
+                            category: model.category || 'Personal',
+                            thumbnail_url: assets.thumbnail || FALLBACK_THUMBNAIL,
+                            download_url: assets.download,
+                            meta_height_offset: model.meta_height_offset,
+                            price: Number.isFinite(numericPrice) ? numericPrice : null,
+                            source: 'user'
+                        };
+                        registerModelMetadata(sanitized);
+                        return sanitized;
+                    })
+                    .filter(Boolean);
+            } catch (error) {
+                console.warn('Unable to fetch personal models', error);
+                return [];
+            }
+        }
+
+        async function fetchCompanyModels() {
+            try {
+                const response = await fetch(`${API_BASE}/api/company-models`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch company models: ${response.status}`);
+                }
+                const payload = await response.json();
+                if (!payload?.success || !Array.isArray(payload.models)) {
+                    return [];
+                }
+                return payload.models
+                    .map(model => {
+                        const assets = resolveModelAssets(model);
+                        if (!assets.download) {
+                            return null;
+                        }
+                        const numericPrice = Number.parseFloat(model.price);
+                        const sanitized = {
+                            id: model.id,
+                            name: model.name || 'Showroom Asset',
+                            category: model.category || 'Marketplace',
+                            thumbnail_url: assets.thumbnail || FALLBACK_THUMBNAIL,
+                            download_url: assets.download,
+                            meta_height_offset: model.meta_height_offset,
+                            price: Number.isFinite(numericPrice) ? numericPrice : null,
+                            source: 'company'
+                        };
+                        registerModelMetadata(sanitized);
+                        return sanitized;
+                    })
+                    .filter(Boolean);
+            } catch (error) {
+                console.warn('Unable to fetch marketplace models', error);
+                return [];
+            }
+        }
+
+        function setInventoryVisibility(open) {
+            if (bottomBar) {
+                bottomBar.classList.toggle('open', open);
+                bottomBar.setAttribute('aria-hidden', open ? 'false' : 'true');
+            }
+            if (inventoryToggle) {
+                inventoryToggle.classList.toggle('active', open);
+                inventoryToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+        }
+
+        function cancelAutoAnalysis() {
+            if (autoAnalysisTimeout) {
+                clearTimeout(autoAnalysisTimeout);
+                autoAnalysisTimeout = null;
+            }
+        }
+
+        function scheduleAutoAnalysis(reason = 'auto') {
+            if (placedModels.length === 0 && reason !== 'room-change') {
+                cancelAutoAnalysis();
+                return;
+            }
+            cancelAutoAnalysis();
+            autoAnalysisTimeout = window.setTimeout(() => {
+                autoAnalysisTimeout = null;
+                runAiCheck({ trigger: 'auto', reason });
+            }, AUTO_ANALYSIS_DEBOUNCE_MS);
+        }
+
+        function resolveAuthToken() {
+            try {
+                const stored = localStorage.getItem('authToken');
+                if (typeof stored === 'string') {
+                    const trimmed = stored.trim();
+                    if (trimmed.length > 0) {
+                        return trimmed.startsWith('Bearer ') ? trimmed : `Bearer ${trimmed}`;
+                    }
+                }
+            } catch (error) {
+                console.warn('Auth token lookup failed', error);
+            }
+            try {
+                const stored = sessionStorage.getItem('authToken');
+                if (typeof stored === 'string') {
+                    const trimmed = stored.trim();
+                    if (trimmed.length > 0) {
+                        return trimmed.startsWith('Bearer ') ? trimmed : `Bearer ${trimmed}`;
+                    }
+                }
+            } catch (error) {
+                console.warn('Session auth token lookup failed', error);
+            }
+            return null;
+        }
+
+        function setShareStatus(message, tone = 'info') {
+            if (!shareStatus) return;
+            const colorMap = {
+                info: 'rgba(148, 163, 184, 0.85)',
+                success: 'rgba(134, 239, 172, 0.9)',
+                error: 'rgba(248, 113, 113, 0.9)'
+            };
+            shareStatus.textContent = message || '';
+            shareStatus.style.color = colorMap[tone] || colorMap.info;
+        }
+
+        function resetShareDialogState() {
+            if (shareRoomForm) {
+                shareRoomForm.reset();
+            }
+            if (shareResult) {
+                shareResult.hidden = true;
+                shareResult.textContent = '';
+            }
+            if (shareCopyButton) {
+                shareCopyButton.hidden = true;
+                delete shareCopyButton.dataset.shareCode;
+                delete shareCopyButton.dataset.shareUrl;
+            }
+            if (shareSubmitButton) {
+                shareSubmitButton.disabled = false;
+                if (shareSubmitDefaultHTML) {
+                    shareSubmitButton.innerHTML = shareSubmitDefaultHTML;
+                }
+            }
+            setShareStatus('Layout snapshot includes furniture locations and room transforms.');
+        }
+
+        function openShareDialog() {
+            if (!shareBackdrop) return;
+            resetShareDialogState();
+            shareBackdrop.classList.add('open');
+            shareBackdrop.setAttribute('aria-hidden', 'false');
+            if (shareContactName && !shareContactName.value) {
+                try {
+                    const storedProfile = sessionStorage.getItem('user');
+                    if (storedProfile) {
+                        const parsed = JSON.parse(storedProfile);
+                        const fallbackName = [parsed?.firstName, parsed?.lastName].filter(Boolean).join(' ').trim();
+                        if (fallbackName) {
+                            shareContactName.value = fallbackName;
+                        }
+                        if (shareContactEmail && !shareContactEmail.value && parsed?.email) {
+                            shareContactEmail.value = parsed.email;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Unable to prefill name', error);
+                }
+            }
+            if (shareContactEmail && !shareContactEmail.value) {
+                try {
+                    const storedEmail = localStorage.getItem('userEmail');
+                    if (storedEmail && storedEmail.includes('@')) {
+                        shareContactEmail.value = storedEmail;
+                    }
+                } catch (error) {
+                    console.warn('Unable to read stored email', error);
+                }
+            }
+            if (shareContactEmail) {
+                setTimeout(() => shareContactEmail.focus({ preventScroll: true }), 60);
+            }
+        }
+
+        function closeShareDialog() {
+            if (!shareBackdrop) return;
+            shareBackdrop.classList.remove('open');
+            shareBackdrop.setAttribute('aria-hidden', 'true');
+        }
+
+        function normalizeShareUrl(url) {
+            if (typeof url !== 'string') {
+                return '';
+            }
+            const trimmed = url.trim();
+            if (!trimmed) {
+                return '';
+            }
+
+            let normalized = trimmed.replace(/room-share(?:\.html?)?/i, 'view-room.html');
+
+            try {
+                const urlObj = new URL(normalized, window.location.origin);
+                const roomPathPattern = /\/view-room\.html\/([A-Za-z0-9_-]+)$/i;
+                const match = urlObj.pathname.match(roomPathPattern);
+                if (match && match[1]) {
+                    const code = match[1];
+                    urlObj.pathname = urlObj.pathname.replace(roomPathPattern, '/view-room.html');
+                    urlObj.searchParams.set('code', code);
+                    normalized = urlObj.toString();
+                } else if (!urlObj.searchParams.has('code')) {
+                    const pathMatch = normalized.match(/view-room\.html\/([A-Za-z0-9_-]+)$/i);
+                    if (pathMatch && pathMatch[1]) {
+                        normalized = normalized.replace(/view-room\.html\/([A-Za-z0-9_-]+)$/i, (full, code) => `view-room.html?code=${code}`);
+                    }
+                }
+            } catch (error) {
+                const fallbackMatch = normalized.match(/view-room\.html\/([A-Za-z0-9_-]+)$/i);
+                if (fallbackMatch && fallbackMatch[1]) {
+                    normalized = normalized.replace(/view-room\.html\/([A-Za-z0-9_-]+)$/i, (full, code) => `view-room.html?code=${code}`);
+                }
+            }
+
+            return normalized;
+        }
+
+        function showShareResult({ shareCode, shareUrl }) {
+            if (!shareResult) return;
+            const normalizedLink = normalizeShareUrl(shareUrl);
+            const hasCode = Boolean(shareCode);
+            const hasLink = Boolean(normalizedLink);
+
+            shareResult.hidden = !hasCode && !hasLink;
+            shareResult.textContent = '';
+            shareResult.replaceChildren();
+
+            if (hasCode) {
+                const codeRow = document.createElement('div');
+                codeRow.textContent = `Reference Code: ${shareCode}`;
+                shareResult.appendChild(codeRow);
+            }
+
+            if (hasLink) {
+                const linkRow = document.createElement('div');
+                const label = document.createElement('span');
+                label.textContent = 'Share Link: ';
+                const linkEl = document.createElement('a');
+                linkEl.href = normalizedLink;
+                linkEl.target = '_blank';
+                linkEl.rel = 'noopener noreferrer';
+                linkEl.textContent = normalizedLink;
+                linkRow.append(label, linkEl);
+                shareResult.appendChild(linkRow);
+            }
+
+            if (shareCopyButton) {
+                if (hasCode || hasLink) {
+                    shareCopyButton.hidden = false;
+                    if (shareCode) {
+                        shareCopyButton.dataset.shareCode = shareCode;
+                    }
+                    if (hasLink) {
+                        shareCopyButton.dataset.shareUrl = normalizedLink;
+                    } else {
+                        delete shareCopyButton.dataset.shareUrl;
+                    }
+                    setTimeout(() => {
+                        try {
+                            shareCopyButton.focus({ preventScroll: true });
+                        } catch (error) {
+                            // Ignore focus errors
+                        }
+                    }, 60);
+                } else {
+                    shareCopyButton.hidden = true;
+                    delete shareCopyButton.dataset.shareCode;
+                    delete shareCopyButton.dataset.shareUrl;
+                }
+            }
+        }
+
+        async function handleShareSubmit(event) {
+            event.preventDefault();
+            if (!shareRoomForm) return;
+
+            if (placedModels.length === 0) {
+                setShareStatus('Place at least one asset before sharing with the relocation team.', 'error');
+                return;
+            }
+
+            const contactEmail = shareContactEmail?.value?.trim();
+            if (!contactEmail) {
+                setShareStatus('Contact email is required so the relocation team can reach you.', 'error');
+                shareContactEmail?.focus();
+                return;
+            }
+
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(contactEmail)) {
+                setShareStatus('Enter a valid email address.', 'error');
+                shareContactEmail?.focus();
+                return;
+            }
+
+            const contactName = shareContactName?.value?.trim();
+            const notes = shareNotes?.value?.trim();
+
+            if (notes && notes.length > 2000) {
+                setShareStatus('Notes must be 2000 characters or fewer.', 'error');
+                shareNotes?.focus();
+                return;
+            }
+
+            if (shareSubmitButton) {
+                shareSubmitButton.disabled = true;
+                shareSubmitButton.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending…';
+            }
+            setShareStatus('Packaging room layout and sending it securely…', 'info');
+
+            const snapshot = gatherSceneSnapshot();
+            const payload = {
+                contactName: contactName || null,
+                contactEmail,
+                notes: notes || null,
+                companyName: 'House Relocation Company',
+                roomName: snapshot?.room?.name || null,
+                userId: resolveStoredUserId(),
+                snapshot,
+                shareSource: 'setup-my-room'
+            };
+
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            const authToken = resolveAuthToken();
+            if (authToken) {
+                headers.Authorization = authToken;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/room-share`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(payload)
+                });
+                const body = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    const message = body?.message || `Share request failed (${response.status})`;
+                    throw new Error(message);
+                }
+                setShareStatus('Layout package sent to House Relocation Company.', 'success');
+                showShareResult({ shareCode: body.shareCode, shareUrl: body.shareUrl });
+                if (shareSubmitButton && shareSubmitDefaultHTML) {
+                    shareSubmitButton.innerHTML = '<i class="fa-solid fa-check"></i> Sent';
+                    window.setTimeout(() => {
+                        if (!shareSubmitButton) return;
+                        shareSubmitButton.disabled = false;
+                        shareSubmitButton.innerHTML = shareSubmitDefaultHTML;
+                    }, 2400);
+                }
+            } catch (error) {
+                console.error('Room share failed:', error);
+                setShareStatus(error.message || 'Unable to share layout right now.', 'error');
+                if (shareResult) {
+                    shareResult.hidden = true;
+                    shareResult.textContent = '';
+                }
+                if (shareCopyButton) {
+                    shareCopyButton.hidden = true;
+                    delete shareCopyButton.dataset.shareCode;
+                    delete shareCopyButton.dataset.shareUrl;
+                }
+                if (shareSubmitButton && shareSubmitDefaultHTML) {
+                    shareSubmitButton.innerHTML = shareSubmitDefaultHTML;
+                }
+                shareSubmitButton && (shareSubmitButton.disabled = false);
+            }
+        }
+
+        function createModelCard(model) {
+            const card = document.createElement('div');
+            card.className = 'model-card';
+            card.draggable = true;
+            card.dataset.modelUrl = model.download_url;
+            card.dataset.name = model.name || 'Asset';
+            if (model.id !== undefined && model.id !== null) {
+                card.dataset.modelId = String(model.id);
+            }
+            const offset = Number.parseFloat(model.meta_height_offset);
+            card.dataset.offsetY = Number.isFinite(offset) ? offset : 0;
+            card.dataset.source = model.source || 'user';
+            const numericPrice = Number.parseFloat(model.price);
+            const hasPrice = Number.isFinite(numericPrice);
+            if (hasPrice) {
+                card.dataset.price = String(numericPrice);
+            }
+            card.dataset.category = model.category || '';
+            card.addEventListener('dragstart', handleDragStart);
+
+            const thumb = document.createElement('img');
+            thumb.src = model.thumbnail_url || FALLBACK_THUMBNAIL;
+            thumb.alt = model.name || 'Model thumbnail';
+            thumb.className = 'model-thumb';
+
+            const meta = document.createElement('div');
+            meta.className = 'model-meta';
+
+            const source = model.source === 'company' ? 'company' : 'user';
+            const badge = document.createElement('span');
+            badge.className = `model-badge ${source}`;
+            badge.textContent = source === 'company' ? 'Marketplace' : 'My Library';
+
+            const title = document.createElement('strong');
+            title.textContent = model.name || 'Untitled';
+
+            const category = document.createElement('span');
+            category.textContent = model.category || 'Asset';
+
+            meta.appendChild(badge);
+            meta.appendChild(title);
+            meta.appendChild(category);
+
+            if (source === 'company') {
+                const priceLabel = document.createElement('span');
+                priceLabel.className = 'model-price';
+                const formatted = formatPrice(hasPrice ? numericPrice : null);
+                priceLabel.textContent = formatted || 'Request Quote';
+                meta.appendChild(priceLabel);
+            }
+
+            const hint = document.createElement('span');
+            hint.style.color = 'rgba(148, 163, 184, 0.6)';
+            hint.textContent = 'Drag to place';
+            meta.appendChild(hint);
+
+            card.appendChild(thumb);
+            card.appendChild(meta);
+            return card;
+        }
+
+        function renderModelPage() {
+            currentUserPage = renderColumn({
+                container: userModelList,
+                models: userLibraryModels,
+                currentPage: currentUserPage,
+                itemsPerPage: USER_ITEMS_PER_PAGE,
+                paginationContainer: userPaginationContainer,
+                emptyCopy: 'No personal models yet. Generate assets to build your library.',
+                onPageChange: page => {
+                    currentUserPage = page;
+                    renderModelPage();
+                }
+            });
+
+            currentCompanyPage = renderColumn({
+                container: companyModelList,
+                models: companyLibraryModels,
+                currentPage: currentCompanyPage,
+                itemsPerPage: COMPANY_ITEMS_PER_PAGE,
+                paginationContainer: companyPaginationContainer,
+                emptyCopy: 'No marketplace assets available right now.',
+                onPageChange: page => {
+                    currentCompanyPage = page;
+                    renderModelPage();
+                }
+            });
+        }
+
+        function renderColumn({ container, models, currentPage, itemsPerPage, paginationContainer, emptyCopy, onPageChange }) {
+            const listEl = container;
+            const paginationEl = paginationContainer;
+            const safeModels = Array.isArray(models) ? models : [];
+
+            if (!listEl) {
+                return 1;
+            }
+
+            listEl.innerHTML = '';
+
+            if (safeModels.length === 0) {
+                if (paginationEl) {
+                    paginationEl.innerHTML = '';
+                    paginationEl.hidden = true;
+                }
+                const empty = document.createElement('div');
+                empty.className = 'empty-state';
+                empty.textContent = emptyCopy || 'No assets available.';
+                listEl.appendChild(empty);
+                return 1;
+            }
+
+            const perPage = Math.max(1, Number.parseInt(itemsPerPage, 10) || 1);
+            const totalPages = Math.max(1, Math.ceil(safeModels.length / perPage));
+            const safePage = Math.min(Math.max(1, currentPage), totalPages);
+            const startIndex = (safePage - 1) * perPage;
+            const pageItems = safeModels.slice(startIndex, startIndex + perPage);
+
+            pageItems.forEach(model => {
+                listEl.appendChild(createModelCard(model));
+            });
+
+            renderPaginationControls({
+                container: paginationEl,
+                totalPages,
+                activePage: safePage,
+                onSelect: page => {
+                    if (typeof onPageChange === 'function') {
+                        onPageChange(page);
+                    }
+                }
+            });
+
+            return safePage;
+        }
+
+        function renderPaginationControls({ container, totalPages, activePage, onSelect }) {
+            if (!container) return;
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                container.hidden = true;
+                return;
+            }
+
+            container.hidden = false;
+            container.innerHTML = '';
+
+            container.appendChild(createPaginationButton('Prev', activePage === 1, false, Math.max(1, activePage - 1), onSelect));
+
+            const windowSize = Math.min(3, totalPages);
+            let startPage = Math.max(1, activePage - Math.floor(windowSize / 2));
+            let endPage = startPage + windowSize - 1;
+            if (endPage > totalPages) {
+                endPage = totalPages;
+                startPage = Math.max(1, endPage - windowSize + 1);
+            }
+
+            for (let page = startPage; page <= endPage; page += 1) {
+                container.appendChild(createPaginationButton(String(page), false, page === activePage, page, onSelect));
+            }
+
+            container.appendChild(createPaginationButton('Next', activePage === totalPages, false, Math.min(totalPages, activePage + 1), onSelect));
+        }
+
+        async function runAiCheck(options = {}) {
+            if (!aiOutput) return;
+
+            const { trigger = 'manual', reason = 'manual-trigger' } = options;
+
+            if (isAiAnalysisRunning) {
+                if (trigger === 'auto') {
+                    scheduleAutoAnalysis(reason);
+                    return;
+                }
+            }
+
+            if (placedModels.length === 0) {
+                if (trigger === 'manual') {
+                    aiOutput.innerHTML = 'Place at least one asset in the scene to get personalized layout feedback.';
+                    setInventoryVisibility(true);
+                }
+                return;
+            }
+
+            cancelAutoAnalysis();
+            isAiAnalysisRunning = true;
+
+            const payload = gatherSceneSnapshot();
+            const localResult = evaluateLocalSafety(payload);
+            let finalResult = localResult;
+
+            const showLoader = trigger === 'manual';
+            const now = Date.now();
+            const shouldCallRemote = trigger === 'manual' || (now - lastRemoteAnalysisAt >= AUTO_REMOTE_COOLDOWN_MS);
+
+            if (showLoader) {
+                aiOutput.classList.add('loading');
+                aiOutput.textContent = 'Analyzing layout with Gemini…';
+            } else {
+                aiOutput.classList.remove('loading');
+                aiOutput.textContent = 'Updating layout safety insights…';
+            }
+
+            if (aiAnalyzeBtn && showLoader) {
+                aiAnalyzeBtn.disabled = true;
+            }
+
+            try {
+                if (shouldCallRemote) {
+                    try {
+                        const headers = {
+                            'Content-Type': 'application/json'
+                        };
+
+                        const inlineKey = typeof window.STELLARION_GEMINI_KEY === 'string'
+                            ? window.STELLARION_GEMINI_KEY.trim()
+                            : '';
+                        if (inlineKey) {
+                            headers['x-api-key'] = inlineKey;
+                        }
+
+                        const response = await fetch(AI_ANALYSIS_ENDPOINT, {
+                            method: 'POST',
+                            headers,
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Request failed (${response.status})`);
+                        }
+
+                        const remoteResult = await response.json();
+                        finalResult = combineAiResults(localResult, remoteResult);
+                        lastRemoteAnalysisAt = now;
+                    } catch (error) {
+                        console.error('AI analysis failed:', error);
+                        const fallback = {
+                            summary: `Gemini analysis unavailable (${error.message}). Showing local checks only.`,
+                            issues: [],
+                            recommendations: []
+                        };
+                        finalResult = combineAiResults(localResult, fallback);
+                    }
+                } else {
+                    finalResult = localResult;
+                }
+
+                renderAiResult(finalResult);
+                const shouldOpenPanel = trigger === 'manual' || reason === 'asset-placed';
+                if (shouldOpenPanel) {
+                    setInventoryVisibility(true);
+                }
+            } finally {
+                if (showLoader) {
+                    aiOutput.classList.remove('loading');
+                }
+                if (aiAnalyzeBtn && showLoader) {
+                    aiAnalyzeBtn.disabled = false;
+                }
+                isAiAnalysisRunning = false;
+            }
+        }
+
+        function createPaginationButton(label, disabled, active, targetPage, onSelect) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = label;
+            if (disabled) {
+                button.disabled = true;
+            }
+            if (active) {
+                button.classList.add('active');
+            }
+            if (!disabled && typeof targetPage === 'number') {
+                button.addEventListener('click', () => {
+                    if (typeof onSelect === 'function') {
+                        onSelect(targetPage);
+                    }
+                });
+            }
+            return button;
+        }
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color('#050816');
+
+        const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 2000);
+        camera.position.set(5, 5, 8);
+
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.target.set(0, 1, 0);
+
+        const transformControls = new TransformControls(camera, renderer.domElement);
+        transformControls.visible = false;
+        scene.add(transformControls);
+
+        transformControls.addEventListener('dragging-changed', event => {
+            controls.enablePan = !event.value;
+            controls.enableRotate = !event.value;
+            controls.enableZoom = !event.value;
+            controls.enabled = !event.value;
+            isTransforming = event.value;
+            if (event.value && transformControls.mode === 'scale' && transformControls.object) {
+                scaleBaseline = transformControls.object.scale.clone();
+            }
+            if (!event.value) {
+                scaleBaseline = null;
+            }
+        });
+
+        transformControls.addEventListener('objectChange', () => {
+            if (!transformControls.object) return;
+            if (transformControls.mode === 'scale') {
+                const target = transformControls.object;
+                if (scaleBaseline) {
+                    const axis = transformControls.axis || 'XYZ';
+                    const clampScale = (value, fallback) => {
+                        const fallbackValue = Number.isFinite(fallback) ? fallback : MIN_SCALE;
+                        const numeric = Number.isFinite(value) ? value : fallbackValue;
+                        return THREE.MathUtils.clamp(numeric, MIN_SCALE, MAX_SCALE);
+                    };
+                    const deriveRatio = () => {
+                        const safeAxis = axis.toUpperCase();
+                        if (safeAxis.includes('X') && Number.isFinite(scaleBaseline.x) && scaleBaseline.x !== 0) {
+                            return target.scale.x / scaleBaseline.x;
+                        }
+                        if (safeAxis.includes('Y') && Number.isFinite(scaleBaseline.y) && scaleBaseline.y !== 0) {
+                            return target.scale.y / scaleBaseline.y;
+                        }
+                        if (safeAxis.includes('Z') && Number.isFinite(scaleBaseline.z) && scaleBaseline.z !== 0) {
+                            return target.scale.z / scaleBaseline.z;
+                        }
+                        if (Number.isFinite(scaleBaseline.x) && scaleBaseline.x !== 0) {
+                            return target.scale.x / scaleBaseline.x;
+                        }
+                        return 1;
+                    };
+                    const rawRatio = deriveRatio();
+                    const ratio = Number.isFinite(rawRatio) && rawRatio !== 0 ? rawRatio : 1;
+                    const nextX = clampScale(scaleBaseline.x * ratio, scaleBaseline.x);
+                    const nextY = clampScale(scaleBaseline.y * ratio, scaleBaseline.y);
+                    const nextZ = clampScale(scaleBaseline.z * ratio, scaleBaseline.z);
+                    target.scale.set(nextX, nextY, nextZ);
+                } else {
+                    target.scale.x = THREE.MathUtils.clamp(target.scale.x, MIN_SCALE, MAX_SCALE);
+                    target.scale.y = THREE.MathUtils.clamp(target.scale.y, MIN_SCALE, MAX_SCALE);
+                    target.scale.z = THREE.MathUtils.clamp(target.scale.z, MIN_SCALE, MAX_SCALE);
+                }
+            }
+            updateTransformUI();
+            scheduleAutoAnalysis('transform-change');
+        });
+
+        const fbxLoader = new FBXLoader();
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        const boundingBox = new THREE.Box3();
+        const boundingSphere = new THREE.Sphere();
+        const tempVec = new THREE.Vector3();
+
+        let activeRoom = null;
+        let roomGroup = new THREE.Group();
+        scene.add(roomGroup);
+
+        const gridHelper = new THREE.GridHelper(20, 20, 0x3b82f6, 0x1f2937);
+        gridHelper.position.y = 0;
+        gridHelper.visible = true;
+        scene.add(gridHelper);
+
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x20263a, BASE_HEMI_INTENSITY);
+        hemiLight.position.set(0, 6, 0);
+        scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, BASE_DIR_INTENSITY);
+        dirLight.position.set(8, 12, 10);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.set(1024, 1024);
+        scene.add(dirLight);
+
+        let extraLightsVisible = false;
+        const extraLights = [];
+        const secondaryLightPositions = [
+            [ -6, 8, -6 ],
+            [ 6, 8, -6 ],
+            [ -6, 8, 6 ],
+            [ 6, 8, 6 ]
+        ];
+        secondaryLightPositions.forEach(([x, y, z]) => {
+            const spot = new THREE.SpotLight(0xffffff, BASE_EXTRA_INTENSITY, 25, Math.PI / 6, 0.35, 1.5);
+            spot.position.set(x, y, z);
+            spot.target.position.set(0, 0, 0);
+            spot.visible = false;
+            scene.add(spot);
+            scene.add(spot.target);
+            extraLights.push(spot);
+        });
+
+        function setExtraLightsVisibility(value) {
+            extraLightsVisible = Boolean(value);
+            extraLights.forEach(light => {
+                light.visible = extraLightsVisible;
+            });
+            if (toggleLightsBtn) {
+                toggleLightsBtn.classList.toggle('active', extraLightsVisible);
+            }
+        }
+
+        function updateLightingIntensity(factor) {
+            const safeFactor = Number.isFinite(factor) ? factor : 1;
+            hemiLight.intensity = BASE_HEMI_INTENSITY * safeFactor;
+            dirLight.intensity = BASE_DIR_INTENSITY * safeFactor;
+            extraLights.forEach(light => {
+                light.intensity = BASE_EXTRA_INTENSITY * safeFactor;
+            });
+        }
+
+        if (lightingSlider) {
+            const initialValue = Number.parseFloat(lightingSlider.value) || 100;
+            const initialFactor = initialValue / 100;
+            updateLightingIntensity(initialFactor);
+            if (lightingValue) {
+                lightingValue.textContent = `${Math.round(initialValue)}%`;
+            }
+            lightingSlider.addEventListener('input', event => {
+                const value = Number.parseFloat(event.target.value) || 100;
+                const factor = value / 100;
+                updateLightingIntensity(factor);
+                if (lightingValue) {
+                    lightingValue.textContent = `${Math.round(value)}%`;
+                }
+            });
+        } else {
+            updateLightingIntensity(1);
+        }
+
+        const placedModels = [];
+        const dropPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+        const dropIntersectPoint = new THREE.Vector3();
+        const objectRaycaster = new THREE.Raycaster();
+        const objectPointer = new THREE.Vector2();
+
+        const BACKGROUND_THEMES = {
+            deepSpace: {
+                sceneColor: '#050816',
+                canvasBackground: 'radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.25), rgba(6, 9, 20, 0.95) 60%) #02041a',
+                bodyBackground: 'radial-gradient(circle at 10% -10%, rgba(99, 102, 241, 0.18), transparent 65%) #030712'
+            },
+            studio: {
+                sceneColor: '#0b1120',
+                canvasBackground: 'radial-gradient(circle at 75% 25%, rgba(148, 163, 184, 0.35), rgba(10, 12, 20, 0.96) 55%) #0a0d14',
+                bodyBackground: 'linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.85))'
+            },
+            daylight: {
+                sceneColor: '#b6d7ff',
+                canvasBackground: 'radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.6), rgba(186, 220, 255, 0.3) 55%) #91bbf7',
+                bodyBackground: 'linear-gradient(180deg, rgba(148, 197, 255, 0.55), rgba(3, 7, 18, 0.2))'
+            },
+            sunset: {
+                sceneColor: '#28121f',
+                canvasBackground: 'radial-gradient(circle at 70% 15%, rgba(251, 191, 36, 0.45), rgba(88, 28, 135, 0.9) 65%) #1b1021',
+                bodyBackground: 'linear-gradient(160deg, rgba(88, 28, 135, 0.85), rgba(251, 113, 133, 0.35))'
+            }
+        };
+
+        const ROOM_PREVIEW_THEMES = [
+            'linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(14, 116, 144, 0.3))',
+            'linear-gradient(135deg, rgba(236, 72, 153, 0.22), rgba(124, 58, 237, 0.25))',
+            'linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(34, 211, 238, 0.25))',
+            'linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(244, 114, 182, 0.2))',
+            'linear-gradient(135deg, rgba(129, 140, 248, 0.28), rgba(59, 130, 246, 0.18))',
+            'linear-gradient(135deg, rgba(248, 113, 113, 0.28), rgba(251, 191, 36, 0.22))'
+        ];
+
+        function applyBackgroundTheme(themeKey) {
+            if (!mainElement) return;
+            const theme = BACKGROUND_THEMES[themeKey] || BACKGROUND_THEMES.deepSpace;
+            scene.background = new THREE.Color(theme.sceneColor);
+            renderer.setClearColor(theme.sceneColor, 1);
+            mainElement.style.background = theme.canvasBackground;
+            document.body.style.background = theme.bodyBackground;
+        }
+
+        if (backgroundSelect) {
+            applyBackgroundTheme(backgroundSelect.value || 'deepSpace');
+            backgroundSelect.addEventListener('change', event => {
+                applyBackgroundTheme(event.target.value);
+            });
+        } else {
+            applyBackgroundTheme('deepSpace');
+        }
+
+        function updateRoomPreviewDisplay() {
+            if (!roomPreview || !roomLabel || ROOM_MODELS.length === 0) return;
+            const index = ((currentRoomIndex % ROOM_MODELS.length) + ROOM_MODELS.length) % ROOM_MODELS.length;
+            const theme = ROOM_PREVIEW_THEMES[index % ROOM_PREVIEW_THEMES.length];
+            roomLabel.textContent = `Room ${index + 1}`;
+            if (theme) {
+                roomPreview.style.background = theme;
+            }
+        }
+
+        function cycleRoom(step) {
+            if (ROOM_MODELS.length === 0) return;
+            currentRoomIndex = (currentRoomIndex + step + ROOM_MODELS.length) % ROOM_MODELS.length;
+            loadRoom(ROOM_MODELS[currentRoomIndex]);
+        }
+
+        function initRoomSelector() {
+            if (roomPrevBtn) {
+                roomPrevBtn.addEventListener('click', () => cycleRoom(-1));
+            }
+            if (roomNextBtn) {
+                roomNextBtn.addEventListener('click', () => cycleRoom(1));
+            }
+            if (roomPreview) {
+                roomPreview.addEventListener('click', () => cycleRoom(1));
+            }
+            updateRoomPreviewDisplay();
+        }
+
+        function vectorToArray(vec, precision = 4) {
+            if (!vec) return [0, 0, 0];
+            return [vec.x, vec.y, vec.z].map(value => Number.parseFloat(value.toFixed(precision)));
+        }
+
+        function rotationToDegrees(euler, precision = 2) {
+            if (!euler) return [0, 0, 0];
+            return [euler.x, euler.y, euler.z].map(value => Number.parseFloat(THREE.MathUtils.radToDeg(value).toFixed(precision)));
+        }
+
+        function gatherSceneSnapshot() {
+            const roomInfo = {
+                name: roomGroup.userData?.roomName || `Room ${currentRoomIndex + 1}`,
+                source: roomGroup.userData?.roomSource || ROOM_MODELS[currentRoomIndex] || null,
+                position: vectorToArray(roomGroup.position),
+                rotationDeg: rotationToDegrees(roomGroup.rotation),
+                scale: vectorToArray(roomGroup.scale, 2)
+            };
+
+            const assets = placedModels.map((model, index) => ({
+                id: model.uuid,
+                assetId: model.userData?.assetId || null,
+                name: model.userData?.assetName || `Asset ${index + 1}`,
+                source: model.userData?.assetUrl || null,
+                librarySource: model.userData?.assetSource || null,
+                category: model.userData?.assetCategory || null,
+                price: Number.isFinite(model.userData?.assetPrice) ? model.userData.assetPrice : null,
+                position: vectorToArray(model.position),
+                rotationDeg: rotationToDegrees(model.rotation),
+                scale: vectorToArray(model.scale, 2),
+                offsetY: Number.parseFloat((model.userData?.placementOffset || 0).toFixed(3)),
+                boundingBox: (() => {
+                    const worldBox = new THREE.Box3().setFromObject(model);
+                    const center = new THREE.Vector3();
+                    const size = new THREE.Vector3();
+                    worldBox.getCenter(center);
+                    worldBox.getSize(size);
+                    return {
+                        min: vectorToArray(worldBox.min),
+                        max: vectorToArray(worldBox.max),
+                        center: vectorToArray(center),
+                        size: vectorToArray(size, 3)
+                    };
+                })()
+            }));
+
+            return {
+                timestamp: new Date().toISOString(),
+                environment: backgroundSelect?.value || 'deepSpace',
+                lighting: {
+                    brightnessPercent: lightingSlider ? Number.parseFloat(lightingSlider.value) : 100,
+                    extraLightsEnabled: extraLightsVisible,
+                    baseIntensities: {
+                        hemisphere: BASE_HEMI_INTENSITY,
+                        directional: BASE_DIR_INTENSITY,
+                        spot: BASE_EXTRA_INTENSITY
+                    }
+                },
+                room: roomInfo,
+                assets
+            };
+        }
+
+        function vectorFromArray(values, fallback = new THREE.Vector3()) {
+            if (!Array.isArray(values) || values.length < 3) {
+                return fallback.clone();
+            }
+            const parsedX = Number.parseFloat(values[0]);
+            const parsedY = Number.parseFloat(values[1]);
+            const parsedZ = Number.parseFloat(values[2]);
+            return new THREE.Vector3(
+                Number.isFinite(parsedX) ? parsedX : fallback.x,
+                Number.isFinite(parsedY) ? parsedY : fallback.y,
+                Number.isFinite(parsedZ) ? parsedZ : fallback.z
+            );
+        }
+
+        function eulerFromDegreesArray(values, fallback = new THREE.Euler()) {
+            const parsedFallback = new THREE.Vector3(
+                THREE.MathUtils.radToDeg(fallback.x),
+                THREE.MathUtils.radToDeg(fallback.y),
+                THREE.MathUtils.radToDeg(fallback.z)
+            );
+            const vec = vectorFromArray(values, parsedFallback);
+            return new THREE.Euler(
+                THREE.MathUtils.degToRad(vec.x),
+                THREE.MathUtils.degToRad(vec.y),
+                THREE.MathUtils.degToRad(vec.z)
+            );
+        }
+
+        function scaleVectorFromArray(values, fallback = new THREE.Vector3(1, 1, 1)) {
+            if (!Array.isArray(values) || values.length < 3) {
+                return fallback.clone();
+            }
+            const parsedX = Number.parseFloat(values[0]);
+            const parsedY = Number.parseFloat(values[1]);
+            const parsedZ = Number.parseFloat(values[2]);
+            return new THREE.Vector3(
+                Number.isFinite(parsedX) ? parsedX : fallback.x,
+                Number.isFinite(parsedY) ? parsedY : fallback.y,
+                Number.isFinite(parsedZ) ? parsedZ : fallback.z
+            );
+        }
+
+        function assetNameIncludes(assetName = '', keywords = []) {
+            const normalized = assetName.toString().toLowerCase();
+            return keywords.some(keyword => normalized.includes(keyword));
+        }
+
+        function evaluateLocalSafety(snapshot) {
+            if (!snapshot) return null;
+
+            const result = {
+                summary: 'Local heuristics did not detect significant hazards.',
+                issues: [],
+                recommendations: []
+            };
+
+            const assets = Array.isArray(snapshot.assets) ? snapshot.assets : [];
+
+            const boxesOverlap = (boxA, boxB, margin = 0.1) => {
+                if (!boxA || !boxB) return false;
+                return !(
+                    boxA.max[0] + margin < boxB.min[0] - margin ||
+                    boxA.min[0] - margin > boxB.max[0] + margin ||
+                    boxA.max[2] + margin < boxB.min[2] - margin ||
+                    boxA.min[2] - margin > boxB.max[2] + margin
+                );
+            };
+
+            const getTop = asset => {
+                const box = asset.boundingBox;
+                if (box?.max) return box.max[1];
+                return (asset.position?.[1] || 0) + ((asset.scale?.[1] || 1) / 2);
+            };
+
+            const getBottom = asset => {
+                const box = asset.boundingBox;
+                if (box?.min) return box.min[1];
+                return asset.position?.[1] || 0;
+            };
+
+            const sofas = assets.filter(asset => assetNameIncludes(asset.name, ['sofa', 'couch', 'sectional']));
+            const shelves = assets.filter(asset => assetNameIncludes(asset.name, ['shelf', 'bookcase', 'book shelf']));
+
+            const hazardIssues = [];
+
+            sofas.forEach(sofa => {
+                shelves.forEach(shelf => {
+                    const dx = shelf.position[0] - sofa.position[0];
+                    const dz = shelf.position[2] - sofa.position[2];
+                    const horizontalDistance = Math.hypot(dx, dz);
+                    const verticalOffset = shelf.position[1] - sofa.position[1];
+
+                    const boundingAligned = boxesOverlap(sofa.boundingBox, shelf.boundingBox);
+                    const sofaTop = getTop(sofa);
+                    const shelfBottom = getBottom(shelf);
+                    const clearance = shelfBottom - sofaTop;
+
+                    const horizontallyAligned = boundingAligned || horizontalDistance < 1.6;
+                    const verticalDifference = Math.abs(verticalOffset);
+
+                    if (horizontallyAligned && clearance > 0 && clearance < 3.25) {
+                        hazardIssues.push({
+                            title: 'Potential falling hazard',
+                            detail: `${shelf.name} is positioned above ${sofa.name}. Ensure it is securely anchored to avoid tipping during disturbances.`
+                        });
+                        result.recommendations.push({
+                            action: 'Relocate shelf or anchor securely',
+                            benefit: 'Prevents injury from falling objects during quakes or accidental impacts.'
+                        });
+                    }
+
+                    if (horizontallyAligned && verticalDifference >= 5) {
+                        hazardIssues.push({
+                            title: 'Tall fixture above seating zone',
+                            detail: `${shelf.name} sits far above ${sofa.name}. Secure heavily or move to reduce risks from high-mounted furniture.`
+                        });
+                        result.recommendations.push({
+                            action: 'Lower shelf or add safety anchors',
+                            benefit: 'Reduces the chance of severe injuries from elevated falling objects.'
+                        });
+                    }
+                });
+            });
+
+            if (hazardIssues.length > 0) {
+                result.summary = 'Local safety rules detected potential layout risks.';
+                result.issues = hazardIssues;
+            } else {
+                result.summary = 'Local rules did not detect obvious risks.';
+            }
+
+            return result;
+        }
+
+        function combineAiResults(primary, secondary) {
+            if (!primary && !secondary) return null;
+            if (!primary) return secondary;
+            if (!secondary) return primary;
+
+            const summaryPieces = [primary.summary, secondary.summary].filter(Boolean);
+            const uniqueSummaries = Array.from(new Set(summaryPieces));
+            return {
+                summary: uniqueSummaries.join(' | '),
+                issues: [...(primary.issues || []), ...(secondary.issues || [])],
+                recommendations: [...(primary.recommendations || []), ...(secondary.recommendations || [])]
+            };
+        }
+
+        function renderAiResult(result) {
+            if (!aiOutput) return;
+
+            const payload = result?.result || result;
+
+            if (!payload) {
+                aiOutput.textContent = 'Analysis completed but no result payload was returned.';
+                return;
+            }
+
+            const parts = [];
+            if (payload.summary) {
+                parts.push(`<strong>Summary:</strong> ${payload.summary}`);
+            }
+
+            if (Array.isArray(payload.issues) && payload.issues.length > 0) {
+                const issueLines = payload.issues.map((issue, index) => {
+                    if (typeof issue === 'string') return `${index + 1}. ${issue}`;
+                    if (issue?.title && issue?.detail) {
+                        return `${index + 1}. <strong>${issue.title}</strong> — ${issue.detail}`;
+                    }
+                    if (issue?.title) {
+                        return `${index + 1}. <strong>${issue.title}</strong>`;
+                    }
+                    return `${index + 1}. ${JSON.stringify(issue)}`;
+                });
+                parts.push(`<strong>Risks:</strong><br>${issueLines.join('<br>')}`);
+            }
+
+            if (Array.isArray(payload.recommendations) && payload.recommendations.length > 0) {
+                const recLines = payload.recommendations.map((rec, index) => {
+                    if (typeof rec === 'string') return `${index + 1}. ${rec}`;
+                    if (rec?.action && rec?.benefit) {
+                        return `${index + 1}. <strong>${rec.action}</strong> — ${rec.benefit}`;
+                    }
+                    return `${index + 1}. ${JSON.stringify(rec)}`;
+                });
+                parts.push(`<strong>Recommendations:</strong><br>${recLines.join('<br>')}`);
+            }
+
+            if (parts.length === 0) {
+                parts.push('No issues detected. Layout looks safe based on current rules.');
+            }
+
+            aiOutput.innerHTML = parts.join('<br><br>');
+        }
+
+        function handleResize() {
+            const width = canvas.clientWidth || canvas.parentElement.clientWidth;
+            const height = canvas.clientHeight || canvas.parentElement.clientHeight;
+            renderer.setSize(width, height, false);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        async function loadRoom(url) {
+            if (!url) return;
+
+            const index = ROOM_MODELS.indexOf(url);
+            if (index >= 0) {
+                currentRoomIndex = index;
+                updateRoomPreviewDisplay();
+            }
+
+            if (activeRoom === url) {
+                resetRoomTransform();
+                return;
+            }
+            activeRoom = url;
+            roomLocked = false;
+            updateRoomLockUI();
+
+            while (roomGroup.children.length > 0) {
+                const child = roomGroup.children.pop();
+                child.traverse(node => {
+                    if (node.geometry) node.geometry.dispose();
+                    if (node.material) {
+                        if (Array.isArray(node.material)) {
+                            node.material.forEach(m => m.dispose());
+                        } else {
+                            node.material.dispose();
+                        }
+                    }
+                });
+            }
+
+            roomGroup.position.set(0, 0, 0);
+            roomGroup.rotation.set(0, 0, 0);
+
+            await new Promise((resolve, reject) => {
+                fbxLoader.load(url, object => {
+                    try {
+                        object.traverse(child => {
+                            if (child.isMesh) {
+                                child.castShadow = true;
+                                child.receiveShadow = true;
+                                if (child.material && child.material.map) {
+                                    child.material.map.anisotropy = 8;
+                                }
+                            }
+                        });
+                        object.position.set(0, 0, 0);
+                        object.rotation.y = Math.PI;
+                        const scale = 0.01;
+                        object.scale.setScalar(scale);
+                        roomGroup.add(object);
+                        roomGroup.userData.roomName = `Room ${currentRoomIndex + 1}`;
+                        roomGroup.userData.roomSource = url;
+                        updateTransformUI();
+                        updateRoomLockUI();
+                        updateTransformAttachment();
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, undefined, error => {
+                    console.error('Failed to load room model', error);
+                    reject(error);
+                });
+            });
+        }
+
+        function toggleGrid() {
+            gridHelper.visible = !gridHelper.visible;
+            toggleGridBtn.classList.toggle('active', gridHelper.visible);
+        }
+
+        function toggleLights() {
+            setExtraLightsVisibility(!extraLightsVisible);
+        }
+
+        function resetScene() {
+            placedModels.forEach(model => {
+                if (model.parent) model.parent.remove(model);
+            });
+            placedModels.length = 0;
+            selectModel(null);
+            controls.reset();
+            roomLocked = false;
+            updateRoomLockUI();
+            resetRoomTransform();
+            cancelAutoAnalysis();
+            lastRemoteAnalysisAt = 0;
+        }
+
+        async function importSharedLayoutIfAvailable() {
+            const payload = consumeSharedLayoutImport();
+            if (!payload || !payload.snapshot) {
+                return;
+            }
+            await applySnapshotToScene(payload.snapshot, {
+                shareCode: payload.code,
+                metadata: payload.metadata || null
+            });
+        }
+
+        function consumeSharedLayoutImport() {
+            let raw = null;
+            try {
+                raw = localStorage.getItem(SHARE_IMPORT_STORAGE_KEY);
+            } catch (error) {
+                console.warn('Shared layout storage unavailable', error);
+                return null;
+            }
+            if (!raw) {
+                return null;
+            }
+            try {
+                localStorage.removeItem(SHARE_IMPORT_STORAGE_KEY);
+            } catch (error) {
+                console.warn('Unable to clear shared layout storage', error);
+            }
+            try {
+                return JSON.parse(raw);
+            } catch (error) {
+                console.warn('Invalid shared layout payload', error);
+                return null;
+            }
+        }
+
+        async function instantiateSnapshotAsset(asset) {
+            if (!asset) {
+                throw new Error('Snapshot asset missing definition');
+            }
+
+            const sourceUrl = asset.source || asset.assetUrl;
+            if (!sourceUrl) {
+                throw new Error('Snapshot asset missing source URL');
+            }
+
+            const loader = new GLTFLoader();
+            const gltf = await new Promise((resolve, reject) => {
+                loader.load(sourceUrl, resolve, undefined, reject);
+            });
+            const model = gltf.scene || (Array.isArray(gltf.scenes) ? gltf.scenes[0] : null);
+            if (!model) {
+                throw new Error('Shared asset GLTF missing scene');
+            }
+
+            model.traverse(node => {
+                if (node.isMesh) {
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                }
+            });
+
+            const position = vectorFromArray(asset.position, new THREE.Vector3());
+            const rotation = eulerFromDegreesArray(asset.rotationDeg, new THREE.Euler());
+            const scale = scaleVectorFromArray(asset.scale, new THREE.Vector3(DEFAULT_MODEL_SCALE, DEFAULT_MODEL_SCALE, DEFAULT_MODEL_SCALE));
+
+            const clampComponent = value => THREE.MathUtils.clamp(value, MIN_SCALE, MAX_SCALE);
+            scale.set(clampComponent(scale.x), clampComponent(scale.y), clampComponent(scale.z));
+
+            model.position.copy(position);
+            model.rotation.copy(rotation);
+            model.scale.copy(scale);
+
+            model.userData.assetId = asset.assetId ?? null;
+            model.userData.assetName = asset.name || 'Shared Asset';
+            model.userData.assetUrl = sourceUrl;
+            const parsedOffset = Number.parseFloat(asset.offsetY);
+            model.userData.placementOffset = Number.isFinite(parsedOffset) ? parsedOffset : 0;
+            model.userData.assetSource = asset.librarySource || null;
+            const parsedPrice = Number.parseFloat(asset.price);
+            model.userData.assetPrice = Number.isFinite(parsedPrice) ? parsedPrice : null;
+            model.userData.assetCategory = asset.category || null;
+            if (asset.boundingBox) {
+                model.userData.assetBoundingBox = asset.boundingBox;
+            }
+            model.userData.assetMetadata = {
+                id: asset.assetId ?? null,
+                name: asset.name || 'Shared Asset',
+                category: asset.category || null,
+                price: Number.isFinite(parsedPrice) ? parsedPrice : null,
+                source: asset.librarySource || null
+            };
+            if (asset.assetId) {
+                registerModelMetadata({
+                    id: asset.assetId,
+                    name: asset.name || 'Shared Asset',
+                    category: asset.category || null,
+                    price: Number.isFinite(parsedPrice) ? parsedPrice : null,
+                    source: asset.librarySource || null
+                });
+            }
+            model.name = asset.name || 'Shared Asset';
+            return model;
+        }
+
+        async function applySnapshotToScene(snapshot, context = {}) {
+            if (!snapshot) {
+                return false;
+            }
+            try {
+                resetScene();
+
+                let desiredRoom = null;
+                if (typeof snapshot.room?.source === 'string' && snapshot.room.source.trim().length > 0) {
+                    desiredRoom = snapshot.room.source.trim();
+                } else if (typeof snapshot.room?.name === 'string') {
+                    const match = snapshot.room.name.match(/room\s*(\d+)/i);
+                    if (match) {
+                        const index = Number.parseInt(match[1], 10) - 1;
+                        if (Number.isFinite(index) && ROOM_MODELS[index]) {
+                            desiredRoom = ROOM_MODELS[index];
+                        }
+                    }
+                }
+                if (!desiredRoom) {
+                    desiredRoom = ROOM_MODELS[0];
+                }
+
+                await loadRoom(desiredRoom);
+
+                if (snapshot.room) {
+                    const roomPosition = vectorFromArray(snapshot.room.position, new THREE.Vector3());
+                    const roomRotation = eulerFromDegreesArray(snapshot.room.rotationDeg, new THREE.Euler());
+                    const roomScale = scaleVectorFromArray(snapshot.room.scale, new THREE.Vector3(1, 1, 1));
+                    roomGroup.position.copy(roomPosition);
+                    roomGroup.rotation.copy(roomRotation);
+                    roomGroup.scale.copy(roomScale);
+                    roomGroup.userData.roomName = snapshot.room.name || roomGroup.userData.roomName;
+                    roomGroup.userData.roomSource = desiredRoom;
+                }
+
+                if (backgroundSelect && snapshot.environment) {
+                    const options = Array.from(backgroundSelect.options || []);
+                    const exists = options.some(option => option.value === snapshot.environment);
+                    if (exists) {
+                        backgroundSelect.value = snapshot.environment;
+                        backgroundSelect.dispatchEvent(new Event('change'));
+                    }
+                }
+
+                if (snapshot.lighting) {
+                    if (lightingSlider) {
+                        const parsedBrightness = Number.parseFloat(snapshot.lighting.brightnessPercent);
+                        const safeBrightness = Number.isFinite(parsedBrightness) ? parsedBrightness : (lightingSlider.value ? Number.parseFloat(lightingSlider.value) : 100);
+                        const clampedBrightness = THREE.MathUtils.clamp(safeBrightness, 0, 200);
+                        lightingSlider.value = clampedBrightness;
+                        lightingSlider.dispatchEvent(new Event('input'));
+                    }
+                    setExtraLightsVisibility(Boolean(snapshot.lighting.extraLightsEnabled));
+                }
+
+            } catch (error) {
+                console.error('Shared room import failed during setup', error);
+                return false;
+            }
+
+            const assets = Array.isArray(snapshot.assets) ? snapshot.assets : [];
+            for (const asset of assets) {
+                try {
+                    const model = await instantiateSnapshotAsset(asset);
+                    scene.add(model);
+                    placedModels.push(model);
+                } catch (error) {
+                    console.warn('Failed to import shared asset', asset?.name || asset?.assetId || 'asset', error);
+                }
+            }
+
+            selectModel(null);
+            updateTransformAttachment();
+            updateTransformUI();
+            focusRoom();
+            scheduleAutoAnalysis('snapshot-import');
+            setInventoryVisibility(true);
+
+            if (context.shareCode) {
+                setShareStatus(`Layout imported from share code ${context.shareCode}.`, 'success');
+                console.info(`Imported layout from share code ${context.shareCode}`);
+            }
+            return true;
+        }
+
+        function focusRoom() {
+            boundingBox.makeEmpty();
+            if (roomGroup.children.length > 0) {
+                boundingBox.expandByObject(roomGroup);
+            }
+            placedModels.forEach(model => boundingBox.expandByObject(model));
+
+            if (boundingBox.isEmpty()) {
+                controls.target.set(0, 1, 0);
+                camera.position.set(5, 5, 8);
+                controls.update();
+                return;
+            }
+
+            boundingBox.getCenter(tempVec);
+            controls.target.copy(tempVec);
+            boundingBox.getBoundingSphere(boundingSphere);
+
+            const radius = boundingSphere.radius || 1;
+            const distance = radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2));
+            const direction = new THREE.Vector3().subVectors(camera.position, controls.target);
+            if (direction.lengthSq() === 0) {
+                direction.set(0, 0, 1);
+            } else {
+                direction.normalize();
+            }
+
+            camera.position.copy(controls.target).add(direction.multiplyScalar(distance * 1.2));
+            controls.update();
+        }
+
+        toggleGridBtn.addEventListener('click', toggleGrid);
+        toggleLightsBtn.addEventListener('click', toggleLights);
+        focusBtn.addEventListener('click', focusRoom);
+        resetBtn.addEventListener('click', resetScene);
+        window.addEventListener('keydown', handleKeyShortcuts);
+
+        let draggedModelData = null;
+
+        function handleDragStart(event) {
+            const { modelUrl, name, offsetY: offsetAttr, source, price, category, modelId } = event.currentTarget.dataset;
+            const rawOffset = Number.parseFloat(offsetAttr);
+            const numericPrice = Number.parseFloat(price);
+            const offsetY = Number.isFinite(rawOffset) ? rawOffset : 0;
+            const catalogMeta = modelId ? getMetadataById(modelId) : null;
+            draggedModelData = {
+                modelUrl,
+                name: catalogMeta?.name || name || 'Asset',
+                modelId: modelId ?? null,
+                offsetY,
+                metadata: {
+                    source: catalogMeta?.source || source || null,
+                    price: Number.isFinite(numericPrice) ? numericPrice : (catalogMeta?.price ?? null),
+                    category: catalogMeta?.category || category || null
+                }
+            };
+            event.dataTransfer.effectAllowed = 'copy';
+            event.dataTransfer.setData('text/plain', JSON.stringify(draggedModelData));
+        }
+
+        function handlePointerMove(event) {
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function placeDraggedModel(intersectionPoint) {
+            if (!draggedModelData || !draggedModelData.modelUrl) return;
+
+            const placementData = { ...draggedModelData };
+            draggedModelData = null;
+
+            const gltfUrl = placementData.modelUrl;
+            const loader = new GLTFLoader();
+            loader.load(gltfUrl, gltf => {
+                const model = gltf.scene || gltf.scenes[0];
+                if (!model) return;
+
+                model.traverse(node => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+
+                model.position.copy(intersectionPoint);
+                model.position.y += Number.isFinite(placementData.offsetY) ? placementData.offsetY : 0;
+                model.scale.setScalar(DEFAULT_MODEL_SCALE);
+                const metadata = placementData.modelId ? getMetadataById(placementData.modelId) : null;
+                const assetName = metadata?.name || placementData.name || 'Asset';
+                const assetCategory = metadata?.category || placementData.metadata?.category || null;
+                const assetSource = metadata?.source || placementData.metadata?.source || null;
+                const resolvedPriceCandidate = metadata?.price ?? placementData.metadata?.price ?? null;
+                const resolvedPriceNumber = Number.parseFloat(resolvedPriceCandidate);
+                const resolvedPrice = Number.isFinite(resolvedPriceNumber) ? resolvedPriceNumber : null;
+                model.userData.assetId = metadata?.id || placementData.modelId || null;
+                model.userData.assetName = assetName;
+                model.userData.assetUrl = gltfUrl;
+                model.userData.placementOffset = placementData.offsetY || 0;
+                model.userData.assetSource = assetSource;
+                model.userData.assetPrice = resolvedPrice;
+                model.userData.assetCategory = assetCategory;
+                if (metadata) {
+                    model.userData.assetMetadata = metadata;
+                }
+                model.name = assetName;
+                scene.add(model);
+                placedModels.push(model);
+                selectModel(model);
+                scheduleAutoAnalysis('asset-placed');
+            }, undefined, error => {
+                console.error('Failed to load model asset:', gltfUrl, error);
+            });
+        }
+
+        canvas.addEventListener('pointermove', handlePointerMove);
+        canvas.addEventListener('dragover', event => {
+            if (!draggedModelData) return;
+            event.preventDefault();
+            raycaster.setFromCamera(pointer, camera);
+            raycaster.ray.intersectPlane(dropPlane, dropIntersectPoint);
+        });
+
+        function handleObjectPick(event) {
+            const rect = canvas.getBoundingClientRect();
+            objectPointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            objectPointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            objectRaycaster.setFromCamera(objectPointer, camera);
+            const intersects = objectRaycaster.intersectObjects(placedModels, true);
+
+            if (intersects.length > 0) {
+                let object = intersects[0].object;
+                while (object && !placedModels.includes(object)) {
+                    object = object.parent;
+                }
+                if (object) {
+                    selectModel(object);
+                    return;
+                }
+            }
+
+            selectModel(null);
+        }
+
+        function selectModel(model) {
+            if (selectedModel === model) return;
+
+            if (selectedModel) {
+                selectedModel.traverse(node => {
+                    if (node.isMesh && node.material?.emissive) {
+                        node.material.emissive.multiplyScalar(0);
+                    }
+                });
+            }
+
+            selectedModel = model;
+
+            if (selectedModel) {
+                selectedModel.traverse(node => {
+                    if (node.isMesh) {
+                        if (!node.material) return;
+                        if (!node.material.emissive) {
+                            node.material = node.material.clone();
+                            node.material.emissive = new THREE.Color(0x3b82f6);
+                            node.material.emissiveIntensity = 0.25;
+                        }
+                        node.material.emissiveIntensity = 0.35;
+                    }
+                });
+            }
+
+            refreshControlStates();
+            updateTransformAttachment();
+            updateTransformUI();
+        }
+
+        canvas.addEventListener('drop', event => {
+            event.preventDefault();
+            if (!draggedModelData) return;
+            raycaster.setFromCamera(pointer, camera);
+            raycaster.ray.intersectPlane(dropPlane, dropIntersectPoint);
+            placeDraggedModel(dropIntersectPoint.clone());
+        });
+
+        canvas.addEventListener('dragleave', () => {
+            draggedModelData = null;
+        });
+
+        canvas.addEventListener('pointerdown', event => {
+            if (draggedModelData) return;
+            if (isTransforming) return;
+            if (event.button !== 0) return;
+            handleObjectPick(event);
+        });
+
+        async function loadModelLibrary() {
+            try {
+                if (userModelList) {
+                    userModelList.innerHTML = '<div class="empty-state">Loading models...</div>';
+                }
+                if (companyModelList) {
+                    companyModelList.innerHTML = '<div class="empty-state">Loading models...</div>';
+                }
+
+                const storedUserId = resolveStoredUserId();
+                const [personalModels, marketplaceModels] = await Promise.all([
+                    fetchUserModels(storedUserId),
+                    fetchCompanyModels()
+                ]);
+
+                userLibraryModels = personalModels;
+                companyLibraryModels = marketplaceModels;
+                currentUserPage = 1;
+                currentCompanyPage = 1;
+                renderModelPage();
+            } catch (error) {
+                console.error('Model fetch failed:', error);
+                userLibraryModels = [];
+                companyLibraryModels = [];
+                currentUserPage = 1;
+                currentCompanyPage = 1;
+                if (userModelList) {
+                    userModelList.innerHTML = '<div class="empty-state" style="color:#f87171;">Failed to load models. Please try again later.</div>';
+                }
+                if (companyModelList) {
+                    companyModelList.innerHTML = '<div class="empty-state" style="color:#f87171;">Failed to load models. Please try again later.</div>';
+                }
+                if (userPaginationContainer) {
+                    userPaginationContainer.innerHTML = '';
+                    userPaginationContainer.hidden = true;
+                }
+                if (companyPaginationContainer) {
+                    companyPaginationContainer.innerHTML = '';
+                    companyPaginationContainer.hidden = true;
+                }
+            }
+        }
+
+        async function bootstrapEditor() {
+            initRoomSelector();
+            try {
+                await loadRoom(ROOM_MODELS[0]);
+            } catch (error) {
+                console.warn('Default room load failed', error);
+            }
+            await loadModelLibrary();
+            await importSharedLayoutIfAvailable();
+            setInventoryVisibility(true);
+        }
+
+        bootstrapEditor().catch(error => {
+            console.error('Editor bootstrap failed', error);
+        });
+        if (aiAnalyzeBtn) {
+            aiAnalyzeBtn.addEventListener('click', async () => {
+                await runAiCheck({ trigger: 'manual', reason: 'button' });
+            });
+        }
+
+        if (aiFloatingButton) {
+            aiFloatingButton.addEventListener('click', async () => {
+                aiFloatingButton.classList.add('active');
+                aiFloatingButton.disabled = true;
+                setInventoryVisibility(true);
+                try {
+                    await runAiCheck({ trigger: 'manual', reason: 'floating-button' });
+                } finally {
+                    aiFloatingButton.classList.remove('active');
+                    aiFloatingButton.disabled = false;
+                }
+            });
+        }
+
+        if (inventoryToggle) {
+            inventoryToggle.addEventListener('click', () => {
+                const nextState = bottomBar ? !bottomBar.classList.contains('open') : false;
+                setInventoryVisibility(nextState);
+            });
+        }
+
+        if (shareRoomButton) {
+            shareRoomButton.addEventListener('click', () => {
+                openShareDialog();
+            });
+        }
+
+        if (shareDialogClose) {
+            shareDialogClose.addEventListener('click', event => {
+                event.preventDefault();
+                closeShareDialog();
+            });
+        }
+
+        if (shareCancelButton) {
+            shareCancelButton.addEventListener('click', event => {
+                event.preventDefault();
+                closeShareDialog();
+            });
+        }
+
+        if (shareBackdrop) {
+            shareBackdrop.addEventListener('click', event => {
+                if (event.target === shareBackdrop) {
+                    closeShareDialog();
+                }
+            });
+        }
+
+        if (shareRoomForm) {
+            shareRoomForm.addEventListener('submit', handleShareSubmit);
+        }
+
+        if (shareCopyButton) {
+            shareCopyButton.addEventListener('click', async () => {
+                const shareCode = shareCopyButton.dataset.shareCode;
+                const shareUrl = shareCopyButton.dataset.shareUrl;
+                const lines = [shareCode ? `Reference Code: ${shareCode}` : null, shareUrl ? `Link: ${shareUrl}` : null]
+                    .filter(Boolean)
+                    .join('\n');
+                if (!lines) {
+                    setShareStatus('Nothing to copy yet.', 'error');
+                    return;
+                }
+                if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+                    setShareStatus('Clipboard copy not supported. Please copy manually.', 'error');
+                    return;
+                }
+                try {
+                    await navigator.clipboard.writeText(lines);
+                    setShareStatus('Copied share details to clipboard.', 'success');
+                } catch (error) {
+                    console.warn('Clipboard unavailable', error);
+                    setShareStatus('Copy failed. Manually copy the code above.', 'error');
+                }
+            });
+        }
+
+        function createTransformPanel() {
+            const panel = document.createElement('div');
+            panel.className = 'transform-panel floating-transform-panel';
+            panel.innerHTML = `
+                <div class="transform-header">
+                    <span class="transform-header-icon"><i class="fa-solid fa-cube"></i></span>
+                    <div class="transform-header-text">
+                        <span class="transform-header-title">Selected Asset</span>
+                        <span class="transform-header-subtitle">Fine-tune placement and orientation</span>
+                    </div>
+                </div>
+                <div class="transform-controls">
+                    <div class="target-switch">
+                        <button type="button" data-target="asset" class="active">Asset</button>
+                        <button type="button" data-target="room">Room</button>
+                    </div>
+                    <div class="mode-switch">
+                        <button type="button" data-mode="translate" class="active">Move</button>
+                        <button type="button" data-mode="rotate">Rotate</button>
+                        <button type="button" data-mode="scale">Scale</button>
+                    </div>
+                    <div class="axis-switch">
+                        <button type="button" data-axis="x" class="active">X</button>
+                        <button type="button" data-axis="y">Y</button>
+                        <button type="button" data-axis="z">Z</button>
+                    </div>
+                    <div class="value-display">
+                        <span class="step-label">0</span>
+                    </div>
+                    <div class="room-actions">
+                        <button type="button" class="lock-room">Lock Room</button>
+                        <button type="button" class="deselect">Clear</button>
+                    </div>
+                </div>
+                <p class="transform-hint">Drag gizmo arrows/circles/cubes · W/E/R switch modes · Q toggles asset/room · F focuses view</p>
+            `;
+            if (mainElement) {
+                mainElement.appendChild(panel);
+            }
+
+            transformPanel = panel;
+            targetButtons = Array.from(panel.querySelectorAll('.target-switch button'));
+            modeButtons = Array.from(panel.querySelectorAll('.mode-switch button'));
+            axisButtons = Array.from(panel.querySelectorAll('.axis-switch button'));
+            lockRoomButton = panel.querySelector('.lock-room');
+
+            targetButtons.forEach(btn => btn.addEventListener('click', () => setTransformTarget(btn.dataset.target)));
+            modeButtons.forEach(btn => btn.addEventListener('click', () => setTransformMode(btn.dataset.mode)));
+            axisButtons.forEach(btn => btn.addEventListener('click', () => setTransformAxis(btn.dataset.axis)));
+
+            panel.querySelector('.deselect').addEventListener('click', () => {
+                if (transformTarget === 'asset') {
+                    selectModel(null);
+                } else {
+                    resetRoomTransform();
+                }
+            });
+
+            lockRoomButton.addEventListener('click', toggleRoomLock);
+
+            refreshControlStates();
+            updateRoomLockUI();
+            updateTransformUI();
+            updateTransformAttachment();
+        }
+        function refreshControlStates() {
+            if (!transformPanel) return;
+            const titleEl = transformPanel.querySelector('.transform-header-title');
+            const subtitleEl = transformPanel.querySelector('.transform-header-subtitle');
+            const iconEl = transformPanel.querySelector('.transform-header-icon i');
+            if (titleEl) {
+                titleEl.textContent = transformTarget === 'asset' ? 'Selected Asset' : 'Room Alignment';
+            }
+            if (subtitleEl) {
+                subtitleEl.textContent = transformTarget === 'asset'
+                    ? 'Fine-tune placement and orientation'
+                    : 'Reposition and align the entire space';
+            }
+            if (iconEl) {
+                iconEl.className = transformTarget === 'asset' ? 'fa-solid fa-cube' : 'fa-solid fa-ruler-combined';
+            }
+
+            targetButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.target === transformTarget);
+            });
+
+            modeButtons.forEach(btn => {
+                const isScale = btn.dataset.mode === 'scale';
+                const shouldDisable = transformTarget === 'room' && isScale;
+                if (shouldDisable && transformMode === 'scale') {
+                    transformMode = 'translate';
+                }
+                btn.disabled = shouldDisable;
+                btn.classList.toggle('is-disabled', shouldDisable);
+                btn.classList.toggle('active', btn.dataset.mode === transformMode && !shouldDisable);
+            });
+
+            axisButtons.forEach(btn => {
+                const shouldDisable = transformMode === 'scale';
+                btn.disabled = shouldDisable;
+                btn.classList.toggle('is-disabled', shouldDisable);
+                btn.classList.toggle('active', btn.dataset.axis === transformAxis && !shouldDisable);
+            });
+
+            updateRoomLockUI();
+        }
+
+        function updateRoomLockUI() {
+            if (!lockRoomButton) return;
+            const showLock = transformTarget === 'room';
+            lockRoomButton.style.display = showLock ? 'inline-flex' : 'none';
+            lockRoomButton.disabled = !showLock;
+            lockRoomButton.textContent = roomLocked ? 'Unlock Room' : 'Lock Room';
+            lockRoomButton.classList.toggle('active', roomLocked);
+        }
+
+        function updateAxisVisibility() {
+            if (!transformControls) return;
+            if (!transformControls.object) return;
+            transformControls.showX = true;
+            transformControls.showY = true;
+            transformControls.showZ = true;
+        }
+
+        function updateTransformAttachment() {
+            if (!transformControls) return;
+
+            if (transformTarget === 'asset') {
+                if (selectedModel) {
+                    transformControls.attach(selectedModel);
+                    transformControls.visible = true;
+                } else {
+                    transformControls.detach();
+                    transformControls.visible = false;
+                }
+            } else if (transformTarget === 'room' && !roomLocked) {
+                transformControls.attach(roomGroup);
+                transformControls.visible = true;
+            } else {
+                transformControls.detach();
+                transformControls.visible = false;
+            }
+
+            transformControls.setMode(transformMode);
+            updateAxisVisibility();
+        }
+
+        function setTransformTarget(target) {
+            if (transformTarget === target) {
+                refreshControlStates();
+                updateTransformAttachment();
+                updateTransformUI();
+                return;
+            }
+
+            transformTarget = target;
+            if (transformTarget === 'room' && transformMode === 'scale') {
+                transformMode = 'translate';
+            }
+            refreshControlStates();
+            updateTransformAttachment();
+            updateTransformUI();
+        }
+
+        function setTransformMode(mode) {
+            if (mode === 'scale' && transformTarget === 'room') return;
+            if (transformMode === mode) {
+                refreshControlStates();
+                updateTransformAttachment();
+                updateTransformUI();
+                return;
+            }
+            transformMode = mode;
+            refreshControlStates();
+            updateTransformAttachment();
+            updateTransformUI();
+        }
+
+        function setTransformAxis(axis) {
+            if (transformMode === 'scale') return;
+            if (transformAxis === axis) return;
+            transformAxis = axis;
+            refreshControlStates();
+            updateTransformAttachment();
+            updateTransformUI();
+        }
+
+        function updateTransformUI() {
+            if (!transformPanel) return;
+            const stepLabel = transformPanel.querySelector('.step-label');
+            const clearButton = transformPanel.querySelector('.deselect');
+
+            if (transformTarget === 'asset') {
+                transformPanel.classList.toggle('disabled', !selectedModel);
+                if (!selectedModel) {
+                    stepLabel.textContent = 'No asset selected';
+                    clearButton.textContent = 'Clear';
+                    clearButton.disabled = false;
+                    clearButton.classList.remove('is-disabled');
+                    return;
+                }
+
+                clearButton.textContent = 'Clear';
+                clearButton.disabled = false;
+                clearButton.classList.remove('is-disabled');
+                if (transformMode === 'scale') {
+                    const averageScale = (selectedModel.scale.x + selectedModel.scale.y + selectedModel.scale.z) / 3;
+                    stepLabel.textContent = `Scale: ${averageScale.toFixed(2)}`;
+                } else {
+                    const value = transformMode === 'translate'
+                        ? selectedModel.position[transformAxis]
+                        : THREE.MathUtils.radToDeg(selectedModel.rotation[transformAxis]);
+                    stepLabel.textContent = `${transformAxis.toUpperCase()}: ${value.toFixed(2)}`;
+                }
+            } else {
+                transformPanel.classList.remove('disabled');
+                clearButton.textContent = roomLocked ? 'Unlock to reset' : 'Reset Room';
+                clearButton.disabled = roomLocked;
+                clearButton.classList.toggle('is-disabled', roomLocked);
+                if (roomLocked) {
+                    stepLabel.textContent = 'Room locked';
+                    return;
+                }
+
+                if (transformMode === 'scale') {
+                    stepLabel.textContent = 'Room scale locked';
+                } else {
+                    const value = transformMode === 'translate'
+                        ? roomGroup.position[transformAxis]
+                        : THREE.MathUtils.radToDeg(roomGroup.rotation[transformAxis]);
+                    stepLabel.textContent = `Room ${transformAxis.toUpperCase()}: ${value.toFixed(2)}`;
+                }
+            }
+        }
+
+        function toggleRoomLock() {
+            roomLocked = !roomLocked;
+            updateRoomLockUI();
+            updateTransformAttachment();
+            updateTransformUI();
+        }
+
+        function resetRoomTransform() {
+            if (roomLocked) return;
+            roomGroup.position.set(0, 0, 0);
+            roomGroup.rotation.set(0, 0, 0);
+            updateTransformAttachment();
+            updateTransformUI();
+        }
+
+        function handleKeyShortcuts(event) {
+            if ((event.key === 'Escape' || event.key === 'Esc') && shareBackdrop && shareBackdrop.classList.contains('open')) {
+                event.preventDefault();
+                closeShareDialog();
+                return;
+            }
+
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable)) {
+                return;
+            }
+
+            const key = event.key.toLowerCase();
+
+            if (key === 'w') {
+                event.preventDefault();
+                setTransformMode('translate');
+            } else if (key === 'e') {
+                event.preventDefault();
+                setTransformMode('rotate');
+            } else if (key === 'r') {
+                event.preventDefault();
+                setTransformMode('scale');
+            } else if (key === 'q') {
+                event.preventDefault();
+                const nextTarget = transformTarget === 'asset' ? 'room' : 'asset';
+                setTransformTarget(nextTarget);
+            } else if (key === 'f') {
+                event.preventDefault();
+                focusRoom();
+            } else if (key === 'x' || key === 'y' || key === 'z') {
+                event.preventDefault();
+                setTransformAxis(key);
+            }
+        }
+
+        createTransformPanel();
+    </script>
+</body>
+</html>

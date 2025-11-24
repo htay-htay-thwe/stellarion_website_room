@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Get Direct Image URLs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .method {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .method h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+        
+        .steps {
+            margin: 15px 0;
+        }
+        
+        .step {
+            margin: 10px 0;
+            padding: 10px 0;
+            display: flex;
+            align-items: start;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-right: 15px;
+        }
+        
+        .step-text {
+            flex: 1;
+            line-height: 1.6;
+        }
+        
+        .example {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 3px solid #2196F3;
+        }
+        
+        .example strong {
+            color: #1976D2;
+        }
+        
+        .url-box {
+            background: #2d2d2d;
+            color: #0f0;
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        
+        .good {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .bad {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .quick-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        
+        .quick-link:hover {
+            transform: translateY(-3px);
+        }
+        
+        .tip {
+            background: #fff9c4;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 3px solid #fbc02d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 How to Get Direct Image URLs</h1>
+        
+        <!-- Method 1: Unsplash -->
+        <div class="method">
+            <h2>Method 1: Unsplash (Recommended ⭐)</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">Go to <a href="https://unsplash.com" target="_blank">https://unsplash.com</a></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Search for "furniture", "sofa", "chair", etc.</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text"><strong>RIGHT-CLICK</strong> on any image</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">Select <strong>"Copy image address"</strong> or <strong>"Open image in new tab"</strong></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-text">If you opened in new tab, copy the URL from address bar</div>
+                </div>
+            </div>
+            
+            <div class="example">
+                <strong>Example URL:</strong>
+                <div class="url-box">https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800</div>
+                <span class="good">✅ VALID - Ends with image format or ?w=800</span>
+            </div>
+        </div>
+
+        <!-- Method 2: Imgur -->
+        <div class="method">
+            <h2>Method 2: Imgur</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">Upload your image to <a href="https://imgur.com" target="_blank">https://imgur.com</a> (no account needed)</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">After upload, click the image</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text"><strong>RIGHT-CLICK</strong> on the image</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">Select <strong>"Copy image address"</strong></div>
+                </div>
+            </div>
+            
+            <div class="example">
+                <strong>Example URL:</strong>
+                <div class="url-box">https://i.imgur.com/abc123.jpg</div>
+                <span class="good">✅ VALID - Starts with i.imgur.com and ends with .jpg/.png</span>
+            </div>
+        </div>
+
+        <!-- Method 3: Google Images -->
+        <div class="method">
+            <h2>Method 3: Google Images</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">Go to <a href="https://images.google.com" target="_blank">https://images.google.com</a></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Search for "furniture", "sofa", etc.</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Click on an image to open it</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-text"><strong>RIGHT-CLICK</strong> on the large image (not the thumbnail)</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-text">Select <strong>"Open image in new tab"</strong></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <div class="step-text">Copy the URL from the new tab's address bar</div>
+                </div>
+            </div>
+            
+            <div class="tip">
+                <strong>⚠️ Important:</strong> Make sure the URL ends with .jpg, .png, or .webp. If it doesn't, it's not a direct image link!
+            </div>
+        </div>
+
+        <!-- Method 4: Upload to Your Website -->
+        <div class="method">
+            <h2>Method 4: Use "Upload File" Tab (Easiest! 🎉)</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">In your website's Admin Panel</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Click the <strong>"Upload File"</strong> tab</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Click "Choose File" and select your image</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">The system automatically uploads to Firebase/ImgBB</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-text">Click "Generate 3D Model" - no URL needed!</div>
+                </div>
+            </div>
+            
+            <div class="example">
+                <strong>✨ This is the EASIEST method - no URLs needed!</strong>
+            </div>
+        </div>
+
+        <!-- Common Mistakes -->
+        <div class="method">
+            <h2>❌ Common Mistakes to Avoid</h2>
+            
+            <div class="example">
+                <strong>BAD - Search page URL:</strong>
+                <div class="url-box" style="color: #f44;">https://www.google.com/search?q=sofa</div>
+                <span class="bad">❌ INVALID - This is a search page, not an image</span>
+            </div>
+            
+            <div class="example">
+                <strong>BAD - Image viewer page:</strong>
+                <div class="url-box" style="color: #f44;">https://unsplash.com/photos/abc123</div>
+                <span class="bad">❌ INVALID - This is a webpage, not a direct image</span>
+            </div>
+            
+            <div class="example">
+                <strong>BAD - Local file path:</strong>
+                <div class="url-box" style="color: #f44;">C:\Users\Name\Pictures\sofa.jpg</div>
+                <span class="bad">❌ INVALID - Local files don't work, needs to be online</span>
+            </div>
+            
+            <div class="example">
+                <strong>GOOD - Direct image URL:</strong>
+                <div class="url-box" style="color: #0f0;">https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800</div>
+                <span class="good">✅ VALID - Direct link to the image file</span>
+            </div>
+        </div>
+
+        <!-- Quick Test URLs -->
+        <h2 style="margin-top: 40px; text-align: center;">🚀 Ready-to-Use Test URLs</h2>
+        <div class="quick-links">
+            <a href="#" class="quick-link" onclick="copyUrl('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800'); return false;">
+                Copy Sofa URL 1
+            </a>
+            <a href="#" class="quick-link" onclick="copyUrl('https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800'); return false;">
+                Copy Sofa URL 2
+            </a>
+            <a href="#" class="quick-link" onclick="copyUrl('https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800'); return false;">
+                Copy Chair URL
+            </a>
+            <a href="#" class="quick-link" onclick="copyUrl('https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800'); return false;">
+                Copy Table URL
+            </a>
+        </div>
+        
+        <div class="tip" style="margin-top: 30px; text-align: center;">
+            <strong>💡 Pro Tip:</strong> The URL MUST end with .jpg, .jpeg, .png, .webp, or have ?w= parameter!
+        </div>
+    </div>
+
+    <script>
+        function copyUrl(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ URL copied to clipboard!\n\n' + url + '\n\nNow paste it in your website!');
+            });
+        }
+    </script>
+</body>
+</html>

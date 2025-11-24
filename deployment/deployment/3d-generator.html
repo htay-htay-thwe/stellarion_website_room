@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Generator - Stellarion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/icons-sprite.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Ubuntu', sans-serif !important;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 0;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 1000;
+            background: white;
+            border: 2px solid #e5e7eb;
+            color: #6b7280;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #0f172a;
+            border-color: #0f172a;
+            color: white;
+            text-decoration: none;
+        }
+
+        .generator-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: white;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .header-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffffff, #e0e7ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        .upload-section {
+            padding: 3rem;
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area:hover {
+            border-color: #0f172a;
+            background: #f1f5f9;
+        }
+
+        .upload-area.dragover {
+            border-color: #0f172a;
+            background: #e0f2fe;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.25rem;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtext {
+            color: #94a3b8;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-container {
+            display: none;
+            margin-bottom: 2rem;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .model-name-section {
+            margin-bottom: 2rem;
+        }
+
+        .model-name-input {
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            width: 100%;
+            background: white;
+        }
+
+        .model-name-input:focus {
+            outline: none;
+            border-color: #0f172a;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+        }
+
+        .generate-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .generate-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .generate-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-container {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: #f8fafc;
+            border-radius: 15px;
+        }
+
+        .loading-gif {
+            max-width: 200px;
+            margin-bottom: 1rem;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .result-container {
+            display: none;
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .model-viewer {
+            width: 100%;
+            height: 400px;
+            background: #ffffff;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #e5e7eb;
+        }
+
+        .download-section {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .download-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .download-button:hover {
+            background: linear-gradient(135deg, #047857, #059669);
+            color: white;
+            text-decoration: none;
+        }
+
+        .save-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .save-button:hover {
+            background: linear-gradient(135deg, #1e293b, #334155);
+        }
+
+        .success-message {
+            display: none;
+            background: #dcfce7;
+            color: #15803d;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .generator-card {
+                margin: 20px;
+                border-radius: 15px;
+            }
+            
+            .header-section {
+                padding: 2rem 1.5rem;
+            }
+            
+            .upload-section {
+                padding: 2rem 1.5rem;
+            }
+            
+            .header-title {
+                font-size: 2rem;
+            }
+            
+            .upload-area {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button -->
+    <a href="index.html" class="back-button">
+        <i class="ti ti-arrow-left me-2"></i>Back to Home
+    </a>
+
+    <div class="main-container">
+        <div class="container">
+            <div class="generator-card">
+                <!-- Header Section -->
+                <div class="header-section">
+                    <h1 class="header-title">3D Model Generator</h1>
+                    <p class="header-subtitle">Transform your images into stunning 3D models with AI</p>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="upload-section">
+                    <!-- File Upload Area -->
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="ti ti-cloud-upload"></i>
+                        </div>
+                        <div class="upload-text">Drop your image here or click to browse</div>
+                        <div class="upload-subtext">Supports JPG, PNG, WebP (Max 10MB)</div>
+                        <input type="file" id="fileInput" class="file-input" accept="image/*">
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div class="preview-container" id="previewContainer">
+                        <div class="text-center">
+                            <img id="previewImage" class="preview-image" alt="Preview">
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-outline-secondary" onclick="clearImage()">
+                                    <i class="ti ti-x me-2"></i>Remove Image
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Name Input -->
+                    <div class="model-name-section">
+                        <label for="modelName" class="form-label fw-bold">Model Name</label>
+                        <input type="text" id="modelName" class="model-name-input" placeholder="Enter a name for your 3D model" onchange="toggleDetailsSection()">
+                        <button type="button" id="showDetailsBtn" class="btn btn-outline-primary mt-2" onclick="toggleDetailsSection()" style="display: none;">
+                            <i class="ti ti-settings me-2"></i>Add Model Details
+                        </button>
+                    </div>
+
+                    <!-- Model Details Section -->
+                    <div class="model-details-section" id="modelDetailsSection" style="display: none;">
+                        <h4 class="fw-bold mb-3 text-primary">3D Model Details</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="modelCategory" class="form-label fw-bold">Category</label>
+                                    <select id="modelCategory" class="model-name-input">
+                                        <option value="">Select Category</option>
+                                        <option value="sofa">Sofa</option>
+                                        <option value="chair">Chair</option>
+                                        <option value="table">Table</option>
+                                        <option value="bed">Bed</option>
+                                        <option value="storage">Storage</option>
+                                        <option value="lighting">Lighting</option>
+                                        <option value="decor">Decor</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="modelStyle" class="form-label fw-bold">Style</label>
+                                    <select id="modelStyle" class="model-name-input">
+                                        <option value="">Select Style</option>
+                                        <option value="modern">Modern</option>
+                                        <option value="scandinavian">Scandinavian</option>
+                                        <option value="traditional">Traditional</option>
+                                        <option value="industrial">Industrial</option>
+                                        <option value="minimalist">Minimalist</option>
+                                        <option value="luxury">Luxury</option>
+                                        <option value="vintage">Vintage</option>
+                                        <option value="contemporary">Contemporary</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="modelDimensions" class="form-label fw-bold">Dimensions (L×W×H)</label>
+                                    <input type="text" id="modelDimensions" class="model-name-input" placeholder="e.g., 200×90×85 cm">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="modelMaterial" class="form-label fw-bold">Material</label>
+                                    <input type="text" id="modelMaterial" class="model-name-input" placeholder="e.g., Leather, Wood, Fabric">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="modelDescription" class="form-label fw-bold">Description</label>
+                            <textarea id="modelDescription" class="model-name-input" rows="3" placeholder="Detailed description of the furniture piece..."></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="modelPrice" class="form-label fw-bold">Estimated Price ($)</label>
+                                    <input type="number" id="modelPrice" class="model-name-input" placeholder="0.00" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="modelColors" class="form-label fw-bold">Available Colors</label>
+                                    <input type="text" id="modelColors" class="model-name-input" placeholder="e.g., Black, White, Brown">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button id="generateButton" class="generate-button" onclick="generateModel()">
+                        <i class="ti ti-wand me-2"></i>Generate 3D Model
+                    </button>
+
+                    <!-- Loading Container -->
+                    <div id="loadingContainer" class="loading-container">
+                        <img src="assets/logo/loader/3dloader.gif" alt="Loading..." class="loading-gif">
+                        <div class="loading-text">Generating your 3D model...</div>
+                        <div class="mt-2 text-muted">This may take a few minutes</div>
+                    </div>
+
+                    <!-- Result Container -->
+                    <div id="resultContainer" class="result-container">
+                        <h4 class="mb-3">Your 3D Model is Ready!</h4>
+                        <div id="modelViewer" class="model-viewer">
+                            <div class="text-muted">
+                                <i class="ti ti-3d-cube-sphere" style="font-size: 3rem;"></i>
+                                <div class="mt-2">3D Model Preview</div>
+                            </div>
+                        </div>
+                        <div class="download-section">
+                            <a id="downloadButton" href="#" class="download-button">
+                                <i class="ti ti-download me-2"></i>Download Model
+                            </a>
+                            <button id="saveButton" class="save-button" onclick="saveModel()">
+                                <i class="ti ti-device-floppy me-2"></i>Save to Gallery
+                            </button>
+                        </div>
+                        <div id="successMessage" class="success-message">
+                            <i class="ti ti-check me-2"></i>Model saved to your gallery successfully!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentFile = null;
+        let currentModelData = null;
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                // Show authentication required message
+                document.querySelector('.upload-section').innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="ti ti-lock" style="font-size: 4rem; color: #64748b; margin-bottom: 1rem;"></i>
+                        <h3 class="text-2xl font-bold text-gray-700 mb-3">Authentication Required</h3>
+                        <p class="text-gray-600 mb-4">Please sign in to access the 3D Model Generator</p>
+                        <a href="index.html#signin" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-medium">
+                            <i class="ti ti-login me-2"></i>Sign In to Continue
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+        });
+
+        // Toggle model details section
+        function toggleDetailsSection() {
+            const modelName = document.getElementById('modelName').value.trim();
+            const detailsSection = document.getElementById('modelDetailsSection');
+            const showDetailsBtn = document.getElementById('showDetailsBtn');
+            
+            if (modelName) {
+                showDetailsBtn.style.display = 'inline-block';
+                if (detailsSection.style.display === 'none' || detailsSection.style.display === '') {
+                    detailsSection.style.display = 'block';
+                    showDetailsBtn.innerHTML = '<i class="ti ti-eye-off me-2"></i>Hide Details';
+                } else {
+                    detailsSection.style.display = 'none';
+                    showDetailsBtn.innerHTML = '<i class="ti ti-settings me-2"></i>Add Model Details';
+                }
+            } else {
+                showDetailsBtn.style.display = 'none';
+                detailsSection.style.display = 'none';
+            }
+        }
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const generateButton = document.getElementById('generateButton');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const resultContainer = document.getElementById('resultContainer');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleDrop);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file');
+                return;
+            }
+
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB');
+                return;
+            }
+
+            currentFile = file;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                uploadArea.style.display = 'none';
+                generateButton.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearImage() {
+            currentFile = null;
+            previewContainer.style.display = 'none';
+            uploadArea.style.display = 'block';
+            generateButton.disabled = true;
+            resultContainer.style.display = 'none';
+            loadingContainer.style.display = 'none';
+            fileInput.value = '';
+        }
+
+        async function generateModel() {
+            // Check authentication first
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please sign in to generate 3D models. You will be redirected to the sign-in page.');
+                window.location.href = 'index.html#signin';
+                return;
+            }
+
+            if (!currentFile) {
+                alert('Please select an image first');
+                return;
+            }
+
+            const modelName = document.getElementById('modelName').value.trim();
+            if (!modelName) {
+                alert('Please enter a name for your 3D model');
+                return;
+            }
+
+            // Collect model details
+            const modelDetails = {
+                name: modelName,
+                category: document.getElementById('modelCategory')?.value || '',
+                style: document.getElementById('modelStyle')?.value || '',
+                dimensions: document.getElementById('modelDimensions')?.value || '',
+                material: document.getElementById('modelMaterial')?.value || '',
+                description: document.getElementById('modelDescription')?.value || '',
+                price: document.getElementById('modelPrice')?.value || 0,
+                colors: document.getElementById('modelColors')?.value || ''
+            };
+
+            try {
+                // Show loading
+                generateButton.disabled = true;
+                generateButton.innerHTML = '<i class="ti ti-loader me-2"></i>Generating...';
+                loadingContainer.style.display = 'block';
+                resultContainer.style.display = 'none';
+
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('image', currentFile);
+                formData.append('name', modelName);
+                formData.append('details', JSON.stringify(modelDetails));
+
+                // Send request to generate 3D model
+                const response = await fetch('/api/create-3d-model', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Server error: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Store model details for later use
+                    window.currentModelDetails = modelDetails;
+                    // Poll for completion
+                    await pollModelStatus(result.taskId, modelName);
+                } else {
+                    throw new Error(result.message || 'Failed to generate 3D model');
+                }
+            } catch (error) {
+                console.error('Generation error:', error);
+                alert('Failed to generate 3D model: ' + error.message);
+                resetGenerateButton();
+                loadingContainer.style.display = 'none';
+            }
+        }
+
+        async function pollModelStatus(taskId, modelName) {
+            const maxAttempts = 60; // 5 minutes with 5-second intervals
+            let attempts = 0;
+
+            const poll = async () => {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(`/api/check-status/${taskId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            alert('Session expired. Please sign in again.');
+                            window.location.href = 'signin.html?redirect=3d-generator';
+                            return;
+                        }
+                        throw new Error(`Status check failed: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+
+                    if (result.status === 'SUCCEEDED') {
+                        // Model is ready
+                        currentModelData = {
+                            taskId: taskId,
+                            name: modelName,
+                            downloadUrl: result.output?.model_urls?.obj || result.downloadUrl,
+                            thumbnailUrl: result.output?.thumbnail_url
+                        };
+                        
+                        showResult();
+                        loadingContainer.style.display = 'none';
+                        resetGenerateButton();
+                    } else if (result.status === 'FAILED') {
+                        throw new Error('3D model generation failed');
+                    } else if (attempts < maxAttempts) {
+                        // Still processing, check again in 5 seconds
+                        attempts++;
+                        setTimeout(poll, 5000);
+                    } else {
+                        throw new Error('Generation timed out');
+                    }
+                } catch (error) {
+                    console.error('Status check error:', error);
+                    alert('Failed to check model status: ' + error.message);
+                    resetGenerateButton();
+                    loadingContainer.style.display = 'none';
+                }
+            };
+
+            poll();
+        }
+
+        function showResult() {
+            resultContainer.style.display = 'block';
+            
+            if (currentModelData.downloadUrl) {
+                document.getElementById('downloadButton').href = currentModelData.downloadUrl;
+                document.getElementById('downloadButton').download = `${currentModelData.name}.obj`;
+            }
+
+            // If we have a thumbnail, show it in the model viewer
+            if (currentModelData.thumbnailUrl) {
+                document.getElementById('modelViewer').innerHTML = 
+                    `<img src="${currentModelData.thumbnailUrl}" alt="Model Preview" style="max-width: 100%; max-height: 100%; border-radius: 8px;">`;
+            }
+        }
+
+        function resetGenerateButton() {
+            generateButton.disabled = false;
+            generateButton.innerHTML = '<i class="ti ti-wand me-2"></i>Generate 3D Model';
+        }
+
+        async function saveModel() {
+            if (!currentModelData) {
+                alert('No model to save');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/models/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        name: currentModelData.name,
+                        taskId: currentModelData.taskId,
+                        downloadUrl: currentModelData.downloadUrl,
+                        thumbnailUrl: currentModelData.thumbnailUrl,
+                        originalImage: previewImage.src
+                    })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('Session expired. Please sign in again.');
+                        window.location.href = 'signin.html?redirect=3d-generator';
+                        return;
+                    }
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('saveButton').disabled = true;
+                    document.getElementById('saveButton').innerHTML = '<i class="ti ti-check me-2"></i>Saved';
+                } else {
+                    throw new Error(result.message || 'Failed to save model');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('Failed to save model: ' + error.message);
+            }
+        }
+
+        // Auto-generate model name from file
+        fileInput.addEventListener('change', function() {
+            if (this.files[0] && !document.getElementById('modelName').value) {
+                const fileName = this.files[0].name;
+                const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+                document.getElementById('modelName').value = nameWithoutExt;
+            }
+        });
+    </script>
+</body>
+</html>

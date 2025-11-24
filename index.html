@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellarion - Quality Furniture for Every Room</title>
+    <link rel="icon" href="assets/logo/logo/stellarion.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tabler Icons - Using most reliable CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <!-- FBX/GLTF loaders will be included after Three core below -->
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#3b82f6',
+                        accent: '#f8fafc',
+                        luxury: '#64748b',
+                        dark: '#0f172a',
+                        light: '#f1f5f9',
+                        modern: '#1e293b'
+                    },
+                    fontFamily: {
+                        sans: ['Ubuntu', 'system-ui', 'sans-serif'],
+                        body: ['Ubuntu', 'system-ui', 'sans-serif'],
+                        display: ['Ubuntu', 'system-ui', 'sans-serif'],
+                        condensed: ['Ubuntu Condensed', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Condensed:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="modern-styles.css">
+    <!-- Three.js for Advanced 3D Rendering -->
+<!-- Three.js core (r128) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- OrbitControls (r128) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<!-- fflate (required for FBXLoader) -->
+<script src="https://cdn.jsdelivr.net/npm/fflate/umd/fflate.min.js"></script>
+<script src="https://unpkg.com/fflate"></script>
+
+<!-- FBXLoader (r128) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+<!-- GLTFLoader for .glb/.gltf product models -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<!-- TransformControls for object manipulation (gizmos) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.js"></script>
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: #FFFFFF !important;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Ubuntu', sans-serif;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        .animate-fadeIn {
+            animation: fadeIn 1s ease-out;
+        }
+        .animate-slideInLeft {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-family: 'Ubuntu', sans-serif;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 450px;
+            margin: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2.5rem;
+        }
+        
+        .modal-icon.question {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        
+        .modal-icon.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+        
+        .modal-text {
+            font-size: 1rem;
+            color: #6b7280;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .modal-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+        
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        
+        .modal-btn.primary:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+        
+        .modal-btn.secondary {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .modal-btn.secondary:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .modal-btn.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .modal-btn.danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(139, 115, 85, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+        }
+        .product-card {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: white;
+        }
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(232, 184, 109, 0.1) 0%, rgba(139, 115, 85, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        .product-card:hover::before {
+            opacity: 1;
+        }
+        .product-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 60px rgba(45, 62, 80, 0.15);
+        }
+        .luxury-border {
+            border: 1px solid rgba(139, 115, 85, 0.15);
+        }
+        .text-shadow-luxury {
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .bg-pattern {
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(232, 184, 109, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 115, 85, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(45, 62, 80, 0.03) 0%, transparent 50%);
+        }
+        .hover-grow {
+            transition: transform 0.3s ease;
+        }
+        .hover-grow:hover {
+            transform: scale(1.05);
+        }
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            --poster-color: transparent;
+            --progress-bar-color: #4F7CFF;
+        }
+        model-viewer::part(default-progress-bar) {
+            display: none;
+        }
+        #viewer3DContainer canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(232, 184, 109, 0.2);
+            border-top: 4px solid #E8B86D;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .view-3d-btn {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: linear-gradient(135deg, #2D3E50 0%, #1A1F2E 100%);
+            color: #E8B86D;
+            padding: 0.65rem 1.25rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            border: 1px solid rgba(232, 184, 109, 0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(45, 62, 80, 0.3);
+        }
+        .view-3d-btn:hover {
+            background: linear-gradient(135deg, #E8B86D 0%, #D4A960 100%);
+            color: #2D3E50;
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 6px 25px rgba(232, 184, 109, 0.4);
+        }
+        .product-image-container {
+            position: relative;
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+        }
+        .category-card {
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .category-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(45, 62, 80, 0.2);
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #E8B86D 0%, #D4A960 100%);
+            transition: all 0.3s ease;
+            color: #2D3E50;
+        }
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #D4A960 0%, #C09650 100%);
+            box-shadow: 0 8px 30px rgba(232, 184, 109, 0.4);
+            transform: translateY(-2px);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #1A1F2E 0%, #2D3E50 50%, #3D4E60 100%);
+            position: relative;
+        }
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(232, 184, 109, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(232, 184, 109, 0.1) 0%, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-white font-sans" style="background-color: #FFFFFF !important; font-family: 'Ubuntu', sans-serif !important;">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100" style="background-color: rgba(255,255,255,0.95) !important;">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex items-center justify-between py-6">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer group">
+                    <img src="assets/logo/logo/stellarion.png" alt="Stellarion" class="h-10 rounded-lg transform group-hover:scale-110 transition-transform duration-200">
+                </div>
+
+                <!-- Icon Navigation -->
+                <nav class="hidden lg:flex items-center space-x-2">
+                    <a href="#products" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200" title="Collections">
+                        <i class="ti ti-layout-grid text-lg"></i>
+                    </a>
+                    <a href="#rooms" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200" title="Rooms">
+                        <i class="ti ti-door text-lg"></i>
+                    </a>
+                    <a href="improved-3d-generator.html" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-cyan-600 hover:bg-cyan-50 transition-all duration-200" title="3D Model Generator">
+                        <i class="ti ti-3d-cube-sphere text-lg"></i>
+                    </a>
+                    <a href="#room-designer" onclick="event.preventDefault(); openRoomDesigner();" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200" title="Room Designer">
+                        <i class="ti ti-palette text-lg"></i>
+                    </a>
+                    <a href="setup_myroom.html" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-sky-600 hover:bg-sky-50 transition-all duration-200" title="Setup My Room">
+                        <i class="ti ti-home-cog text-lg"></i>
+                    </a>
+                    <a href="#subscription" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-amber-600 hover:bg-amber-50 transition-all duration-200" title="Premium">
+                        <i class="ti ti-crown text-lg"></i>
+                    </a>
+                    <a href="#deals" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200" title="Featured">
+                        <i class="ti ti-flame text-lg"></i>
+                    </a>
+                    <a href="#inspiration" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200" title="Inspiration">
+                        <i class="ti ti-bulb text-lg"></i>
+                    </a>
+                </nav>
+
+                <!-- Actions -->
+                <div class="flex items-center space-x-2">
+                    <!-- Search -->
+                    <button class="hidden md:block w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200" title="Search">
+                        <i class="ti ti-search text-lg"></i>
+                    </button>
+
+                    <!-- Sign In/Sign Up -->
+                    <div class="flex items-center space-x-2">
+                        <!-- Sign In Button -->
+                        <button id="signinBtn" class="hidden lg:flex items-center space-x-2 px-4 py-2 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 font-medium text-sm" title="Sign In">
+                            <i class="ti ti-login text-sm"></i>
+                            <span>Sign In</span>
+                        </button>
+                        
+                        <!-- Sign Up Dropdown -->
+                        <div class="relative">
+                            <button id="signupBtn" class="hidden lg:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg transition-all duration-200 font-medium text-sm" title="Sign Up">
+                                <i class="ti ti-user-plus text-sm"></i>
+                                <span>Sign Up</span>
+                            </button>
+                            <!-- Dropdown Menu -->
+                            <div id="signupDropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50">
+                                <a href="register.html" class="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="ti ti-user text-blue-600"></i>
+                                    <span>Personal Account</span>
+                                </a>
+                                <a href="register.html?type=company" class="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i class="ti ti-building text-emerald-600"></i>
+                                    <span>Company Account</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wishlist -->
+                    <button id="wishlistBtn" class="relative w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200" title="Wishlist">
+                        <i class="ti ti-heart text-lg"></i>
+                        <span id="wishlistCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">0</span>
+                    </button>
+
+                    <!-- Cart -->
+                    <button id="cartBtn" class="relative w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200" title="Cart">
+                        <i class="ti ti-shopping-bag text-lg"></i>
+                        <span id="cartCount" class="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">0</span>
+                    </button>
+
+                    <!-- 3D Generator -->
+                    <button id="adminBtn" class="hidden sm:block w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200" title="3D Generator">
+                        <i class="ti ti-cube text-lg"></i>
+                    </button>
+
+                    <!-- User -->
+                    <button id="userBtn" class="hidden lg:block w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200" title="Account">
+                        <i class="ti ti-user text-lg"></i>
+                    </button>
+
+                    <!-- Mobile Menu -->
+                    <button id="mobileMenuBtn" class="lg:hidden w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200" title="Menu">
+                        <i class="ti ti-menu-2 text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative py-16 md:py-24 overflow-hidden bg-white" style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);">
+        <!-- Animated Decorative Elements -->
+        <div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/10 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 w-1/4 h-1/2 bg-gradient-to-tr from-white/10 to-transparent"></div>
+        <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-white/8 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-1/4 left-1/4 w-96 h-96 bg-white/8 rounded-full blur-3xl animate-float" style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-white/5 rounded-full blur-2xl"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <!-- Left Content -->
+                <div class="animate-slideInLeft">
+                    <div class="inline-block mb-8">
+                        <span class="inline-flex items-center text-blue-600 font-medium text-xs uppercase tracking-wide bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">✨ Modern Collection 2025</span>
+                    </div>
+                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight text-gray-900">
+                        Modern Design
+                        <span class="block text-blue-600 mt-3">For Your Space</span>
+                    </h1>
+                    <p class="text-xl md:text-2xl mb-12 text-gray-600 leading-relaxed max-w-2xl">
+                        Discover contemporary furniture that transforms spaces into sophisticated sanctuaries. Clean lines, premium materials, and thoughtful design.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-6">
+                        <button onclick="scrollToProducts()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-5 px-12 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl uppercase tracking-wider text-sm">
+                            <i class="ti ti-arrow-right mr-3"></i>Explore Collection
+                        </button>
+                        <button onclick="scrollToRooms()" class="bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-medium py-5 px-12 rounded-2xl transition-all duration-300 uppercase tracking-wider text-sm">
+                            <i class="ti ti-book mr-3"></i>View Catalog
+                        </button>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-8 mt-20 pt-12 border-t border-gray-200">
+                        <div class="text-center sm:text-left">
+                            <div class="text-5xl font-bold mb-2 text-gray-900">500+</div>
+                            <div class="text-gray-600 text-sm uppercase tracking-wider font-medium">Modern Pieces</div>
+                        </div>
+                        <div class="text-center sm:text-left">
+                            <div class="text-5xl font-bold mb-2 text-gray-900">15K+</div>
+                            <div class="text-gray-600 text-sm uppercase tracking-wider font-medium">Happy Clients</div>
+                        </div>
+                        <div class="text-center sm:text-left">
+                            <div class="text-5xl font-bold mb-2 text-gray-900">25+</div>
+                            <div class="text-gray-600 text-sm uppercase tracking-wider font-medium">Years Experience</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hidden lg:block animate-fadeIn">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-6">
+                            <div class="luxury-border bg-white p-6 shadow-2xl hover:shadow-blue-200/50 transition-all duration-500 hover:-translate-y-2 rounded-2xl overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=500&fit=crop" alt="Modern sofa" class="w-full h-64 object-cover mb-4 rounded-xl">
+                                <h3 class="text-lg font-bold text-primary mb-1">Modern Living</h3>
+                                <p class="text-sm text-luxury/70 font-body">Contemporary designs</p>
+                            </div>
+                            <div class="luxury-border bg-white p-6 shadow-2xl hover:shadow-blue-200/50 transition-all duration-500 hover:-translate-y-2 rounded-2xl overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400&h=300&fit=crop" alt="Dining" class="w-full h-48 object-cover mb-4 rounded-xl">
+                                <h3 class="text-lg font-bold text-primary mb-1">Dining Spaces</h3>
+                                <p class="text-sm text-luxury/70 font-body">Elegant gatherings</p>
+                            </div>
+                        </div>
+                        <div class="space-y-6 mt-12">
+                            <div class="luxury-border bg-white p-6 shadow-2xl hover:shadow-blue-200/50 transition-all duration-500 hover:-translate-y-2 rounded-2xl overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=300&fit=crop" alt="Bedroom" class="w-full h-48 object-cover mb-4 rounded-xl">
+                                <h3 class="text-lg font-bold text-primary mb-1">Restful Bedrooms</h3>
+                                <p class="text-sm text-luxury/70 font-body">Peaceful retreats</p>
+                            </div>
+                            <div class="luxury-border bg-white p-6 shadow-2xl hover:shadow-blue-200/50 transition-all duration-500 hover:-translate-y-2 rounded-2xl overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=400&h=500&fit=crop" alt="Office" class="w-full h-64 object-cover mb-4 rounded-xl">
+                                <h3 class="text-lg font-bold text-primary mb-1">Work Spaces</h3>
+                                <p class="text-sm text-luxury/70 font-body">Productive elegance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Section -->
+    <section id="rooms" class="py-20 md:py-32 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <span class="text-blue-600 font-medium text-sm uppercase tracking-wide bg-blue-50 px-6 py-3 rounded-full border border-blue-100">Curated Collections</span>
+                <h2 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6 mt-8">Shop by Room</h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">Explore our carefully selected furniture collections designed for every space in your home</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div data-category="living-room" class="category-card group cursor-pointer relative bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 hover:border-blue-200 transition-all duration-500">
+                    <div class="relative p-8">
+                        <div class="h-52 mb-6 flex items-center justify-center rounded-xl overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=200&fit=crop" alt="Living Room" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">Living Room</h3>
+                        <p class="text-gray-600 mb-4 leading-relaxed">Sofas, sectionals & coffee tables</p>
+                        <div class="flex items-center text-blue-600 font-medium text-sm uppercase tracking-wider">
+                            Explore <i class="ti ti-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-category="bedroom" class="group cursor-pointer relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 hover:border-blue-200 transition-all duration-500">
+                    <div class="relative p-10">
+                        <div class="h-48 mb-6 flex items-center justify-center">
+                            <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=300&h=200&fit=crop" alt="Bedroom" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Bedroom</h3>
+                        <p class="text-gray-600 mb-4">Beds, nightstands & wardrobes</p>
+                        <div class="flex items-center text-blue-600 font-medium text-sm uppercase tracking-wider">
+                            Explore <i class="ti ti-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-category="dining" class="group cursor-pointer relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 hover:border-blue-200 transition-all duration-500">
+                    <div class="relative p-10">
+                        <div class="h-48 mb-6 flex items-center justify-center">
+                            <img src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=300&h=200&fit=crop" alt="Dining" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Dining Room</h3>
+                        <p class="text-gray-600 mb-4">Tables, chairs & dining sets</p>
+                        <div class="flex items-center text-blue-600 font-medium text-sm uppercase tracking-wider">
+                            Explore <i class="ti ti-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-category="office" class="group cursor-pointer relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 hover:border-blue-200 transition-all duration-500">
+                    <div class="relative p-10">
+                        <div class="h-48 mb-6 flex items-center justify-center">
+                            <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=300&h=200&fit=crop" alt="Office" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Home Office</h3>
+                        <p class="text-gray-600 mb-4">Desks, chairs & storage</p>
+                        <div class="flex items-center text-blue-600 font-medium text-sm uppercase tracking-wider">
+                            Explore <i class="ti ti-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-category="outdoor" class="group cursor-pointer relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 hover:border-blue-200 transition-all duration-500">
+                    <div class="relative p-10">
+                        <div class="h-48 mb-6 flex items-center justify-center">
+                            <img src="https://images.unsplash.com/photo-1600210492493-0946911123ea?w=300&h=200&fit=crop" alt="Outdoor" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Outdoor</h3>
+                        <p class="text-gray-600 mb-4">Patio & garden furniture</p>
+                        <div class="flex items-center text-blue-600 font-medium text-sm uppercase tracking-wider">
+                            Explore <i class="ti ti-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-category="storage" class="group cursor-pointer relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 hover:border-blue-200 transition-all duration-500">
+                    <div class="relative p-10">
+                        <div class="h-48 mb-6 flex items-center justify-center">
+                            <img src="https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=300&h=200&fit=crop" alt="Storage" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Storage</h3>
+                        <p class="text-gray-600 mb-4">Shelves, cabinets & organizers</p>
+                        <div class="flex items-center text-blue-600 font-medium text-sm uppercase tracking-wider">
+                            Explore <i class="ti ti-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Bar -->
+    <section class="py-8 bg-gray-50 border-y border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap gap-6 justify-center items-center">
+                <div class="flex items-center gap-3">
+                    <label class="font-medium text-gray-900 text-sm uppercase tracking-wider">Category:</label>
+                    <select id="categoryFilter" class="px-6 py-3 border-2 border-gray-200 focus:border-blue-500 focus:outline-none bg-white cursor-pointer text-sm hover:border-blue-300 transition-colors rounded-lg">
+                        <option value="all">All Collections</option>
+                        <option value="living-room">Living Room</option>
+                        <option value="bedroom">Bedroom</option>
+                        <option value="dining">Dining</option>
+                        <option value="office">Home Office</option>
+                        <option value="outdoor">Outdoor</option>
+                        <option value="storage">Storage</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <label class="font-medium text-gray-900 text-sm uppercase tracking-wider">Price:</label>
+                    <select id="priceFilter" class="px-6 py-3 border-2 border-gray-200 focus:border-blue-500 focus:outline-none bg-white cursor-pointer text-sm hover:border-blue-300 transition-colors rounded-lg">
+                        <option value="all">All Prices</option>
+                        <option value="0-100">Under $100</option>
+                        <option value="100-300">$100 - $300</option>
+                        <option value="300-500">$300 - $500</option>
+                        <option value="500+">$500+</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <label class="font-medium text-gray-900 text-sm uppercase tracking-wider">Sort by:</label>
+                    <select id="sortFilter" class="px-6 py-3 border-2 border-gray-200 focus:border-blue-500 focus:outline-none bg-white cursor-pointer text-sm hover:border-blue-300 transition-colors rounded-lg">
+                        <option value="featured">Featured</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="name">Name: A-Z</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="py-20 md:py-32 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="deals" class="text-center mb-20">
+                <span class="text-blue-600 font-medium text-sm uppercase tracking-wide bg-blue-50 px-6 py-3 rounded-full border border-blue-100">Featured Collection</span>
+                <h2 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6 mt-8">Signature Pieces</h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">Each piece is meticulously crafted with attention to detail and modern design</p>
+            </div>
+
+            <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <!-- Products will be dynamically inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Inspiration Section -->
+    <section id="inspiration" class="py-20 md:py-32 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <span class="text-blue-600 font-medium text-sm uppercase tracking-wide bg-blue-50 px-6 py-3 rounded-full border border-blue-100">Design Philosophy</span>
+                <h2 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6 mt-8">Interior Inspirations</h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">Explore design styles that reflect your personality and elevate your living spaces</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="group cursor-pointer overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 transition-all duration-500">
+                    <div class="relative h-96 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&h=800&fit=crop" alt="Modern Minimalism" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-0.5 bg-blue-500"></div>
+                                <span class="text-sm uppercase tracking-widest">Style 01</span>
+                            </div>
+                            <h3 class="text-3xl font-bold mb-3">Modern Minimalism</h3>
+                            <p class="text-white/90 mb-4">Clean lines, functional design, and sophisticated simplicity</p>
+                            <div class="flex items-center text-blue-400 font-medium text-sm uppercase tracking-wider opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                                Discover More <i class="ti ti-arrow-right ml-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group cursor-pointer overflow-hidden luxury-border bg-light hover:shadow-2xl transition-all duration-500">
+                    <div class="relative h-96 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1600210492486-724d285f4725?w=600&h=800&fit=crop" alt="Scandinavian" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/50 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-0.5 bg-secondary"></div>
+                                <span class="font-body text-sm uppercase tracking-widest">Style 02</span>
+                            </div>
+                            <h3 class="text-3xl font-bold mb-3">Scandinavian Warmth</h3>
+                            <p class="text-white/90 font-body mb-4">Cozy, inviting spaces with natural materials and light tones</p>
+                            <div class="flex items-center text-secondary font-body font-semibold text-sm uppercase tracking-wider opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                                Discover More <i class="ti ti-arrow-right ml-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="group cursor-pointer overflow-hidden luxury-border bg-light hover:shadow-2xl transition-all duration-500">
+                    <div class="relative h-96 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&h=800&fit=crop" alt="Contemporary Luxury" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/50 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-0.5 bg-secondary"></div>
+                                <span class="font-body text-sm uppercase tracking-widest">Style 03</span>
+                            </div>
+                            <h3 class="text-3xl font-bold mb-3">Contemporary Luxury</h3>
+                            <p class="text-white/90 font-body mb-4">Refined elegance with rich textures and premium finishes</p>
+                            <div class="flex items-center text-secondary font-body font-semibold text-sm uppercase tracking-wider opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                                Discover More <i class="ti ti-arrow-right ml-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partner Brands Section -->
+    <section id="partner-brands" class="py-20 md:py-32 bg-gradient-to-br from-primary/5 via-secondary/5 to-luxury/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-secondary font-body font-semibold text-sm uppercase tracking-[0.3em] border-b-2 border-secondary pb-2">Curated Partners</span>
+                <h2 class="text-5xl md:text-6xl font-bold text-primary mb-6 mt-8">Featured Furniture Brands</h2>
+                <p class="text-luxury/70 text-lg font-body max-w-2xl mx-auto">Discover exceptional pieces from our carefully selected partner brands</p>
+            </div>
+
+            <!-- Brand Filter Tabs -->
+            <div class="flex flex-wrap justify-center gap-3 mb-12">
+                <button onclick="filterPartnerProducts('all')" 
+                        class="partner-filter-btn active px-8 py-3 rounded-full font-body font-semibold text-sm uppercase tracking-wider transition-all duration-300 bg-primary text-white hover:bg-primary/90">
+                    All Brands
+                </button>
+                <button onclick="filterPartnerProducts('ikea')" 
+                        class="partner-filter-btn px-8 py-3 rounded-full font-body font-semibold text-sm uppercase tracking-wider transition-all duration-300 bg-white text-primary border-2 border-primary/20 hover:bg-primary hover:text-white hover:border-primary">
+                    IKEA
+                </button>
+                <button onclick="filterPartnerProducts('wayfair')" 
+                        class="partner-filter-btn px-8 py-3 rounded-full font-body font-semibold text-sm uppercase tracking-wider transition-all duration-300 bg-white text-primary border-2 border-primary/20 hover:bg-primary hover:text-white hover:border-primary">
+                    Wayfair
+                </button>
+                <button onclick="filterPartnerProducts('west-elm')" 
+                        class="partner-filter-btn px-8 py-3 rounded-full font-body font-semibold text-sm uppercase tracking-wider transition-all duration-300 bg-white text-primary border-2 border-primary/20 hover:bg-primary hover:text-white hover:border-primary">
+                    West Elm
+                </button>
+                <button onclick="filterPartnerProducts('cb2')" 
+                        class="partner-filter-btn px-8 py-3 rounded-full font-body font-semibold text-sm uppercase tracking-wider transition-all duration-300 bg-white text-primary border-2 border-primary/20 hover:bg-primary hover:text-white hover:border-primary">
+                    CB2
+                </button>
+                <button onclick="filterPartnerProducts('pottery-barn')" 
+                        class="partner-filter-btn px-8 py-3 rounded-full font-body font-semibold text-sm uppercase tracking-wider transition-all duration-300 bg-white text-primary border-2 border-primary/20 hover:bg-primary hover:text-white hover:border-primary">
+                    Pottery Barn
+                </button>
+            </div>
+
+            <!-- Partner Products Grid -->
+            <div id="partnerProductsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <!-- Partner products will be dynamically inserted here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Subscription Plans Section -->
+    <section id="subscription" class="py-32 bg-white relative overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-5">
+            <div class="absolute top-0 left-0 w-full h-full" style="background-image: radial-gradient(circle at 20% 50%, rgba(37,99,235,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59,130,246,0.1) 0%, transparent 50%);"></div>
+        </div>
+        <div class="absolute top-10 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <!-- Section Header -->
+            <div class="text-center mb-20">
+                <div class="inline-flex items-center justify-center mb-6 px-8 py-3 bg-blue-50 rounded-full border border-blue-100">
+                    <i class="ti ti-crown text-blue-600 mr-3 text-xl"></i>
+                    <span class="text-blue-600 uppercase tracking-wide text-sm font-bold">Premium Membership</span>
+                </div>
+                <h2 class="text-6xl md:text-7xl font-bold text-gray-900 mb-6">
+                    Choose Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600">Plan</span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    Elevate your furniture design experience with powerful 3D visualization and premium features
+                </p>
+            </div>
+
+            <!-- Pricing Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+                <!-- Freemium Plan -->
+                <div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden transform hover:-translate-y-3 transition-all duration-500 relative group border border-white/20">
+                    <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <!-- Card Header -->
+                    <div class="relative p-8 pb-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center shadow-lg">
+                                <i class="ti ti-cube text-white text-2xl"></i>
+                            </div>
+                            <span class="px-4 py-1.5 bg-green-100 text-green-700 text-xs font-bold uppercase tracking-wider rounded-full">Free</span>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold text-primary mb-2">Freemium</h3>
+                        <p class="text-gray-500 font-body text-sm">Perfect for beginners</p>
+                    </div>
+
+                    
+                    
+                    <!-- Card Body -->
+                    <div class="relative p-8">
+                        <ul class="space-y-4 mb-8">
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-check text-primary text-xs"></i>
+                                </div>
+                                <span>Augmented Reality (AR) Access</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-check text-primary text-xs"></i>
+                                </div>
+                                <span>Comprehensive Tutorial Guide</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-500">
+                                <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-x text-gray-400 text-xs"></i>
+                                </div>
+                                <span>Advertising Integration</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-500">
+                                <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-x text-gray-400 text-xs"></i>
+                                </div>
+                                <span>Restricted Color Palette</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-500">
+                                <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-x text-gray-400 text-xs"></i>
+                                </div>
+                                <span>No AI Features</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-check text-primary text-xs"></i>
+                                </div>
+                                <span>Free 3D objects Functionality</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-500">
+                                <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-x text-gray-400 text-xs"></i>
+                                </div>
+                                <span>Single-User Editing Constraint</span>
+                            </li>
+                        </ul>
+                        <button onclick="selectPlan('freemium')" class="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-body font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                            Get Started Free
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Premium Plan -->
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:-translate-y-3 transition-all duration-500 relative group border-2 border-blue-500 scale-105">
+                    <!-- Popular Ribbon -->
+                    <div class="absolute -top-0 -right-0 w-40 h-40 overflow-hidden">
+                        <div class="absolute top-6 right-[-35px] w-48 py-2 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 text-white text-center font-bold text-xs uppercase tracking-wider shadow-lg transform rotate-45">
+                            <i class="ti ti-star mr-1"></i>Popular
+                        </div>
+                    </div>
+                    
+                    <!-- Card Header -->
+                    <div class="relative p-8 pb-6 border-b border-blue-100 bg-gradient-to-br from-blue-50 to-transparent">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                                <i class="ti ti-crown text-white text-2xl"></i>
+                            </div>
+                            <span class="px-4 py-1.5 bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider rounded-full border border-blue-200">Best Value</span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900 mb-2">Premium</h3>
+                        <p class="text-gray-600 text-sm">Most popular choice</p>
+                    </div>
+                    
+                    <!-- Card Body -->
+                    <div class="relative p-8">
+                        <ul class="space-y-4 mb-8">
+                            <li class="flex items-start text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0 shadow-sm">
+                                    <i class="ti ti-check text-white text-xs"></i>
+                                </div>
+                                <span class="font-semibold">Augmented Reality (AR) Access</span>
+                            </li>
+                            <li class="flex items-start text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0 shadow-sm">
+                                    <i class="ti ti-check text-white text-xs"></i>
+                                </div>
+                                <span class="font-semibold">Comprehensive Tutorial Guide</span>
+                            </li>
+                            <li class="flex items-start text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0 shadow-sm">
+                                    <i class="ti ti-check text-white text-xs"></i>
+                                </div>
+                                <span class="font-semibold">Ad-Free Experience</span>
+                            </li>
+                            <li class="flex items-start text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0 shadow-sm">
+                                    <i class="ti ti-check text-white text-xs"></i>
+                                </div>
+                                <span class="font-semibold">Comprehensive Color Palette</span>
+                            </li>
+                            <li class="flex items-start text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0 shadow-sm">
+                                    <i class="ti ti-check text-white text-xs"></i>
+                                </div>
+                                <span class="font-semibold">AI-Powered Assistance</span>
+                            </li>
+                            <li class="flex items-start text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0 shadow-sm">
+                                    <i class="ti ti-check text-white text-xs"></i>
+                                </div>
+                                <span class="font-semibold">3D Object Scanning Support</span>
+                            </li>
+                            <li class="flex items-start text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0 shadow-sm">
+                                    <i class="ti ti-check text-white text-xs"></i>
+                                </div>
+                                <span class="font-semibold">Collaborative Editing</span>
+                            </li>
+                        </ul>
+                        <button onclick="selectPlan('premium')" class="w-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 hover:from-blue-600 hover:to-blue-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl">
+                            Choose Premium
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden transform hover:-translate-y-3 transition-all duration-500 relative group border border-white/20">
+                    <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <!-- Card Header -->
+                    <div class="relative p-8 pb-6 border-b border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+                                <i class="ti ti-briefcase text-white text-2xl"></i>
+                            </div>
+                            <span class="px-4 py-1.5 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider rounded-full">Custom</span>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold text-primary mb-2">Enterprise</h3>
+                        <p class="text-gray-500 font-body text-sm">For large organizations</p>
+                    </div>
+                    
+                    <!-- Card Body -->
+                    <div class="relative p-8">
+                        <ul class="space-y-4 mb-8">
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-check text-primary text-xs"></i>
+                                </div>
+                                <span>All Premium Features</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-check text-primary text-xs"></i>
+                                </div>
+                                <span>Unlimited Team Members</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="fas fa-check text-primary text-xs"></i>
+                                </div>
+                                <span>White-Label Solutions</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-check text-primary text-xs"></i>
+                                </div>
+                                <span>API Access & Integration</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="ti ti-check text-primary text-xs"></i>
+                                </div>
+                                <span>Custom Training Sessions</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="fas fa-check text-primary text-xs"></i>
+                                </div>
+                                <span>24/7 Priority Support</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="fas fa-check text-primary text-xs"></i>
+                                </div>
+                                <span>Service Level Agreement (SLA)</span>
+                            </li>
+                            <li class="flex items-start font-body text-gray-700">
+                                <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                                    <i class="fas fa-check text-primary text-xs"></i>
+                                </div>
+                                <span>Dedicated Infrastructure</span>
+                            </li>
+                        </ul>
+                        <button onclick="selectPlan('enterprise')" class="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white font-body font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                            Contact Sales
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Virtual Room Designer Section -->
+    <section  class="py-32 bg-gradient-to-br from-accent via-white to-accent relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <!-- Section Header -->
+            <div class="text-center mb-20">
+                <div class="inline-block mb-6">
+                    <span class="bg-gradient-to-r from-primary to-secondary text-white uppercase tracking-[0.3em] text-xs font-bold px-6 py-2 rounded-full font-body shadow-lg">
+                        <i class="ti ti-wand mr-2"></i>Virtual Designer
+                    </span>
+                </div>
+                <h2 class="text-5xl md:text-6xl font-display font-bold text-primary mb-6">
+                    Design Your Dream Room
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto font-body leading-relaxed">
+                    Try our 3D furniture in virtual room templates before making your purchase
+                </p>
+            </div>
+
+            <!-- CTA Button -->
+            <div class="text-center mb-16"  id="room-designer">
+                <button onclick="openRoomDesigner()" class="bg-gradient-to-r from-secondary via-luxury to-secondary hover:from-luxury hover:to-secondary text-white font-body font-bold py-5 px-12 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl inline-flex items-center space-x-3">
+                    <i class="fas fa-paint-brush text-2xl"></i>
+                    <span class="text-lg">Start Designing Now</span>
+                    <i class="ti ti-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- Sample Room Templates Preview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300 cursor-pointer group" onclick="selectRoomTemplate('living-room', this)" data-model="./image/Rooms/Room1.fbx">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800" alt="Living Room" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 text-white">
+                            <h3 class="text-2xl font-display font-bold mb-2">Living Room</h3>
+                            <p class="font-body text-sm text-white/80">Modern & Spacious</p>
+                        </div>
+                        <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                            <i class="ti ti-sofa text-white mr-2"></i>
+                            <span class="text-white text-xs font-bold">15 Items</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300 cursor-pointer group" onclick="selectRoomTemplate('bedroom', this)" data-model="./image/Rooms/Room2.fbx">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800" alt="Bedroom" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 text-white">
+                            <h3 class="text-2xl font-display font-bold mb-2">Bedroom</h3>
+                            <p class="font-body text-sm text-white/80">Cozy & Comfortable</p>
+                        </div>
+                        <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                            <i class="ti ti-bed text-white mr-2"></i>
+                            <span class="text-white text-xs font-bold">12 Items</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300 cursor-pointer group" onclick="selectRoomTemplate('dining-room', this)" data-model="./image/Rooms/Room3.fbx">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800" alt="Dining Room" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 text-white">
+                            <h3 class="text-2xl font-display font-bold mb-2">Dining Room</h3>
+                            <p class="font-body text-sm text-white/80">Elegant & Inviting</p>
+                        </div>
+                        <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                            <i class="ti ti-tools-kitchen text-white mr-2"></i>
+                            <span class="text-white text-xs font-bold">10 Items</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+                <div class="text-center p-6 bg-white rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="ti ti-cube text-white text-2xl"></i>
+                    </div>
+                    <h4 class="font-display font-bold text-primary mb-2">3D Visualization</h4>
+                    <p class="font-body text-sm text-gray-600">View furniture in realistic 3D</p>
+                </div>
+
+                <div class="text-center p-6 bg-white rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-gradient-to-br from-secondary to-luxury rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="ti ti-arrows-maximize text-white text-2xl"></i>
+                    </div>
+                    <h4 class="font-display font-bold text-primary mb-2">Drag & Drop</h4>
+                    <p class="font-body text-sm text-gray-600">Easy furniture placement</p>
+                </div>
+
+                <div class="text-center p-6 bg-white rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-gradient-to-br from-luxury to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="ti ti-palette text-white text-2xl"></i>
+                    </div>
+                    <h4 class="font-display font-bold text-primary mb-2">Customize Colors</h4>
+                    <p class="font-body text-sm text-gray-600">Change materials & colors</p>
+                </div>
+
+                <div class="text-center p-6 bg-white rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-gradient-to-br from-primary to-luxury rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="ti ti-device-floppy text-white text-2xl"></i>
+                    </div>
+                    <h4 class="font-display font-bold text-primary mb-2">Save Designs</h4>
+                    <p class="font-body text-sm text-gray-600">Keep your favorite layouts</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Room Designer Modal -->
+    <div id="roomDesignerModal" class="hidden fixed inset-0 z-50 overflow-hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeRoomDesigner()"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative h-full flex flex-col bg-white">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-primary to-secondary text-white px-6 py-4 flex items-center justify-between shadow-lg">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-paint-brush text-2xl"></i>
+                    <div>
+                        <h3 class="text-2xl font-display font-bold">Virtual Room Designer</h3>
+                        <p class="text-sm text-white/80 font-body">Design your perfect space</p>
+                    </div>
+                </div>
+                <button onclick="closeRoomDesigner()" class="p-2 hover:bg-white/20 rounded-full transition-all">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 flex overflow-hidden">
+                <!-- Sidebar - Furniture Library -->
+                <div class="w-80 bg-gray-50 border-r border-gray-200 overflow-y-auto">
+                    <div class="p-6">
+                        <h4 class="text-lg font-display font-bold text-primary mb-4">Furniture Library</h4>
+                        
+                        <!-- Categories -->
+                        <div class="space-y-2 mb-6">
+                            <button onclick="filterDesignerFurniture('all')" class="w-full text-left px-4 py-2 rounded-lg bg-primary text-white font-body text-sm font-semibold">
+                                <i class="ti ti-grid-dots mr-2"></i>All Items
+                            </button>
+                            <button onclick="filterDesignerFurniture('seating')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-200 font-body text-sm text-gray-700">
+                                <i class="ti ti-sofa mr-2"></i>Seating
+                            </button>
+                            <button onclick="filterDesignerFurniture('tables')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-200 font-body text-sm text-gray-700">
+                                <i class="ti ti-table mr-2"></i>Tables
+                            </button>
+                            <button onclick="filterDesignerFurniture('storage')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-200 font-body text-sm text-gray-700">
+                                <i class="ti ti-package mr-2"></i>Storage
+                            </button>
+                            <button onclick="filterDesignerFurniture('lighting')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-200 font-body text-sm text-gray-700">
+                                <i class="ti ti-bulb mr-2"></i>Lighting
+                            </button>
+                            <button onclick="filterDesignerFurniture('decor')" class="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-200 font-body text-sm text-gray-700">
+                                <i class="ti ti-leaf mr-2"></i>Decor
+                            </button>
+                        </div>
+
+                        <!-- Furniture Items -->
+                        <div id="designerFurnitureList" class="space-y-3">
+                            <!-- Items will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas Area -->
+                <div class="flex-1 flex flex-col bg-gray-100">
+                    <!-- Toolbar -->
+                    <div class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <button onclick="changeRoomView('top')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-body text-sm font-semibold transition-all">
+                                <i class="ti ti-layout-grid mr-2"></i>Top View
+                            </button>
+                            <button onclick="changeRoomView('3d')" class="px-4 py-2 bg-primary text-white rounded-lg font-body text-sm font-semibold">
+                                <i class="ti ti-cube mr-2"></i>3D View
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="clearRoom()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-body text-sm font-semibold transition-all">
+                                <i class="ti ti-trash mr-2"></i>Clear Room
+                            </button>
+                            <button onclick="saveRoomDesign()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-body text-sm font-semibold transition-all">
+                                <i class="ti ti-device-floppy mr-2"></i>Save Design
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3D Canvas -->
+                <div class="flex-1 relative" id="roomCanvas" style="height: 600px;">
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div class="text-center">
+            <i class="ti ti-cube text-6xl text-gray-400 mb-4"></i>
+            <p class="text-gray-600 font-body text-lg">Select a room template to start designing</p>
+        </div>
+    </div>
+</div>
+
+
+                    <!-- Instructions -->
+                    <div class="bg-white border-t border-gray-200 px-6 py-3">
+                        <div class="flex items-center justify-between text-sm text-gray-600 font-body">
+                            <div class="flex items-center space-x-6">
+                                <span><i class="ti ti-pointer text-primary mr-2"></i>Drag to place furniture</span>
+                                <span><i class="ti ti-rotate-clockwise text-primary mr-2"></i>Right-click to rotate</span>
+                                <span><i class="ti ti-zoom-in text-primary mr-2"></i>Scroll to zoom</span>
+                            </div>
+                            <span class="text-secondary font-semibold">Room: <span id="currentRoomName">Not Selected</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Properties Panel -->
+                <div class="w-64 bg-gray-50 border-l border-gray-200 overflow-y-auto">
+                    <div class="p-6">
+                        <h4 class="text-lg font-display font-bold text-primary mb-4">Properties</h4>
+                        <div id="itemProperties" class="text-center py-12">
+                            <i class="ti ti-hand-click text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-gray-500 font-body text-sm">Select an item to view properties</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <!-- About -->
+                <div>
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600">
+                            <span class="text-2xl text-white font-bold">S</span>
+                        </div>
+                        <div>
+                            <span class="text-2xl font-bold">Stellarion</span>
+                            <div class="text-xs text-blue-400 uppercase font-medium tracking-wide">Modern Furniture</div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-8 leading-relaxed">Crafting modern pieces that transform houses into homes. Experience contemporary design, comfort, and sophistication.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-11 h-11 bg-white/10 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-all hover:scale-110">
+                            <i class="ti ti-brand-facebook text-sm"></i>
+                        </a>
+                        <a href="#" class="w-11 h-11 bg-white/10 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-all hover:scale-110">
+                            <i class="ti ti-brand-instagram text-sm"></i>
+                        </a>
+                        <a href="#" class="w-11 h-11 bg-white/10 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-all hover:scale-110">
+                            <i class="ti ti-brand-pinterest text-sm"></i>
+                        </a>
+                        <a href="#" class="w-11 h-11 bg-white/10 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-all hover:scale-110">
+                            <i class="ti ti-brand-linkedin text-sm"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Shop -->
+                <div>
+                    <h4 class="text-xl font-bold mb-6 border-b-2 border-secondary pb-3 inline-block">Collections</h4>
+                    <ul class="space-y-3 font-body">
+                        <li><a href="#" class="text-white/70 hover:text-secondary transition-colors flex items-center group"><i class="ti ti-chevron-right mr-2 group-hover:translate-x-1 transition-transform"></i>Living Room</a></li>
+                        <li><a href="#" class="text-white/70 hover:text-secondary transition-colors flex items-center group"><i class="ti ti-chevron-right mr-2 group-hover:translate-x-1 transition-transform"></i>Bedroom</a></li>
+                        <li><a href="#" class="text-white/70 hover:text-secondary transition-colors flex items-center group"><i class="ti ti-chevron-right mr-2 group-hover:translate-x-1 transition-transform"></i>Dining Room</a></li>
+                        <li><a href="#" class="text-white/70 hover:text-secondary transition-colors flex items-center group"><i class="ti ti-chevron-right mr-2 group-hover:translate-x-1 transition-transform"></i>Home Office</a></li>
+                        <li><a href="#" class="text-white/70 hover:text-secondary transition-colors flex items-center group"><i class="ti ti-chevron-right mr-2 group-hover:translate-x-1 transition-transform"></i>Outdoor</a></li>
+                    </ul>
+                </div>
+
+                <!-- Customer Service -->
+                <div>
+                    <h4 class="text-xl font-bold mb-6 border-b-2 border-secondary pb-3 inline-block">Customer Care</h4>
+                    <ul class="space-y-3 font-body">
+                        <li><a href="#" class="text-white/70 hover:text-secondary transition-colors flex items-center group"><i class="ti ti-chevron-right mr-2 group-hover:translate-x-1 transition-transform"></i>Contact Us</a></li>
+                        <li><a href="#" class="text-white/70 hover:text-secondary transition-colors flex items-center group"><i class="ti ti-chevron-right mr-2 group-hover:translate-x-1 transition-transform"></i>Shipping & Delivery</a></li>
+                        <li><a href="#" class="text-white/70 hover:text-secondary transition-colors flex items-center group"><i class="ti ti-chevron-right mr-2 group-hover:translate-x-1 transition-transform"></i>Returns Policy</a></li>
+                        <li><a href="#" class="text-white/70 hover:text-secondary transition-colors flex items-center group"><i class="ti ti-chevron-right mr-2 group-hover:translate-x-1 transition-transform"></i>White Glove Service</a></li>
+                        <li><a href="#" class="text-white/70 hover:text-secondary transition-colors flex items-center group"><i class="ti ti-chevron-right mr-2 group-hover:translate-x-1 transition-transform"></i>Design Consultation</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div>
+                    <h4 class="text-xl font-bold mb-6 border-b-2 border-secondary pb-3 inline-block">Stay Connected</h4>
+                    <p class="text-white/70 mb-6 font-body">Subscribe for exclusive offers, design tips, and new arrivals</p>
+                    <div class="space-y-3">
+                        <input type="email" placeholder="Your email address" class="w-full px-5 py-3 bg-white/10 border-2 border-white/20 focus:border-secondary focus:outline-none text-white placeholder-white/50 font-body transition-colors">
+                        <button class="w-full bg-secondary hover:bg-luxury text-primary hover:text-white font-body font-bold py-3 px-6 transition-all duration-300 uppercase tracking-wider text-sm">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom -->
+            <div class="pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-gray-400 text-sm">&copy; 2025 Stellarion Modern Furniture. All rights reserved.</p>
+                <div class="flex gap-6 text-sm">
+                    <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Modal -->
+    <div id="cartModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col luxury-border">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b luxury-border">
+                <h2 class="text-2xl font-bold text-primary">Shopping Cart</h2>
+                <button id="closeCart" class="text-luxury/60 hover:text-primary text-3xl leading-none transition-colors">
+                    &times;
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div id="cartItems" class="flex-1 overflow-y-auto p-6">
+                <!-- Cart items will be inserted here -->
+            </div>
+
+            <!-- Footer -->
+            <div class="p-6 border-t luxury-border bg-light">
+                <div class="flex items-center justify-between mb-4 text-2xl font-bold">
+                    <span>Total:</span>
+                    <span id="cartTotal" class="text-secondary">$0.00</span>
+                </div>
+                <button class="w-full bg-primary hover:bg-secondary text-white hover:text-primary font-body font-bold py-4 transition-all transform hover:scale-105 uppercase tracking-wider">
+                    <i class="ti ti-lock mr-2"></i>Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wishlist Modal -->
+    <div id="wishlistModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col luxury-border">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b luxury-border bg-light">
+                <div>
+                    <h2 class="text-2xl font-bold text-primary">My Wishlist</h2>
+                    <p class="text-sm text-luxury/70 font-body mt-1">Your favorite furniture pieces</p>
+                </div>
+                <button id="closeWishlist" class="text-luxury/60 hover:text-primary text-3xl leading-none transition-colors">
+                    &times;
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div id="wishlistItems" class="flex-1 overflow-y-auto p-6">
+                <!-- Wishlist items will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Product Viewer Modal -->
+    <div id="viewer3DModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+        <div class="bg-white shadow-2xl w-full max-w-5xl h-[80vh] flex flex-col luxury-border">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b luxury-border bg-light">
+                <div>
+                    <h2 class="text-2xl font-bold text-primary" id="viewer3DTitle">3D Product View</h2>
+                    <p class="text-sm text-luxury/70 font-body mt-1">Rotate, zoom, and explore in 3D</p>
+                </div>
+                <button id="close3DViewer" class="text-luxury/60 hover:text-primary text-3xl leading-none transition-colors">
+                    &times;
+                </button>
+            </div>
+
+            <!-- 3D Viewer Body -->
+            <div class="flex-1 p-6 bg-gradient-to-br from-accent/30 to-light">
+                <div id="viewer3DContainer" class="w-full h-full flex items-center justify-center">
+                    <!-- 3D model will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Footer Controls -->
+            <div class="p-6 border-t luxury-border bg-light">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-luxury/70 font-body">
+                        <i class="ti ti-pointer mr-2"></i>Click and drag to rotate • Scroll to zoom
+                    </div>
+                    <button id="add3DToCart" class="bg-primary hover:bg-secondary text-white hover:text-primary font-body font-bold py-3 px-8 transition-all uppercase tracking-wider text-sm">
+                        <i class="ti ti-shopping-bag mr-2"></i>Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="userModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+        <div class="bg-white shadow-2xl w-full max-w-md luxury-border">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b luxury-border bg-light">
+                <h2 class="text-2xl font-bold text-primary">My Account</h2>
+                <button id="closeUserModal" class="text-luxury/60 hover:text-primary text-3xl leading-none transition-colors">
+                    &times;
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="p-6">
+                <h3 class="text-xl font-bold text-primary mb-6">Sign In</h3>
+                <form onsubmit="handleLogin(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-body font-semibold text-primary mb-2">Email</label>
+                        <input type="email" id="loginEmail" required 
+                               class="w-full px-4 py-3 border-2 border-accent focus:border-secondary bg-transparent focus:outline-none transition-all font-body"
+                               placeholder="your@email.com">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-body font-semibold text-primary mb-2">Password</label>
+                        <input type="password" id="loginPassword" required 
+                               class="w-full px-4 py-3 border-2 border-accent focus:border-secondary bg-transparent focus:outline-none transition-all font-body"
+                               placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-secondary text-white hover:text-primary font-body font-bold py-3 transition-all uppercase tracking-wider mb-4">
+                        <i class="ti ti-login mr-2"></i>Sign In
+                    </button>
+                </form>
+                <div class="text-center">
+                    <p class="text-sm text-luxury/70 font-body">Don't have an account? 
+                        <button onclick="showRegisterForm()" class="text-secondary hover:text-primary font-bold">Register</button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="p-6 hidden">
+                <h3 class="text-xl font-bold text-primary mb-6">Create Account</h3>
+                <form onsubmit="handleRegister(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-body font-semibold text-primary mb-2">Full Name</label>
+                        <input type="text" id="registerName" required 
+                               class="w-full px-4 py-3 border-2 border-accent focus:border-secondary bg-transparent focus:outline-none transition-all font-body"
+                               placeholder="John Doe">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-body font-semibold text-primary mb-2">Email</label>
+                        <input type="email" id="registerEmail" required 
+                               class="w-full px-4 py-3 border-2 border-accent focus:border-secondary bg-transparent focus:outline-none transition-all font-body"
+                               placeholder="your@email.com">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-body font-semibold text-primary mb-2">Password</label>
+                        <input type="password" id="registerPassword" required minlength="6"
+                               class="w-full px-4 py-3 border-2 border-accent focus:border-secondary bg-transparent focus:outline-none transition-all font-body"
+                               placeholder="Min. 6 characters">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-body font-semibold text-primary mb-2">Confirm Password</label>
+                        <input type="password" id="registerConfirmPassword" required minlength="6"
+                               class="w-full px-4 py-3 border-2 border-accent focus:border-secondary bg-transparent focus:outline-none transition-all font-body"
+                               placeholder="Re-enter password">
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-secondary text-white hover:text-primary font-body font-bold py-3 transition-all uppercase tracking-wider mb-4">
+                        <i class="ti ti-user-plus mr-2"></i>Create Account
+                    </button>
+                </form>
+                <div class="text-center">
+                    <p class="text-sm text-luxury/70 font-body">Already have an account? 
+                        <button onclick="showLoginForm()" class="text-secondary hover:text-primary font-bold">Sign In</button>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Profile View -->
+            <div id="profileView" class="p-6 hidden">
+                <div class="text-center mb-6">
+                    <div class="w-24 h-24 bg-gradient-to-br from-primary to-secondary rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="ti ti-user text-4xl text-white"></i>
+                    </div>
+                    <h3 id="profileName" class="text-2xl font-bold text-primary mb-1">User Name</h3>
+                    <p id="profileEmail" class="text-sm text-luxury/70 font-body">user@email.com</p>
+                </div>
+
+                <div class="space-y-4 mb-6">
+                    <div class="p-4 bg-accent/30 luxury-border">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-body font-semibold text-primary">Phone:</span>
+                            <span id="profilePhone" class="text-sm text-luxury/70 font-body">Not set</span>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-accent/30 luxury-border">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-body font-semibold text-primary">Address:</span>
+                            <span id="profileAddress" class="text-sm text-luxury/70 font-body">Not set</span>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-accent/30 luxury-border">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-body font-semibold text-primary">Member Since:</span>
+                            <span id="profileJoinDate" class="text-sm text-luxury/70 font-body">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button class="w-full bg-accent hover:bg-secondary hover:text-white text-primary font-body font-bold py-3 transition-all uppercase tracking-wider text-sm">
+                        <i class="ti ti-package mr-2"></i>My Orders
+                    </button>
+                    <button class="w-full bg-accent hover:bg-secondary hover:text-white text-primary font-body font-bold py-3 transition-all uppercase tracking-wider text-sm">
+                        <i class="ti ti-heart mr-2"></i>My Wishlist
+                    </button>
+                    <button onclick="handleLogout()" class="w-full bg-primary hover:bg-luxury/20 text-white hover:text-primary font-body font-bold py-3 transition-all uppercase tracking-wider text-sm">
+                        <i class="ti ti-logout mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin 3D Generator Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cream rounded-none max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="sticky top-0 bg-primary text-white p-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-display font-semibold">3D Model Generator</h2>
+                    <p class="text-xs text-secondary mt-1">
+                        <i class="ti ti-server mr-1"></i>
+                        <span id="serverStatus">Backend Mode: localhost:3000</span>
+                    </p>
+                </div>
+                <button onclick="closeAdminModal()" class="text-white hover:text-secondary transition-colors">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <!-- Upload Section -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-display font-semibold text-primary mb-4">Convert Image to 3D Model</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-primary mb-2">Product Name</label>
+                            <input type="text" id="productNameInput" placeholder="e.g., Modern Leather Sofa"
+                                   class="w-full px-4 py-3 border-2 border-accent focus:border-secondary focus:outline-none font-body">
+                        </div>
+
+                        <!-- Tab Selection -->
+                        <div class="flex gap-2 border-b-2 border-accent">
+                            <button id="urlTab" onclick="switchTab('url')" 
+                                    class="tab-button flex-1 py-2 font-semibold transition-all border-b-2 border-secondary text-primary">
+                                <i class="fas fa-link mr-1"></i>From URL
+                            </button>
+                            <button id="uploadTab" onclick="switchTab('upload')" 
+                                    class="tab-button flex-1 py-2 font-semibold transition-all border-b-2 border-transparent text-gray-500 hover:text-primary">
+                                <i class="fas fa-upload mr-1"></i>Upload File
+                            </button>
+                        </div>
+
+                        <!-- URL Input Tab -->
+                        <div id="urlTabContent" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-primary mb-2">Image URL</label>
+                                <div class="flex gap-2">
+                                    <input type="url" id="imageUrlInput" placeholder="https://images.unsplash.com/photo-..."
+                                           class="flex-1 px-4 py-3 border-2 border-accent focus:border-secondary focus:outline-none font-body">
+                                    <button onclick="useExampleURL()" 
+                                            class="px-4 py-3 bg-accent text-primary font-semibold hover:bg-accent/80 transition-all whitespace-nowrap">
+                                        <i class="fas fa-magic mr-1"></i>Example
+                                    </button>
+                                </div>
+                                <div class="text-xs text-gray-600 mt-2">
+                                    <p class="font-semibold text-primary mb-1">✅ Valid URLs (direct image links):</p>
+                                    <p>• https://images.unsplash.com/photo-xxx.jpg</p>
+                                    <p>• https://i.imgur.com/abc123.png</p>
+                                    <p class="font-semibold text-red-600 mt-2 mb-1">❌ Invalid URLs (search/page URLs):</p>
+                                    <p>• https://www.bing.com/images/search?...</p>
+                                    <p>• https://www.google.com/search?...</p>
+                                    <p class="mt-2 text-secondary font-semibold">💡 Tip: Right-click image → "Copy image address"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload File Tab -->
+                        <div id="uploadTabContent" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-sm font-semibold text-primary mb-2">Upload Image</label>
+                                <div class="border-2 border-dashed border-accent rounded-lg p-6 text-center hover:border-secondary transition-all cursor-pointer"
+                                     onclick="document.getElementById('fileInput').click()">
+                                    <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-accent mb-2"></i>
+                                    <p class="text-sm font-semibold text-primary">Click to upload image</p>
+                                    <p class="text-xs text-gray-600 mt-1">Or drag and drop (JPG, PNG, WEBP)</p>
+                                </div>
+                                <div id="uploadPreview" class="mt-3 hidden">
+                                    <img id="previewImage" class="w-full h-48 object-cover rounded-lg border-2 border-accent">
+                                    <p id="uploadStatus" class="text-xs text-center mt-2 text-gray-600"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button onclick="testAPIConnection()" 
+                                    class="flex-1 bg-accent text-primary py-3 px-6 font-semibold hover:bg-accent/80 transition-all">
+                                <i class="fas fa-plug mr-2"></i>Test API
+                            </button>
+                            <button onclick="startGeneration()" 
+                                    class="flex-1 bg-primary text-white py-3 px-6 font-semibold hover:bg-primary/90 transition-all">
+                                <i class="fas fa-magic mr-2"></i>Generate 3D Model
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div id="progressSection" class="mb-8 hidden">
+                    <h3 class="text-lg font-display font-semibold text-primary mb-4">Generation Progress</h3>
+                    
+                    <div class="bg-white p-4 rounded-lg border-2 border-accent">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-semibold text-primary" id="statusText">Starting...</span>
+                            <span class="text-sm text-secondary font-semibold" id="progressPercent">0%</span>
+                        </div>
+                        
+                        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div id="progressBar" class="bg-secondary h-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+
+                        <p class="text-xs text-gray-600 mt-2" id="taskIdDisplay"></p>
+                    </div>
+                </div>
+
+                <!-- Recent Models Section -->
+                <div id="recentModels" class="mb-8">
+                    <h3 class="text-lg font-display font-semibold text-primary mb-4">Recent 3D Models</h3>
+                    <div id="modelsList" class="space-y-2">
+                        <p class="text-gray-500 text-center py-8">No models generated yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // Replace with your API key
+            authDomain: "stellarion-3d.firebaseapp.com", // Replace
+            projectId: "stellarion-3d", // Replace
+            storageBucket: "stellarion-3d.appspot.com", // Replace
+            messagingSenderId: "123456789012", // Replace
+            appId: "1:123456789012:web:xxxxxxxxxxxxx" // Replace
+        };
+
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.warn('Firebase initialization skipped or failed:', error.message);
+        }
+    </script>
+
+    <script src="script.js"></script>
+    
+    <!-- Custom Modal -->
+    <div id="customModal" class="custom-modal">
+        <div class="modal-content">
+            <div id="modalIcon" class="modal-icon">
+                <i id="modalIconSymbol" class="ti ti-question-mark"></i>
+            </div>
+            <h3 id="modalTitle" class="modal-title">Confirm Action</h3>
+            <p id="modalText" class="modal-text">Are you sure you want to proceed?</p>
+            <div class="modal-buttons">
+                <button id="modalCancel" class="modal-btn secondary">Cancel</button>
+                <button id="modalConfirm" class="modal-btn primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar Dropdown Script -->
+    <script>
+        // Custom Modal Functions
+        function showCustomModal(title, message, type = 'question') {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customModal');
+                const modalIcon = document.getElementById('modalIcon');
+                const modalIconSymbol = document.getElementById('modalIconSymbol');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalText = document.getElementById('modalText');
+                const modalConfirm = document.getElementById('modalConfirm');
+                const modalCancel = document.getElementById('modalCancel');
+                
+                // Set modal content
+                modalTitle.textContent = title;
+                modalText.textContent = message;
+                
+                // Set icon and style based on type
+                if (type === 'question') {
+                    modalIcon.className = 'modal-icon question';
+                    modalIconSymbol.className = 'ti ti-help';
+                    modalConfirm.className = 'modal-btn primary';
+                    modalConfirm.textContent = 'Yes';
+                } else if (type === 'warning') {
+                    modalIcon.className = 'modal-icon warning';
+                    modalIconSymbol.className = 'ti ti-alert-triangle';
+                    modalConfirm.className = 'modal-btn danger';
+                    modalConfirm.textContent = 'Sign Out';
+                }
+                
+                // Show modal
+                modal.style.display = 'flex';
+                
+                // Handle button clicks
+                const handleConfirm = () => {
+                    modal.style.display = 'none';
+                    modalConfirm.removeEventListener('click', handleConfirm);
+                    modalCancel.removeEventListener('click', handleCancel);
+                    resolve(true);
+                };
+                
+                const handleCancel = () => {
+                    modal.style.display = 'none';
+                    modalConfirm.removeEventListener('click', handleConfirm);
+                    modalCancel.removeEventListener('click', handleCancel);
+                    resolve(false);
+                };
+                
+                modalConfirm.addEventListener('click', handleConfirm);
+                modalCancel.addEventListener('click', handleCancel);
+                
+                // Close on backdrop click
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        handleCancel();
+                    }
+                });
+            });
+        }
+
+        // Check authentication for 3D Generator
+        async function checkAuthFor3DGenerator(event) {
+            event.preventDefault();
+            const token = localStorage.getItem('token');
+            
+            if (token) {
+                // User is signed in, go to 3D generator
+                window.location.href = '3d-generator.html';
+            } else {
+                // User not signed in, show custom modal
+                const result = await showCustomModal(
+                    'Authentication Required',
+                    'Please sign in to access the 3D Model Generator. Would you like to sign in now?',
+                    'question'
+                );
+                
+                if (result) {
+                    window.location.href = 'signin.html?redirect=3d-generator';
+                }
+            }
+        }
+
+        async function signOut() {
+            const result = await showCustomModal(
+                'Confirm Sign Out',
+                'Are you sure you want to sign out of your account?',
+                'warning'
+            );
+            
+            if (result) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.reload();
+            }
+        }
+
+        function updateNavbarForSignedInUser(user) {
+            const signinBtn = document.getElementById('signinBtn');
+            const signupBtn = document.getElementById('signupBtn');
+            
+            if (signinBtn && signupBtn) {
+                // Hide sign in/up buttons and show user menu
+                signinBtn.style.display = 'none';
+                signupBtn.parentElement.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="hidden lg:block text-sm text-gray-600">Welcome, ${user.username || user.firstName || 'User'}</span>
+                        <button onclick="signOut()" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200" title="Sign Out">
+                            <i class="ti ti-logout text-lg"></i>
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const signupBtn = document.getElementById('signupBtn');
+            const signupDropdown = document.getElementById('signupDropdown');
+            const signinBtn = document.getElementById('signinBtn');
+
+            // Check authentication status on page load
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (token && user) {
+                // User is signed in, update navbar
+                const userData = JSON.parse(user);
+                updateNavbarForSignedInUser(userData);
+            }
+
+            // Sign In Button functionality
+            if (signinBtn) {
+                signinBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = 'signin.html';
+                });
+            }
+
+            // Toggle dropdown on button click
+            if (signupBtn && signupDropdown) {
+                signupBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    signupDropdown.classList.toggle('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!signupBtn.contains(e.target) && !signupDropdown.contains(e.target)) {
+                        signupDropdown.classList.add('hidden');
+                    }
+                });
+
+                // Close dropdown when pressing escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        signupDropdown.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

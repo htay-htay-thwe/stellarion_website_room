@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellarion Studio | Company Model Entry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Manrope', 'Inter', 'sans-serif']
+                    },
+                    colors: {
+                        slateInk: '#0b1220',
+                        accent: {
+                            DEFAULT: '#1d4ed8',
+                            dark: '#1e3a8a'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: radial-gradient(circle at top left, rgba(30, 64, 175, 0.18), transparent 55%),
+                        radial-gradient(circle at bottom right, rgba(14, 116, 144, 0.18), transparent 50%),
+                        #030712;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(11, 18, 32, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .input-shell {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .input-shell:focus {
+            border-color: rgba(59, 130, 246, 0.7);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            outline: none;
+        }
+        .toast {
+            animation: fadeInUp 0.25s ease both;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <div class="min-h-screen flex flex-col">
+        <header class="py-10 px-6 lg:px-10">
+            <div class="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="space-y-3">
+                    <span class="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.3em] uppercase text-blue-300">
+                        <span class="block w-2 h-2 rounded-full bg-blue-400"></span>
+                        Stellarion for Brands
+                    </span>
+                    <h1 class="text-3xl lg:text-4xl font-semibold text-white">Add Catalog Models</h1>
+                    <p class="text-sm lg:text-base text-slate-300 max-w-2xl">
+                        Submit new assets directly to the Stellarion library. We only need a few product details—our team verifies the rest before publishing to the marketplace.
+                    </p>
+                </div>
+                <a href="register.html" class="inline-flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200 transition">
+                    <span class="hidden sm:block">Need a hand?</span>
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 1.756-2 3.272-2 1.969 0 3.5 1.414 3.5 3.167 0 1.571-1.168 2.505-2.64 3.317-.878.479-1.36 1.101-1.36 1.849v.167M12 18h.01M21 12c0 4.971-4.477 9-9.5 9S2 16.971 2 12 6.477 3 11.5 3 21 7.029 21 12Z" />
+                        </svg>
+                    </span>
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 px-6 lg:px-10 pb-16">
+            <div class="max-w-5xl mx-auto grid lg:grid-cols-5 gap-8">
+                <section class="glass-card rounded-3xl p-8 lg:col-span-3">
+                    <form id="companyEntryForm" class="space-y-6">
+                        <div>
+                            <label for="modelName" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Name *</label>
+                            <input id="modelName" name="name" type="text" required placeholder="E.g. Aurelia Lounge Chair" class="mt-2 w-full rounded-xl input-shell px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500">
+                        </div>
+                        <div>
+                            <label for="modelDescription" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Description *</label>
+                            <textarea id="modelDescription" name="description" required rows="4" placeholder="A concise summary of materials, comfort notes, and finishes." class="mt-2 w-full rounded-xl input-shell px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 resize-y"></textarea>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="modelPrice" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Price (USD) *</label>
+                                <input id="modelPrice" name="price" type="number" min="0" step="0.01" required placeholder="1299" class="mt-2 w-full rounded-xl input-shell px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500">
+                            </div>
+                            <div>
+                                <label for="modelStyle" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Style *</label>
+                                <select id="modelStyle" name="style" required class="mt-2 w-full rounded-xl input-shell px-4 py-3 text-sm text-slate-100 cursor-pointer">
+                                    <option value="modern">Modern</option>
+                                    <option value="contemporary">Contemporary</option>
+                                    <option value="minimalist">Minimalist</option>
+                                    <option value="industrial">Industrial</option>
+                                    <option value="traditional">Traditional</option>
+                                    <option value="bohemian">Bohemian</option>
+                                    <option value="mid-century">Mid-Century</option>
+                                    <option value="scandinavian">Scandinavian</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="modelCategory" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Category *</label>
+                                <select id="modelCategory" name="category" required class="mt-2 w-full rounded-xl input-shell px-4 py-3 text-sm text-slate-100 cursor-pointer">
+                                    <option value="living-room">Living Room</option>
+                                    <option value="bedroom">Bedroom</option>
+                                    <option value="dining">Dining</option>
+                                    <option value="office">Office</option>
+                                    <option value="outdoor">Outdoor</option>
+                                    <option value="decor">Decor</option>
+                                    <option value="storage">Storage</option>
+                                    <option value="lighting">Lighting</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <details class="bg-white/5 rounded-2xl px-6 py-4">
+                            <summary class="text-sm font-medium text-blue-200 cursor-pointer select-none flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold">Optional</span>
+                                Attach asset references (recommended)
+                            </summary>
+                            <div class="mt-4 space-y-4">
+                                <div>
+                                    <label for="modelThumbnail" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Preview Image URL</label>
+                                    <input id="modelThumbnail" type="url" placeholder="https://yourcdn.com/products/aurelia/preview.jpg" class="mt-2 w-full rounded-xl input-shell px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500">
+                                </div>
+                                <div>
+                                    <label for="modelGlb" class="text-xs font-semibold uppercase tracking-wider text-slate-400">GLB / Model URL</label>
+                                    <input id="modelGlb" type="url" placeholder="https://yourcdn.com/products/aurelia/model.glb" class="mt-2 w-full rounded-xl input-shell px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500">
+                                </div>
+                            </div>
+                        </details>
+
+                        <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-accent to-accent-dark py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-700/20 transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400">
+                            Submit for Review
+                        </button>
+                    </form>
+                </section>
+
+                <aside class="glass-card rounded-3xl p-8 lg:col-span-2 flex flex-col gap-8">
+                    <div class="space-y-4">
+                        <h2 class="text-lg font-semibold text-white">Submission Checklist</h2>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li class="flex gap-3"><span class="mt-1 h-2 w-2 rounded-full bg-green-400"></span>Provide pricing inclusive of MSRP or showroom pricing.</li>
+                            <li class="flex gap-3"><span class="mt-1 h-2 w-2 rounded-full bg-green-400"></span>Descriptions should highlight materials, finishes, and lead times.</li>
+                            <li class="flex gap-3"><span class="mt-1 h-2 w-2 rounded-full bg-blue-400"></span>Drop a hosted GLB link to preview in AR (optional but fast-tracks approval).</li>
+                        </ul>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-semibold uppercase tracking-widest text-blue-300">Processing Time</h3>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            Our curators validate every submission within 24 hours on business days. Approved listings go live instantly for both personal shoppers and partner showrooms.
+                        </p>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-semibold uppercase tracking-widest text-blue-300">Need Asset Help?</h3>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            Upload product photography to the <a href="improved-3d-generator.html" class="text-blue-300 hover:text-blue-200 underline">Stellarion 3D Generator</a> to create ready-to-use models.
+                        </p>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <div id="toastHost" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none"></div>
+
+    <script>
+        const API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:3000' : window.location.origin;
+        const form = document.getElementById('companyEntryForm');
+        const toastHost = document.getElementById('toastHost');
+
+        const showToast = (message, type = 'success') => {
+            const toast = document.createElement('div');
+            toast.className = `toast pointer-events-auto rounded-2xl px-4 py-3 text-sm font-medium shadow-lg border border-white/10 ${type === 'success' ? 'bg-emerald-500/90 text-white' : 'bg-rose-500/90 text-white'}`;
+            toast.textContent = message;
+            toastHost.appendChild(toast);
+            setTimeout(() => toast.remove(), 3200);
+        };
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            const defaultLabel = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="inline-flex items-center gap-2"><svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>Submitting</span>';
+
+            const modelName = document.getElementById('modelName').value.trim();
+            const description = document.getElementById('modelDescription').value.trim();
+            const price = parseFloat(document.getElementById('modelPrice').value);
+            const style = document.getElementById('modelStyle').value;
+            const category = document.getElementById('modelCategory').value;
+            const thumbnailUrl = document.getElementById('modelThumbnail').value.trim() || null;
+            const glbUrl = document.getElementById('modelGlb').value.trim() || null;
+
+            if (!modelName || !description || Number.isNaN(price)) {
+                showToast('Please complete all required fields.', 'error');
+                submitButton.disabled = false;
+                submitButton.innerHTML = defaultLabel;
+                return;
+            }
+
+            const storedUser = (() => {
+                try {
+                    return JSON.parse(localStorage.getItem('user'));
+                } catch (error) {
+                    return null;
+                }
+            })();
+
+            const payload = {
+                userId: storedUser?.id || undefined,
+                taskId: `manual-${Date.now()}`,
+                name: modelName,
+                description,
+                category,
+                style,
+                price,
+                modelUrl: glbUrl,
+                previewUrl: thumbnailUrl,
+                imageUrl: thumbnailUrl,
+                modelUrls: glbUrl ? { glb: glbUrl, thumbnail: thumbnailUrl } : {}
+            };
+
+            try {
+                const token = localStorage.getItem('authToken');
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) {
+                    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+                }
+
+                const response = await fetch(`${API_BASE}/api/models/save`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                if (!response.ok || result.success === false) {
+                    throw new Error(result.message || 'Submission failed, please try again.');
+                }
+
+                showToast('Submission received! We will review it shortly.');
+                form.reset();
+            } catch (error) {
+                showToast(error.message || 'Unable to submit right now.', 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = defaultLabel;
+            }
+        });
+    </script>
+</body>
+</html>
